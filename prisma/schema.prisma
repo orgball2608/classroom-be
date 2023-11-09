@@ -1,0 +1,59 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   Int       @id @default(autoincrement())
+  username             String    @unique
+  password             String
+  firstName            String?
+  lastName             String?
+  status               Boolean   @default(false)
+  email                String?   @unique
+  phoneNumber          String
+  address              String
+  role                 UserRole  @default(USER)
+  resetPasswordToken   String?
+  resetPasswordExpires DateTime?
+
+  sessions Session[] @relation("userSession")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Session {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  loggedOut    Boolean  @default(false)
+  ipAddress    String?
+  tokenId      String?
+  tokenSecret  String?
+  tokenDeleted Boolean  @default(false)
+  device       String?
+
+  loggedInAt   DateTime @default(now())
+  loggedOutAt  DateTime?
+
+  user User @relation("userSession",fields: [userId], references: [id])
+
+  @@unique([userId, tokenId])
+  @@index([userId, tokenId])
+  @@map("session")
+}
+
+enum UserRole {
+  COMPANY
+  USER
+}
