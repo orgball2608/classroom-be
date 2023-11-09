@@ -1,0 +1,6 @@
+.eslintrc.js
+dist/
+coverage/
+node_modules/
+babel.config.js
+tsconfig.json
