@@ -1,4 +1,3 @@
-
 # SET UP MAIN SERVICE
 
 ## Getting started
@@ -7,27 +6,27 @@
 
 # 1. Clone the repository or click on "Use this template" button.
 
-git  clone  https://quang2602@bitbucket.org/thiet-ke-nhanh/main-service.git
+git  clone  https://github.com/orgball2608/webnc-be.git
 
-  
+
 
 # 2. Enter your newly-cloned folder.
 
 cd  main-service
 
-  
+
 
 # 3. Create Environment variables file.
 
 cp  .env.example  .env
 
-  
+
 
 #4 Run prisma migrate reset
 
 yarn  prisma  migrate  reset
 
-  
+
 
 # 3. Install dependencies. (Make sure yarn is installed: https://yarnpkg.com/lang/en/docs/install)
 
@@ -44,7 +43,9 @@ yarn
 yarn run start:dev
 
 ```
+
 or
+
 ```
 
 docker-compose up -d
