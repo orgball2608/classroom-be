@@ -1,21 +1,20 @@
-import {
-  BooleanFieldOptional,
-  EmailFieldOptional,
-  PhoneField,
-  StringField,
-  StringFieldOptional,
-} from '@src/decorators';
+import { BooleanFieldOptional, EmailField, StringField } from '@src/decorators';
 
 export class RegisterDto {
-  @StringFieldOptional({
-    example: 'Nguyễn Văn A',
+  @StringField({
+    example: 'Nguyễn',
   })
-  name?: string;
+  firstName!: string;
 
   @StringField({
-    example: 'user',
+    example: 'Văn A',
   })
-  username!: string;
+  lastName!: string;
+
+  @EmailField({
+    example: 'quanghuynh@gmail.com',
+  })
+  email!: string;
 
   @StringField({
     minLength: 6,
@@ -28,13 +27,8 @@ export class RegisterDto {
   })
   status?: boolean;
 
-  @EmailFieldOptional({
-    example: 'nguyenvana@gmail.com',
-  })
-  email?: string;
-
-  @PhoneField({
-    example: '0123456789',
+  @StringField({
+    example: '0796694097',
   })
   phoneNumber!: string;
 

@@ -1,5 +1,4 @@
 import {
-  Request,
   Controller,
   HttpCode,
   HttpStatus,
@@ -7,6 +6,7 @@ import {
   UseGuards,
   Get,
   Body,
+  Req,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from '../../guards/local-auth.guard';
@@ -24,6 +24,8 @@ import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 import { UserEntity } from './entities/user.entity';
 import { RegisterDto } from './dto/register.dto';
 import { UserRequest } from '@src/interfaces';
+import { RefreshTokenGuard } from '@src/guards/refresh-token.guard';
+import { Request } from 'express';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -39,7 +41,6 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @ApiBody({ type: AuthCredentialsDto })
   @ApiOkResponse({
-    description: 'Sign up success',
     schema: {
       type: 'object',
       properties: {
@@ -53,14 +54,13 @@ export class AuthController {
   })
   @HttpCode(HttpStatus.OK)
   @Post('/login')
-  async signIn(@Request() req: UserRequest) {
+  async signIn(@Req() req: UserRequest) {
     return this.authService.login(req);
   }
 
   @Auth()
   @ApiBearerAuth()
   @ApiNotFoundResponse({
-    description: 'User not found.',
     schema: {
       type: 'object',
       properties: {
@@ -70,16 +70,15 @@ export class AuthController {
       },
     },
   })
-  @ApiOkResponse({ description: 'Get user data success', type: UserEntity })
+  @ApiOkResponse({ type: UserEntity })
   @HttpCode(HttpStatus.OK)
   @Get('/me')
-  async me(@Request() req: UserRequest) {
+  async me(@Req() req: UserRequest) {
     return omit(req.user, ['password']);
   }
 
   @ApiBearerAuth()
   @ApiOkResponse({
-    description: 'Logged out successfully',
     schema: {
       type: 'object',
       properties: {
@@ -88,7 +87,6 @@ export class AuthController {
     },
   })
   @ApiUnauthorizedResponse({
-    description: 'Unauthorized',
     schema: {
       type: 'object',
       properties: {
@@ -101,5 +99,13 @@ export class AuthController {
   @Get('/logout')
   async signOut() {
     return this.authService.logout();
+  }
+
+  @UseGuards(RefreshTokenGuard)
+  @ApiBearerAuth()
+  @Get('refresh')
+  refreshToken(@Req() req: UserRequest) {
+    const userId = req.user['id'];
+    return this.authService.refreshToken(userId);
   }
 }

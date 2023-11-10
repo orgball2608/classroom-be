@@ -6,8 +6,10 @@ export type AppConfig = {
 };
 
 export type AuthConfig = {
-  secret?: string;
-  expires?: number;
+  accessTokenSecret?: string;
+  accessTokenExpires?: number;
+  refreshTokenSecret?: string;
+  refreshTokenExpires?: number;
 };
 
 export type DatabaseConfig = {
