@@ -4,7 +4,6 @@ import { ClassConstructor, plainToClass } from 'class-transformer';
 
 import { Request } from 'express';
 import { UnauthorizedException } from '@nestjs/common';
-import { UserRequest } from '@src/interfaces';
 import { validateSync } from 'class-validator';
 
 /**

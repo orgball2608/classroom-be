@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { AbstractEntity } from '@src/common/entity/abstract.entity';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class UserEntity extends AbstractEntity {
   @ApiProperty({
@@ -12,5 +12,5 @@ export class UserEntity extends AbstractEntity {
     type: String,
     example: 'admin',
   })
-  username: string;
+  string: string;
 }

@@ -1,10 +1,10 @@
-import { StringField } from '@src/decorators';
+import { EmailField, StringField } from '@src/decorators';
 
 export class AuthCredentialsDto {
-  @StringField({
-    example: 'admin',
+  @EmailField({
+    example: 'quanghuynh@gmail.com',
   })
-  username!: string;
+  email!: string;
 
   @StringField({
     minLength: 6,

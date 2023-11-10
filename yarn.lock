@@ -1587,6 +1587,15 @@
     "@types/jsonwebtoken" "*"
     "@types/passport-strategy" "*"
 
+"@types/passport-local@^1.0.38":
+  version "1.0.38"
+  resolved "https://registry.yarnpkg.com/@types/passport-local/-/passport-local-1.0.38.tgz#8073758188645dde3515808999b1c218a6fe7141"
+  integrity sha512-nsrW4A963lYE7lNTv9cr5WmiUD1ibYJvWrpE13oxApFsRt77b0RdtZvKbCdNIY4v/QZ6TRQWaDDEwV1kCTmcXg==
+  dependencies:
+    "@types/express" "*"
+    "@types/passport" "*"
+    "@types/passport-strategy" "*"
+
 "@types/passport-strategy@*":
   version "0.2.36"
   resolved "https://registry.yarnpkg.com/@types/passport-strategy/-/passport-strategy-0.2.36.tgz#aaf10153baf4560fa035456c45cc2b9d8c973584"
