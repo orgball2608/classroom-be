@@ -4,22 +4,24 @@ import {
 } from '@src/middlewares';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 
+import { AccessTokenStrategy } from './strategies/access-token.strategy';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy } from './strategies/jwt-auth.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { PrismaService } from '../../shared/prisma/prisma.service';
 import { RedisModule } from '@src/shared/redis/redis.module';
+import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
 
 @Module({
   providers: [
     PrismaService,
     AuthService,
     LocalStrategy,
-    JwtStrategy,
+    AccessTokenStrategy,
+    RefreshTokenStrategy,
     ConfigService,
   ],
   imports: [PassportModule, JwtModule.register({}), RedisModule],

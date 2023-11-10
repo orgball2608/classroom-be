@@ -1,5 +1,6 @@
 import { AccessTokenParsed, UserRequest } from '@src/interfaces';
 import {
+  ForbiddenException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -15,10 +16,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
-import { Request } from 'express';
 import { USER_NOT_FOUND } from '@src/errors/errors.constant';
-import { User } from '@prisma/client';
-import { UserTakenException } from '@src/exceptions/user-taken.exception';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
@@ -29,13 +27,7 @@ export class AuthService {
     private config: ConfigService,
   ) {}
   async register(registerDto: RegisterDto) {
-    const { username, password } = registerDto;
-
-    const isTaken = await this.isUsernameTaken(username);
-
-    if (isTaken) {
-      throw new UserTakenException();
-    }
+    const { password } = registerDto;
 
     const securedPassword = generateHash(password);
 
@@ -88,14 +80,24 @@ export class AuthService {
     const accessToken = this.jwtService.sign(
       { id: user.id, tokenId: tokenId },
       {
-        secret: this.config.get<string>('auth.secret'),
+        secret: this.config.get<string>('auth.accessTokenSecret'),
         // change expires unit to seconds
-        expiresIn: this.config.get<number>('auth.expires') + 's',
+        expiresIn: this.config.get<number>('auth.accessTokenExpires') + 's',
+      },
+    );
+
+    const refreshToken = this.jwtService.sign(
+      { id: user.id },
+      {
+        secret: this.config.get<string>('auth.refreshTokenSecret'),
+        // change expires unit to seconds
+        expiresIn: this.config.get<number>('auth.refreshTokenExpires') + 's',
       },
     );
 
     return {
       accessToken: accessToken,
+      refreshToken: refreshToken,
     };
   }
 
@@ -109,10 +111,10 @@ export class AuthService {
     return user;
   }
 
-  async validateUser(username: string, password: string) {
+  async validateUser(email: string, password: string) {
     const user = await this.prisma.user.findUnique({
       where: {
-        username,
+        email,
       },
     });
 
@@ -132,13 +134,20 @@ export class AuthService {
     };
   }
 
-  private async isUsernameTaken(username: string): Promise<boolean> {
-    const existingUser = await this.prisma.user.findUnique({
-      where: {
-        username,
-      },
-    });
+  async refreshToken(userId: number) {
+    const tokenId: string = uuidv4();
 
-    return Boolean(existingUser);
+    const accessToken = this.jwtService.sign(
+      { id: userId, tokenId: tokenId },
+      {
+        secret: this.config.get<string>('auth.accessTokenSecret'),
+        // change expires unit to seconds
+        expiresIn: this.config.get<number>('auth.accessTokenExpires') + 's',
+      },
+    );
+
+    return {
+      accessToken,
+    };
   }
 }

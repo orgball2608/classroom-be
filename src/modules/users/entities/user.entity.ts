@@ -7,23 +7,17 @@ export class UserEntity
   extends AbstractEntity
   implements Omit<User, 'password'>
 {
-  @ApiPropertyOptional({
+  @ApiProperty({
     type: String,
     example: 'Nguyen Van',
   })
   firstName: string;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     type: String,
     example: 'A',
   })
   lastName: string;
-
-  @ApiProperty({
-    type: String,
-    example: 'admin',
-  })
-  username: string;
 
   @ApiProperty({
     type: Boolean,
@@ -31,7 +25,7 @@ export class UserEntity
   })
   status: boolean;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     type: String,
     example: 'nguyenvana@gmail.com',
   })

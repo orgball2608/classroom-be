@@ -28,7 +28,7 @@ export class BlackListTokenMiddleware implements NestMiddleware {
       tokenId: string;
       exp: number;
     } = this.jwtService.verify(token, {
-      secret: this.config.get<string>('auth.secret'),
+      secret: this.config.get<string>('auth.accessTokenSecret'),
       ignoreExpiration: true,
     });
 
