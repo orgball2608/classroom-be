@@ -16,6 +16,12 @@ class EnvironmentVariablesValidator {
 
   @IsNumber()
   JWT_REFRESH_TOKEN_TTL: number;
+
+  @IsString()
+  JWT_MAIL_SECRET: string;
+
+  @IsNumber()
+  JWT_MAIL_TOKEN_TTL: number;
 }
 
 export default registerAs<AuthConfig>('auth', () => {
@@ -30,5 +36,9 @@ export default registerAs<AuthConfig>('auth', () => {
     accessTokenExpires: process.env.JWT_ACCESS_TOKEN_TTL
       ? parseInt(process.env.JWT_ACCESS_TOKEN_TTL, 10)
       : 2592000,
+    jwtMailSecret: process.env.JWT_MAIL_SECRET,
+    jwtMailExpires: process.env.JWT_MAIL_TOKEN_TTL
+      ? parseInt(process.env.JWT_MAIL_TOKEN_TTL, 10)
+      : 259200,
   };
 });

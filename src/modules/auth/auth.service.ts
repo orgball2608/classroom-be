@@ -1,6 +1,6 @@
 import { AccessTokenParsed, UserRequest } from '@src/interfaces';
 import {
-  ForbiddenException,
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -14,6 +14,7 @@ import {
 
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { MailerService } from '@nestjs-modules/mailer';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { USER_NOT_FOUND } from '@src/errors/errors.constant';
@@ -23,18 +24,53 @@ import { v4 as uuidv4 } from 'uuid';
 export class AuthService {
   constructor(
     private prisma: PrismaService,
-    private jwtService: JwtService,
-    private config: ConfigService,
+    private readonly jwtService: JwtService,
+    private readonly config: ConfigService,
+    private readonly mailerService: MailerService,
   ) {}
   async register(registerDto: RegisterDto) {
     const { password } = registerDto;
 
     const securedPassword = generateHash(password);
 
-    return await this.prisma.user.create({
+    await this.sendVerificationLink(
+      registerDto.email,
+      registerDto.firstName + '' + registerDto.lastName,
+    );
+
+    return this.prisma.user.create({
       data: {
         ...registerDto,
         password: securedPassword,
+        isEmailConfirmed: false,
+      },
+    });
+  }
+
+  public sendVerificationLink(email: string, name: string) {
+    const payload = { email };
+    const token = this.jwtService.sign(payload, {
+      secret: this.config.get('auth.jwtMailSecret'),
+      expiresIn: `${this.config.get('auth.jwtMailExpires')}s`,
+    });
+
+    const apiPrefix =
+      this.config.get<string>('app.apiPrefix') +
+      '/' +
+      this.config.get<string>('app.apiVersion');
+
+    const verifyEmailAddressUrl = `${this.config.get(
+      'APP_URL',
+    )}/${apiPrefix}/auth/verify?token=${token}`;
+
+    return this.mailerService.sendMail({
+      to: email,
+      from: 'elearningapp@gmail.com',
+      subject: 'Email confirmation for leaning app',
+      template: './index',
+      context: {
+        name,
+        verifyEmailAddressUrl,
       },
     });
   }
@@ -125,7 +161,7 @@ export class AuthService {
     if (!valid)
       throw new UnauthorizedException('Password or username is uncorrect');
 
-    return { id: user.id };
+    return { id: user.id, isEmailConfirmed: user.isEmailConfirmed };
   }
 
   async logout() {
@@ -149,5 +185,34 @@ export class AuthService {
     return {
       accessToken,
     };
+  }
+
+  async confirmEmail(token: string) {
+    const payload: {
+      email: string;
+    } = this.jwtService.verify(token, {
+      secret: this.config.get<string>('auth.jwtMailSecret'),
+      ignoreExpiration: false,
+    });
+
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: payload.email,
+      },
+    });
+
+    if (!user)
+      throw new NotFoundException(`User with verifyToken ${token} not found`);
+
+    await this.prisma.user.update({
+      where: {
+        email: payload.email,
+      },
+      data: {
+        isEmailConfirmed: true,
+      },
+    });
+
+    return user;
   }
 }

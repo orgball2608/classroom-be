@@ -16,6 +16,7 @@ import { RedisModule } from '@src/shared/redis/redis.module';
 import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
 
 @Module({
+  imports: [PassportModule, JwtModule.register({}), RedisModule],
   providers: [
     PrismaService,
     AuthService,
@@ -24,7 +25,6 @@ import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
     RefreshTokenStrategy,
     ConfigService,
   ],
-  imports: [PassportModule, JwtModule.register({}), RedisModule],
   controllers: [AuthController],
 })
 export class AuthModule implements NestModule {

@@ -3,13 +3,16 @@ export type AppConfig = {
   port: number;
   apiPrefix: string;
   apiVersion: string;
+  appUrl: string;
 };
 
 export type AuthConfig = {
-  accessTokenSecret?: string;
-  accessTokenExpires?: number;
-  refreshTokenSecret?: string;
-  refreshTokenExpires?: number;
+  accessTokenSecret: string;
+  accessTokenExpires: number;
+  refreshTokenSecret: string;
+  refreshTokenExpires: number;
+  jwtMailSecret: string;
+  jwtMailExpires: number;
 };
 
 export type DatabaseConfig = {
