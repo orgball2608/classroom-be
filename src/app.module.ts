@@ -3,7 +3,9 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AuthModule } from './modules/auth/auth.module';
 import { AuthenticateTokenMiddleware } from './middlewares';
 import { ConfigModule } from '@nestjs/config';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { JwtModule } from '@nestjs/jwt';
+import { MailerModule } from '@nestjs-modules/mailer';
 import { PrismaModule } from './shared/prisma/prisma.module';
 import { RedisModule } from './shared/redis/redis.module';
 import { SessionsModule } from './modules/sessions/sessions.module';
@@ -33,6 +35,27 @@ import redisConfig from './configs/redis.config';
     UserModule,
     JwtModule.register({}),
     SessionsModule,
+    MailerModule.forRoot({
+      transport: {
+        host: process.env.MAIL_HOST,
+        port: parseInt(process.env.MAIL_PORT, 10),
+        secure: true,
+        auth: {
+          user: process.env.MAIL_USERNAME,
+          pass: process.env.MAIL_PASSWORD,
+        },
+      },
+      defaults: {
+        from: '"nest-modules" <modules@nestjs.com>',
+      },
+      template: {
+        dir: process.cwd() + '/templates/',
+        adapter: new HandlebarsAdapter(),
+        options: {
+          strict: true,
+        },
+      },
+    }),
   ],
 })
 export class AppModule implements NestModule {

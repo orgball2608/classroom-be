@@ -27,6 +27,10 @@ class EnvironmentVariablesValidator {
   @IsString()
   @IsOptional()
   API_VERSION: string;
+
+  @IsString()
+  @IsOptional()
+  APP_URL: string;
 }
 
 export default registerAs<AppConfig>('app', () => {
@@ -41,5 +45,6 @@ export default registerAs<AppConfig>('app', () => {
       : 3000,
     apiPrefix: process.env.API_PREFIX || 'api',
     apiVersion: process.env.API_VERSION || 'v1',
+    appUrl: process.env.APP_URL || 'http://localhost:3000',
   };
 });

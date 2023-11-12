@@ -7,6 +7,7 @@ import {
   Get,
   Body,
   Req,
+  Query,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from '../../guards/local-auth.guard';
@@ -17,6 +18,7 @@ import {
   ApiBody,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -107,5 +109,11 @@ export class AuthController {
   refreshToken(@Req() req: UserRequest) {
     const userId = req.user['id'];
     return this.authService.refreshToken(userId);
+  }
+
+  @Get('verify')
+  async findOne(@Query('token') token: string) {
+    await this.authService.confirmEmail(token);
+    return 'Verify email successfully';
   }
 }
