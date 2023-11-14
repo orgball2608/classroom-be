@@ -1,6 +1,5 @@
 import { AccessTokenParsed, UserRequest } from '@src/interfaces';
 import {
-  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -17,6 +16,7 @@ import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
+import { USERS_MESSAGES } from '@src/constants/message';
 import { USER_NOT_FOUND } from '@src/errors/errors.constant';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -38,13 +38,17 @@ export class AuthService {
       registerDto.firstName + '' + registerDto.lastName,
     );
 
-    return this.prisma.user.create({
+    this.prisma.user.create({
       data: {
         ...registerDto,
         password: securedPassword,
         isEmailConfirmed: false,
       },
     });
+
+    return {
+      message: USERS_MESSAGES.REGISTER_SUCCESSFUL,
+    };
   }
 
   public sendVerificationLink(email: string, name: string) {
@@ -132,8 +136,11 @@ export class AuthService {
     );
 
     return {
-      accessToken: accessToken,
-      refreshToken: refreshToken,
+      message: USERS_MESSAGES.LOGIN_SUCCESSFUL,
+      data: {
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+      },
     };
   }
 
@@ -159,14 +166,16 @@ export class AuthService {
     const valid = await validateHash(password, user.password);
 
     if (!valid)
-      throw new UnauthorizedException('Password or username is uncorrect');
+      throw new UnauthorizedException(
+        USERS_MESSAGES.PASSWORD_OR_USERNAME_INCORRECT,
+      );
 
     return { id: user.id, isEmailConfirmed: user.isEmailConfirmed };
   }
 
   async logout() {
     return {
-      message: 'Logged out successfully',
+      message: USERS_MESSAGES.LOGOUT_SUCESSFULL,
     };
   }
 
@@ -183,7 +192,10 @@ export class AuthService {
     );
 
     return {
-      accessToken,
+      message: USERS_MESSAGES.REFRESH_TOKEN_SUCCESSFULLY,
+      data: {
+        accessToken,
+      },
     };
   }
 
@@ -201,8 +213,7 @@ export class AuthService {
       },
     });
 
-    if (!user)
-      throw new NotFoundException(`User with verifyToken ${token} not found`);
+    if (!user) throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
 
     await this.prisma.user.update({
       where: {
@@ -213,6 +224,8 @@ export class AuthService {
       },
     });
 
-    return user;
+    return {
+      message: USERS_MESSAGES.VERIFY_EMAIL_SUCCESSFULLY,
+    };
   }
 }

@@ -18,7 +18,6 @@ import {
   ApiBody,
   ApiNotFoundResponse,
   ApiOkResponse,
-  ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -27,7 +26,6 @@ import { UserEntity } from './entities/user.entity';
 import { RegisterDto } from './dto/register.dto';
 import { UserRequest } from '@src/interfaces';
 import { RefreshTokenGuard } from '@src/guards/refresh-token.guard';
-import { Request } from 'express';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -35,6 +33,17 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @ApiBody({ type: RegisterDto })
+  @ApiOkResponse({
+    schema: {
+      type: 'object',
+      properties: {
+        message: {
+          type: 'string',
+          example: 'Register sucesssfull',
+        },
+      },
+    },
+  })
   @Post('/register')
   create(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
@@ -46,10 +55,24 @@ export class AuthController {
     schema: {
       type: 'object',
       properties: {
-        accessToken: {
+        message: {
           type: 'string',
-          example:
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjg1OTQ5MzI0LCJleHAiOjE2ODU5NDkzMjd9.JAFScDSW24LJjlLBrfuB2PxG7f7jaw3NVMgrCDmFjoA',
+          example: 'Login sucesssfull',
+        },
+        data: {
+          type: 'object',
+          properties: {
+            accessToken: {
+              type: 'string',
+              example:
+                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjg1OTQ5MzI0LCJleHAiOjE2ODU5NDkzMjd9.JAFScDSW24LJjlLBrfuB2PxG7f7jaw3NVMgrCDmFjoA',
+            },
+            refreshToken: {
+              type: 'string',
+              example:
+                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjg1OTQ5MzI0LCJleHAiOjE2ODU5NDkzMjd9.JAFScDSW24LJjlLBrfuB2PxG7f7jaw3NVMgrCDmFjoA',
+            },
+          },
         },
       },
     },
@@ -105,6 +128,27 @@ export class AuthController {
 
   @UseGuards(RefreshTokenGuard)
   @ApiBearerAuth()
+  @ApiOkResponse({
+    schema: {
+      type: 'object',
+      properties: {
+        message: {
+          type: 'string',
+          example: 'Register sucesssfull',
+        },
+        data: {
+          type: 'object',
+          properties: {
+            accessToken: {
+              type: 'string',
+              example:
+                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjg1OTQ5MzI0LCJleHAiOjE2ODU5NDkzMjd9.JAFScDSW24LJjlLBrfuB2PxG7f7jaw3NVMgrCDmFjoA',
+            },
+          },
+        },
+      },
+    },
+  })
   @Get('refresh')
   refreshToken(@Req() req: UserRequest) {
     const userId = req.user['id'];
@@ -112,8 +156,7 @@ export class AuthController {
   }
 
   @Get('verify')
-  async findOne(@Query('token') token: string) {
-    await this.authService.confirmEmail(token);
-    return 'Verify email successfully';
+  findOne(@Query('token') token: string) {
+    return this.authService.confirmEmail(token);
   }
 }

@@ -1,0 +1,15 @@
+export const USERS_MESSAGES = {
+  VALIDATION_ERROR: 'Validation error',
+  LOGIN_SUCCESSFUL: 'Login successful',
+  REGISTER_SUCCESSFUL: 'Register successful',
+  USER_NOT_FOUND: 'User not found',
+  USER_IS_TAKEN: 'User is taken',
+  EMAIL_ALREADY_VERIFIED: 'Email already verified',
+  VERIFY_EMAIL_SUCCESSFULLY: 'Verify email successfully',
+  LOGOUT_SUCESSFULL: 'Logout successfull',
+  REFRESH_TOKEN_SUCCESSFULLY: 'Refresh token successfully',
+  PASSWORD_OR_USERNAME_INCORRECT: 'Password or username is uncorrect',
+  UPDATE_PROFILE_SUCCESSFULLY: 'Update profile successfully',
+  DELETE_USER_SUCCESSFULLY: 'Delete user successfully',
+  VERIFY_TOKEN_BEFORE_LOGIN: 'Please verify token before login ',
+} as const;

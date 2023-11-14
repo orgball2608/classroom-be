@@ -50,13 +50,13 @@ export class UserController {
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
-  ): Promise<void> {
+  ) {
     return this.userService.update(id, updateUserDto);
   }
 
   @ApiParam({ name: 'id', type: Number, example: 1 })
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
+  remove(@Param('id', ParseIntPipe) id: number) {
     return this.userService.remove(id);
   }
 }
