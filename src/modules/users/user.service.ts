@@ -3,6 +3,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PageDto } from '@src/common/dto/page.dto';
 import { PageMetaDto } from '@src/common/dto/page-meta.dto';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
+import { USERS_MESSAGES } from '@src/constants/message';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from '@prisma/client';
 import { UserEntity } from './entities/user.entity';
@@ -49,11 +50,12 @@ export class UserService {
     return user;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<void> {
-    const { username, password } = updateUserDto;
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    const { email, password } = updateUserDto;
     const newPassword = password && generateHash(password);
 
-    const isTaken = await this.isUsernameTaken(username);
+    const isTaken = await this.isEmailTaken(email);
+
     if (isTaken) {
       throw new UserTakenException();
     }
@@ -66,21 +68,29 @@ export class UserService {
       },
     });
 
-    if (!user) throw new NotFoundException(`User #${id} not found`);
+    if (!user) throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
+
+    return {
+      message: USERS_MESSAGES.UPDATE_PROFILE_SUCCESSFULLY,
+    };
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number) {
     const user = await this.prisma.user.delete({ where: { id } });
 
     if (!user) {
-      throw new NotFoundException(`User #${id} not found`);
+      throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
     }
+
+    return {
+      message: USERS_MESSAGES.DELETE_USER_SUCCESSFULLY,
+    };
   }
 
-  private async isUsernameTaken(username: string): Promise<boolean> {
+  private async isEmailTaken(email: string): Promise<boolean> {
     const existingUser = await this.prisma.user.findUnique({
       where: {
-        username,
+        email,
       },
     });
 
