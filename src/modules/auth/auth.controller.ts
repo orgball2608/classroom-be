@@ -8,6 +8,7 @@ import {
   Body,
   Req,
   Query,
+  Delete,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from '../../guards/local-auth.guard';
@@ -121,7 +122,7 @@ export class AuthController {
     },
   })
   @HttpCode(HttpStatus.OK)
-  @Get('/logout')
+  @Delete('/logout')
   async signOut() {
     return this.authService.logout();
   }
