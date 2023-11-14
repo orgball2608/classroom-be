@@ -1,0 +1,19 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": ["config:base"],
+    "rebaseWhen": "conflicted",
+    "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
+    "semanticCommits": "enabled",
+    "semanticPrefix": "chore(dependency)",
+    "labels": ["dependencies"],
+    "reviewers": ["orgball2608"],
+    "assignees": ["orgball2608"],
+    "lockFileMaintenance": {
+        "enabled": true
+    },
+    "baseBranches": ["main"],
+    "separateMajorMinor": false,
+    "rangeStrategy": "pin",
+    "prHourlyLimit": 100,
+    "packageFiles": ["package.json"]
+}
