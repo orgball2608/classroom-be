@@ -22,11 +22,6 @@ export class RegisterDto {
   })
   password!: string;
 
-  @BooleanFieldOptional({
-    example: true,
-  })
-  status?: boolean;
-
   @StringField({
     example: '0796694097',
   })
