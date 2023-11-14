@@ -118,5 +118,9 @@
       "git add ."
     ]
   },
-  "postinstall": "husky install"
+  "postinstall": "husky install",
+  "resolutions": {
+    "wrap-ansi": "7.0.0",
+    "string-width": "4.1.0"
+  }
 }
