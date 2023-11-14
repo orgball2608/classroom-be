@@ -4,17 +4,13 @@ import {
   NestMiddleware,
   UnauthorizedException,
 } from '@nestjs/common';
-import { NextFunction, Request, Response } from 'express';
-import {
-  TOKEN_IS_BLACKLIST,
-  TOKEN_IS_EXPIRED,
-  USER_LOGGED_OUT,
-} from '@src/errors/errors.constant';
+import { NextFunction, Request } from 'express';
 
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { RedisService } from '@src/shared/redis/redis.service';
+import { USERS_MESSAGES } from '@src/constants/message';
 
 @Injectable()
 export class AuthenticateTokenMiddleware implements NestMiddleware {
@@ -24,7 +20,7 @@ export class AuthenticateTokenMiddleware implements NestMiddleware {
     private readonly config: ConfigService,
     private jwtService: JwtService,
   ) {}
-  async use(req: Request, res: Response, next: NextFunction) {
+  async use(req: Request, next: NextFunction) {
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1];
 
@@ -35,9 +31,7 @@ export class AuthenticateTokenMiddleware implements NestMiddleware {
     const isTokenBlacklisted = await this.redis.get(token);
 
     if (isTokenBlacklisted) {
-      throw new ForbiddenException({
-        TOKEN_IS_BLACKLIST,
-      });
+      throw new ForbiddenException(USERS_MESSAGES.TOKEN_IS_BLACKLIST);
     } else {
       const payload: {
         id: number;
@@ -55,7 +49,7 @@ export class AuthenticateTokenMiddleware implements NestMiddleware {
       const currentTimeInSeconds = Math.floor(Date.now() / 1000);
 
       if (payload.exp <= currentTimeInSeconds) {
-        throw new UnauthorizedException(TOKEN_IS_EXPIRED);
+        throw new UnauthorizedException(USERS_MESSAGES.TOKEN_IS_EXPIRED);
       }
 
       const timeRemainingInSeconds = payload.exp - currentTimeInSeconds;
@@ -71,7 +65,7 @@ export class AuthenticateTokenMiddleware implements NestMiddleware {
 
       if (session && session.tokenDeleted) {
         await this.redis.set(token, 'true', timeRemainingInSeconds);
-        throw new UnauthorizedException(USER_LOGGED_OUT);
+        throw new UnauthorizedException(USERS_MESSAGES.USER_LOGGED_OUT);
       }
 
       req.user = payload;

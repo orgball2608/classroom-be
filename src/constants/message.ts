@@ -7,9 +7,12 @@ export const USERS_MESSAGES = {
   EMAIL_ALREADY_VERIFIED: 'Email already verified',
   VERIFY_EMAIL_SUCCESSFULLY: 'Verify email successfully',
   LOGOUT_SUCESSFULL: 'Logout successfull',
+  USER_LOGGED_OUT: 'User logged out',
   REFRESH_TOKEN_SUCCESSFULLY: 'Refresh token successfully',
   PASSWORD_OR_USERNAME_INCORRECT: 'Password or username is uncorrect',
   UPDATE_PROFILE_SUCCESSFULLY: 'Update profile successfully',
   DELETE_USER_SUCCESSFULLY: 'Delete user successfully',
   VERIFY_TOKEN_BEFORE_LOGIN: 'Please verify token before login ',
+  TOKEN_IS_EXPIRED: 'Token is expired',
+  TOKEN_IS_BLACKLIST: 'Token is blacklist',
 } as const;
