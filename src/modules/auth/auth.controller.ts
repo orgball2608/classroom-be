@@ -100,7 +100,13 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Get('/me')
   async me(@Req() req: UserRequest) {
-    return omit(req.user, ['password']);
+    return omit(req.user, [
+      'password',
+      'status',
+      'isEmailConfirmed',
+      'resetPasswordToken',
+      'resetPasswordExpires',
+    ]);
   }
 
   @ApiBearerAuth()
