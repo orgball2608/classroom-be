@@ -22,6 +22,12 @@ class EnvironmentVariablesValidator {
 
   @IsNumber()
   JWT_MAIL_TOKEN_TTL: number;
+
+  @IsString()
+  JWT_FORGOT_PASSWORD_SECRET: string;
+
+  @IsNumber()
+  JWT_FORGOT_PASSWORD_TOKEN_TTL: number;
 }
 
 export default registerAs<AuthConfig>('auth', () => {
@@ -39,6 +45,10 @@ export default registerAs<AuthConfig>('auth', () => {
     jwtMailSecret: process.env.JWT_MAIL_SECRET,
     jwtMailExpires: process.env.JWT_MAIL_TOKEN_TTL
       ? parseInt(process.env.JWT_MAIL_TOKEN_TTL, 10)
+      : 259200,
+    jwtForgotPasswordSecret: process.env.JWT_FORGOT_PASSWORD_SECRET,
+    jwtForgotPasswordExpires: process.env.JWT_FORGOT_PASSWORD_TOKEN_TTL
+      ? parseInt(process.env.JWT_FORGOT_PASSWORD_TOKEN_TTL, 10)
       : 259200,
   };
 });

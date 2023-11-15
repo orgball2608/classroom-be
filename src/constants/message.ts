@@ -19,4 +19,7 @@ export const USERS_MESSAGES = {
   CONFIRM_PASSWORD_MUST_BE_THE_SAME_AS_A_PASSWORD:
     'Confirm password must be the same as password',
   CHANGE_PASSWORD_SUCCESSFULLY: 'Change password successfully',
+  RESEND_CONFIRM_EMAIL_SUCCESSLY: 'Resend cofirm email successly',
+  VERIFY_STATUS_INCORRECT: 'Verify status incorrect',
+  CHECK_EMAIL_TO_RESET_PASSWORD: 'Check mail to reset password',
 } as const;

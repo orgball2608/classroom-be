@@ -1,5 +1,6 @@
 import { AccessTokenParsed, UserRequest } from '@src/interfaces';
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -16,8 +17,10 @@ import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
+import { ResendConfirmEmailDto } from './dto/resend-confirm-email.dto';
 import { USERS_MESSAGES } from '@src/constants/message';
 import { USER_NOT_FOUND } from '@src/errors/errors.constant';
+import { VerifyStatus } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
@@ -38,7 +41,7 @@ export class AuthService {
       registerDto.firstName + '' + registerDto.lastName,
     );
 
-    await this.prisma.user.create({
+    const user = await this.prisma.user.create({
       data: {
         ...registerDto,
         password: securedPassword,
@@ -46,17 +49,39 @@ export class AuthService {
       },
     });
 
+    const resendConfirmToken = this.jwtService.sign(
+      {
+        userId: user.id,
+        email: user.email,
+      },
+      {
+        secret: this.config.get('auth.jwtMailSecret'),
+        expiresIn: `${this.config.get('auth.jwtMailExpires')}s`,
+      },
+    );
+
+    //TODO: update resend token
+
     return {
       message: USERS_MESSAGES.REGISTER_SUCCESSFUL,
+      data: {
+        token: resendConfirmToken,
+      },
     };
   }
 
-  public sendVerificationLink(email: string, name: string) {
-    const payload = { email };
-    const token = this.jwtService.sign(payload, {
-      secret: this.config.get('auth.jwtMailSecret'),
-      expiresIn: `${this.config.get('auth.jwtMailExpires')}s`,
-    });
+  private signEmailConfirmToken(email: string) {
+    return this.jwtService.sign(
+      { email },
+      {
+        secret: this.config.get('auth.jwtMailSecret'),
+        expiresIn: `${this.config.get('auth.jwtMailExpires')}s`,
+      },
+    );
+  }
+
+  private sendVerificationLink(email: string, name: string) {
+    const token = this.signEmailConfirmToken(email);
 
     const apiPrefix =
       this.config.get<string>('app.apiPrefix') +
@@ -117,23 +142,16 @@ export class AuthService {
       });
     });
 
-    const accessToken = this.jwtService.sign(
-      { id: user.id, tokenId: tokenId },
-      {
-        secret: this.config.get<string>('auth.accessTokenSecret'),
-        // change expires unit to seconds
-        expiresIn: this.config.get<number>('auth.accessTokenExpires') + 's',
-      },
-    );
+    const accessToken = this.signAccessToken({
+      userId: user.id,
+      tokenId,
+      verifyStatus: VerifyStatus.VERIFY,
+    });
 
-    const refreshToken = this.jwtService.sign(
-      { id: user.id },
-      {
-        secret: this.config.get<string>('auth.refreshTokenSecret'),
-        // change expires unit to seconds
-        expiresIn: this.config.get<number>('auth.refreshTokenExpires') + 's',
-      },
-    );
+    const refreshToken = this.signRefeshToken({
+      userId: user.id,
+      verifyStatus: VerifyStatus.VERIFY,
+    });
 
     return {
       message: USERS_MESSAGES.LOGIN_SUCCESSFUL,
@@ -142,6 +160,42 @@ export class AuthService {
         refreshToken: refreshToken,
       },
     };
+  }
+
+  private signAccessToken({
+    userId,
+    tokenId,
+    verifyStatus,
+  }: {
+    userId: number;
+    tokenId: string;
+    verifyStatus: VerifyStatus;
+  }) {
+    return this.jwtService.sign(
+      { id: userId, tokenId: tokenId, verifyStatus },
+      {
+        secret: this.config.get<string>('auth.accessTokenSecret'),
+        // change expires unit to seconds
+        expiresIn: this.config.get<number>('auth.accessTokenExpires') + 's',
+      },
+    );
+  }
+
+  private signRefeshToken({
+    userId,
+    verifyStatus,
+  }: {
+    userId: number;
+    verifyStatus: VerifyStatus;
+  }) {
+    return this.jwtService.sign(
+      { id: userId, verifyStatus },
+      {
+        secret: this.config.get<string>('auth.refreshTokenSecret'),
+        // change expires unit to seconds
+        expiresIn: this.config.get<number>('auth.refreshTokenExpires') + 's',
+      },
+    );
   }
 
   async getUser(id: number) {
@@ -173,23 +227,14 @@ export class AuthService {
     return { id: user.id, isEmailConfirmed: user.isEmailConfirmed };
   }
 
-  async logout() {
-    return {
-      message: USERS_MESSAGES.LOGOUT_SUCESSFULL,
-    };
-  }
-
   async refreshToken(userId: number) {
     const tokenId: string = uuidv4();
 
-    const accessToken = this.jwtService.sign(
-      { id: userId, tokenId: tokenId },
-      {
-        secret: this.config.get<string>('auth.accessTokenSecret'),
-        // change expires unit to seconds
-        expiresIn: this.config.get<number>('auth.accessTokenExpires') + 's',
-      },
-    );
+    const accessToken = this.signAccessToken({
+      tokenId,
+      userId,
+      verifyStatus: VerifyStatus.VERIFY,
+    });
 
     return {
       message: USERS_MESSAGES.REFRESH_TOKEN_SUCCESSFULLY,
@@ -226,6 +271,123 @@ export class AuthService {
 
     return {
       message: USERS_MESSAGES.VERIFY_EMAIL_SUCCESSFULLY,
+    };
+  }
+
+  async resendConfirmEmail(resendConfirmEmailDto: ResendConfirmEmailDto) {
+    const payload: {
+      userId: number;
+      email: string;
+    } = this.jwtService.verify(resendConfirmEmailDto.token, {
+      secret: this.config.get<string>('auth.jwtMailSecret'),
+      ignoreExpiration: false,
+    });
+
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: payload.email,
+      },
+    });
+
+    if (!user) throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
+
+    await this.sendVerificationLink(user.email, user.firstName + user.lastName);
+
+    return {
+      message: USERS_MESSAGES.RESEND_CONFIRM_EMAIL_SUCCESSLY,
+    };
+  }
+
+  private signForgotPasswordToken({
+    userId,
+    verifyStatus,
+  }: {
+    userId: number;
+    verifyStatus: VerifyStatus;
+  }) {
+    return this.jwtService.sign(
+      { userId, verifyStatus },
+      {
+        secret: this.config.get('auth.jwtForgotPasswordSecret'),
+        expiresIn: `${this.config.get('auth.jwtForgotPasswordExpires')}s`,
+      },
+    );
+  }
+
+  private sendForgotPasswordMail({
+    email,
+    token,
+    name,
+  }: {
+    email: string;
+    token: string;
+    name: string;
+  }) {
+    const apiPrefix =
+      this.config.get<string>('app.apiPrefix') +
+      '/' +
+      this.config.get<string>('app.apiVersion');
+
+    const forgotPasswordEmailAddressUrl = `${this.config.get(
+      'APP_URL',
+    )}/${apiPrefix}/auth/forgot-passwordx?token=${token}`;
+
+    return this.mailerService.sendMail({
+      to: email,
+      from: 'elearningapp@gmail.com',
+      subject: 'Email reset forgot password for leaning app',
+      template: './index',
+      context: {
+        name,
+        forgotPasswordEmailAddressUrl,
+      },
+    });
+  }
+
+  async resetPassword({
+    email,
+    verifyStatus,
+  }: {
+    email: string;
+    verifyStatus: VerifyStatus;
+  }) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (!user) throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
+
+    if (user.verify !== verifyStatus)
+      throw new BadRequestException(USERS_MESSAGES.VERIFY_STATUS_INCORRECT);
+
+    const token = this.signForgotPasswordToken({
+      userId: user.id,
+      verifyStatus,
+    });
+
+    await this.prisma.user.update({
+      where: {
+        email,
+      },
+      data: {
+        forgotPasswordToken: token,
+      },
+    });
+
+    const name = user.firstName + user.lastName;
+
+    await this.sendForgotPasswordMail({ email, token, name });
+
+    return {
+      message: USERS_MESSAGES.CHECK_EMAIL_TO_RESET_PASSWORD,
+    };
+  }
+
+  async logout() {
+    return {
+      message: USERS_MESSAGES.LOGOUT_SUCESSFULL,
     };
   }
 }

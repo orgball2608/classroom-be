@@ -27,6 +27,7 @@ import { UserEntity } from './entities/user.entity';
 import { RegisterDto } from './dto/register.dto';
 import { UserRequest } from '@src/interfaces';
 import { RefreshTokenGuard } from '@src/guards/refresh-token.guard';
+import { ResendConfirmEmailDto } from './dto/resend-confirm-email.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -165,5 +166,11 @@ export class AuthController {
   @Get('verify')
   findOne(@Query('token') token: string) {
     return this.authService.confirmEmail(token);
+  }
+
+  @Post('resend-confirm-email')
+  @ApiBody({ type: ResendConfirmEmailDto })
+  resendConfirmEmail(@Body() resendConfirmEmailDto: ResendConfirmEmailDto) {
+    this.authService.resendConfirmEmail(resendConfirmEmailDto);
   }
 }

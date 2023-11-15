@@ -13,6 +13,8 @@ export type AuthConfig = {
   refreshTokenExpires: number;
   jwtMailSecret: string;
   jwtMailExpires: number;
+  jwtForgotPasswordSecret: string;
+  jwtForgotPasswordExpires: number;
 };
 
 export type DatabaseConfig = {
