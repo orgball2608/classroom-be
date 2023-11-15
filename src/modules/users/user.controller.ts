@@ -22,6 +22,7 @@ import { omit } from 'lodash';
 import { UserEntity } from './entities/user.entity';
 import { UsersPageOptionsDto } from './dto/user-page-options.dto';
 import { PageDto } from '@src/common/dto/page.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -52,6 +53,15 @@ export class UserController {
     @Body() updateUserDto: UpdateUserDto,
   ) {
     return this.userService.update(id, updateUserDto);
+  }
+
+  @ApiParam({ name: 'id', type: Number, example: 1 })
+  @Patch(':id')
+  changePassword(
+    @Param('id', ParseIntPipe) id: number,
+    changePasswordDto: ChangePasswordDto,
+  ) {
+    return this.userService.changePassword(id, changePasswordDto);
   }
 
   @ApiParam({ name: 'id', type: Number, example: 1 })
