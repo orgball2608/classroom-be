@@ -5,7 +5,15 @@ import { AbstractEntity } from '@src/common/entity/abstract.entity';
 
 export class UserEntity
   extends AbstractEntity
-  implements Omit<User, 'password'>
+  implements
+    Omit<
+      User,
+      | 'password'
+      | 'status'
+      | 'forgotPasswordToken'
+      | 'isEmailConfirmed'
+      | 'verify'
+    >
 {
   @ApiProperty({
     type: String,
@@ -18,12 +26,6 @@ export class UserEntity
     example: 'A',
   })
   lastName: string;
-
-  @ApiProperty({
-    type: Boolean,
-    example: true,
-  })
-  status: boolean;
 
   @ApiProperty({
     type: String,
@@ -47,14 +49,4 @@ export class UserEntity
     example: UserRole.USER,
   })
   role: UserRole;
-
-  @ApiPropertyOptional({
-    example: '',
-  })
-  resetPasswordToken: string;
-
-  @ApiPropertyOptional({
-    example: '',
-  })
-  resetPasswordExpires: Date;
 }
