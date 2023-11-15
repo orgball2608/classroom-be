@@ -1,17 +1,18 @@
-import { HttpAdapterHost, NestFactory, Reflector } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { UnprocessableEntityException, ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { setupSwagger } from './swagger/setup-swagger';
-import helmet from 'helmet';
-import morgan from 'morgan';
-import rateLimit from 'express-rate-limit';
-import compression from 'compression';
 import {
   ExpressAdapter,
   NestExpressApplication,
 } from '@nestjs/platform-express';
-import { HttpExceptionFilter, PrismaClientExceptionFilter } from './filters';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
+import { UnprocessableEntityException, ValidationPipe } from '@nestjs/common';
+
+import { AppModule } from './app.module';
+import { ConfigService } from '@nestjs/config';
+import { PrismaClientExceptionFilter } from './filters';
+import compression from 'compression';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import rateLimit from 'express-rate-limit';
+import { setupSwagger } from './swagger/setup-swagger';
 
 async function bootstrap(): Promise<NestExpressApplication> {
   const app = await NestFactory.create<NestExpressApplication>(
@@ -43,14 +44,9 @@ async function bootstrap(): Promise<NestExpressApplication> {
   app.use(morgan('combined'));
   app.enableVersioning();
 
-  const reflector = app.get(Reflector);
-
   const { httpAdapter } = app.get(HttpAdapterHost);
 
-  app.useGlobalFilters(
-    new HttpExceptionFilter(reflector),
-    new PrismaClientExceptionFilter(httpAdapter),
-  );
+  app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter));
 
   const apiPrefix =
     configService.get<string>('app.apiPrefix') +
