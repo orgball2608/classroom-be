@@ -15,4 +15,8 @@ export const USERS_MESSAGES = {
   VERIFY_TOKEN_BEFORE_LOGIN: 'Please verify token before login ',
   TOKEN_IS_EXPIRED: 'Token is expired',
   TOKEN_IS_BLACKLIST: 'Token is blacklist',
+  PASSWORD_NOT_MATCH: 'Password not match',
+  CONFIRM_PASSWORD_MUST_BE_THE_SAME_AS_A_PASSWORD:
+    'Confirm password must be the same as password',
+  CHANGE_PASSWORD_SUCCESSFULLY: 'Change password successfully',
 } as const;

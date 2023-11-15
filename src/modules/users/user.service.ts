@@ -1,5 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { PageDto } from '@src/common/dto/page.dto';
 import { PageMetaDto } from '@src/common/dto/page-meta.dto';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
@@ -51,27 +56,66 @@ export class UserService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    const { email, password } = updateUserDto;
-    const newPassword = password && generateHash(password);
+    const { email } = updateUserDto;
 
-    const isTaken = await this.isEmailTaken(email);
+    const isEmailTaken = await this.isEmailTaken(email);
 
-    if (isTaken) {
+    if (isEmailTaken) {
       throw new UserTakenException();
     }
 
     const user = await this.prisma.user.update({
       where: { id },
-      data: {
-        ...updateUserDto,
-        password: newPassword,
-      },
+      data: updateUserDto,
     });
 
     if (!user) throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
 
     return {
       message: USERS_MESSAGES.UPDATE_PROFILE_SUCCESSFULLY,
+      data: _.omit(user, ['password', 'status', 'isEmailConfirmed']),
+    };
+  }
+
+  /**
+   * Changes the password of a user.
+   * @param id - The ID of the user whose password needs to be changed.
+   * @param changePasswordDto - An object containing the old password, new password, and confirm password.
+   * @returns An object with a success message.
+   * @throws NotFoundException if the user is not found or the passwords do not match.
+   */
+  async changePassword(id: number, changePasswordDto: ChangePasswordDto) {
+    const { newPassword, oldPassword, confirmPassword } = changePasswordDto;
+
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
+    }
+
+    if (newPassword !== confirmPassword) {
+      throw new BadRequestException(USERS_MESSAGES.PASSWORD_NOT_MATCH);
+    }
+
+    const hashedOldPassword = generateHash(oldPassword);
+
+    if (hashedOldPassword !== user.password) {
+      throw new BadRequestException(USERS_MESSAGES.PASSWORD_NOT_MATCH);
+    }
+
+    const hashedNewPassword = generateHash(newPassword);
+
+    await this.prisma.user.update({
+      where: { id },
+      data: {
+        password: hashedNewPassword,
+      },
+    });
+
+    return {
+      message: USERS_MESSAGES.CHANGE_PASSWORD_SUCCESSFULLY,
     };
   }
 
