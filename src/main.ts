@@ -2,12 +2,12 @@ import {
   ExpressAdapter,
   NestExpressApplication,
 } from '@nestjs/platform-express';
-import { HttpAdapterHost, NestFactory } from '@nestjs/core';
+import { HttpAdapterHost, NestFactory, Reflector } from '@nestjs/core';
+import { HttpExceptionFilter, PrismaClientExceptionFilter } from './filters';
 import { UnprocessableEntityException, ValidationPipe } from '@nestjs/common';
 
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
-import { PrismaClientExceptionFilter } from './filters';
 import compression from 'compression';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -28,6 +28,8 @@ async function bootstrap(): Promise<NestExpressApplication> {
     new ValidationPipe({
       whitelist: true, // Remove all non-whitelisted properties
       transform: true, // Automatically transform payloads to DTO instances
+      dismissDefaultMessages: true,
+      exceptionFactory: (errors) => new UnprocessableEntityException(errors),
     }),
   );
 
@@ -43,8 +45,13 @@ async function bootstrap(): Promise<NestExpressApplication> {
   app.enableVersioning();
 
   const { httpAdapter } = app.get(HttpAdapterHost);
+  const reflector = app.get(Reflector);
 
-  app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter));
+  app.useGlobalFilters(
+    new HttpExceptionFilter(reflector),
+
+    new PrismaClientExceptionFilter(httpAdapter),
+  );
 
   const apiPrefix =
     configService.get<string>('app.apiPrefix') +
