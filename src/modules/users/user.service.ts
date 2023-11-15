@@ -40,7 +40,15 @@ export class UserService {
       pageOptionsDto,
     });
 
-    const filteredUsers = users.map((user) => _.omit(user, ['password']));
+    const filteredUsers = users.map((user) =>
+      _.omit(user, [
+        'password',
+        'status',
+        'forgotPasswordToken',
+        'isEmailConfirmed',
+        'verify',
+      ]),
+    );
 
     return new PageDto(filteredUsers, pageMetaDto);
   }

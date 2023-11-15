@@ -26,6 +26,7 @@ import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
     ConfigService,
   ],
   controllers: [AuthController],
+  exports: [AuthService],
 })
 export class AuthModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
