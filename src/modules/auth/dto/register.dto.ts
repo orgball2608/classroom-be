@@ -1,4 +1,4 @@
-import { BooleanFieldOptional, EmailField, StringField } from '@src/decorators';
+import { EmailField, StringField } from '@src/decorators';
 
 export class RegisterDto {
   @StringField({
