@@ -5,6 +5,7 @@ WORKDIR /app
 
 COPY package*.json ./
 COPY prisma ./prisma/
+COPY /templates ./templates
 COPY .env.docker .env
 
 RUN yarn
@@ -22,5 +23,6 @@ COPY --from=development /app/node_modules ./node_modules
 COPY --from=development /app/package*.json ./
 COPY --from=development /app/dist ./dist
 COPY --from=development /app/prisma ./prisma
+COPY --from=development /app/templates ./templates
 
 CMD [ "node", "dist/main.js" ]
