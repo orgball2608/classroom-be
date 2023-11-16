@@ -5,6 +5,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { TOKEN_MESSAGES, USERS_MESSAGES } from '@src/constants/message';
 import {
   generateHash,
   getDevideInfoFromRequest,
@@ -20,7 +21,6 @@ import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { ResendConfirmEmailDto } from './dto/resend-confirm-email.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { USERS_MESSAGES } from '@src/constants/message';
 import { USER_NOT_FOUND } from '@src/errors/errors.constant';
 import { VerifyStatus } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
@@ -246,33 +246,37 @@ export class AuthService {
   }
 
   async confirmEmail(token: string) {
-    const payload: {
-      email: string;
-    } = this.jwtService.verify(token, {
-      secret: this.config.get<string>('auth.jwtMailSecret'),
-      ignoreExpiration: false,
-    });
+    try {
+      const payload: {
+        email: string;
+      } = this.jwtService.verify(token, {
+        secret: this.config.get<string>('auth.jwtMailSecret'),
+        ignoreExpiration: false,
+      });
 
-    const user = await this.prisma.user.findUnique({
-      where: {
-        email: payload.email,
-      },
-    });
+      const user = await this.prisma.user.findUnique({
+        where: {
+          email: payload.email,
+        },
+      });
 
-    if (!user) throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
+      if (!user) throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
 
-    await this.prisma.user.update({
-      where: {
-        email: payload.email,
-      },
-      data: {
-        isEmailConfirmed: true,
-      },
-    });
+      await this.prisma.user.update({
+        where: {
+          email: payload.email,
+        },
+        data: {
+          isEmailConfirmed: true,
+        },
+      });
 
-    return {
-      message: USERS_MESSAGES.VERIFY_EMAIL_SUCCESSFULLY,
-    };
+      return {
+        message: USERS_MESSAGES.VERIFY_EMAIL_SUCCESSFULLY,
+      };
+    } catch (error) {
+      throw new BadRequestException(TOKEN_MESSAGES.TOKEN_IS_INVALID);
+    }
   }
 
   async resendConfirmEmail(resendConfirmEmailDto: ResendConfirmEmailDto) {
@@ -368,40 +372,44 @@ export class AuthService {
   }
 
   async resetPassword(resetPasswordDto: ResetPasswordDto) {
-    const { token, password } = resetPasswordDto;
-    const payload: {
-      userId: number;
-    } = this.jwtService.verify(token, {
-      secret: this.config.get<string>('auth.jwtForgotPasswordSecret'),
-      ignoreExpiration: false,
-    });
+    try {
+      const { token, password } = resetPasswordDto;
+      const payload: {
+        userId: number;
+      } = this.jwtService.verify(token, {
+        secret: this.config.get<string>('auth.jwtForgotPasswordSecret'),
+        ignoreExpiration: false,
+      });
 
-    const user = await this.prisma.user.findUnique({
-      where: {
-        id: payload.userId,
-      },
-    });
+      const user = await this.prisma.user.findUnique({
+        where: {
+          id: payload.userId,
+        },
+      });
 
-    if (!user) throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
+      if (!user) throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
 
-    if (user.forgotPasswordToken != token)
-      throw new BadRequestException(
-        USERS_MESSAGES.FORGOT_PASSWORD_TOKEN_INVALID,
-      );
+      if (user.forgotPasswordToken != token)
+        throw new BadRequestException(
+          USERS_MESSAGES.FORGOT_PASSWORD_TOKEN_INVALID,
+        );
 
-    await this.prisma.user.update({
-      where: {
-        email: user.email,
-      },
-      data: {
-        password: generateHash(password),
-        forgotPasswordToken: null,
-      },
-    });
+      await this.prisma.user.update({
+        where: {
+          email: user.email,
+        },
+        data: {
+          password: generateHash(password),
+          forgotPasswordToken: null,
+        },
+      });
 
-    return {
-      message: USERS_MESSAGES.RESET_PASSWORD_SUCCESSFULL,
-    };
+      return {
+        message: USERS_MESSAGES.RESET_PASSWORD_SUCCESSFULL,
+      };
+    } catch (error) {
+      throw new BadRequestException(TOKEN_MESSAGES.TOKEN_IS_INVALID);
+    }
   }
 
   async logout() {

@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { RedisService } from '@src/shared/redis/redis.service';
-import { USERS_MESSAGES } from '@src/constants/message';
+import { TOKEN_MESSAGES } from '@src/constants/message';
 
 @Injectable()
 export class BlackListTokenMiddleware implements NestMiddleware {
@@ -84,7 +84,7 @@ export class BlackListTokenMiddleware implements NestMiddleware {
           },
         });
 
-        throw new ForbiddenException(USERS_MESSAGES.TOKEN_IS_EXPIRED);
+        throw new ForbiddenException(TOKEN_MESSAGES.TOKEN_IS_EXPIRED);
       } else {
         const session = await this.prisma.session.findUnique({
           where: {
