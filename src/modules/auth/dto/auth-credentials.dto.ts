@@ -1,4 +1,4 @@
-import { EmailField, StringField } from '@src/decorators';
+import { EmailField, PasswordField } from '@src/decorators';
 
 export class AuthCredentialsDto {
   @EmailField({
@@ -6,8 +6,7 @@ export class AuthCredentialsDto {
   })
   email!: string;
 
-  @StringField({
-    minLength: 6,
+  @PasswordField({
     example: 'password',
   })
   password!: string;

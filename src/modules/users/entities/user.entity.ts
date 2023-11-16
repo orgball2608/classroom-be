@@ -1,7 +1,7 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { User, UserRole } from '@prisma/client';
 
 import { AbstractEntity } from '@src/common/entity/abstract.entity';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class UserEntity
   extends AbstractEntity

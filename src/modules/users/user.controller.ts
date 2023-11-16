@@ -8,7 +8,6 @@ import {
   ParseIntPipe,
   Query,
   ValidationPipe,
-  Res,
   Req,
 } from '@nestjs/common';
 import { UserService } from './user.service';
