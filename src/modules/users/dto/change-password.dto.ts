@@ -1,12 +1,12 @@
-import { StringField } from '@src/decorators';
+import { PasswordField } from '@src/decorators';
 
 export class ChangePasswordDto {
-  @StringField()
+  @PasswordField({ example: 'password' })
   oldPassword: string;
 
-  @StringField()
+  @PasswordField({ example: 'newpassword' })
   newPassword: string;
 
-  @StringField()
+  @PasswordField({ example: 'newpassword' })
   confirmPassword: string;
 }

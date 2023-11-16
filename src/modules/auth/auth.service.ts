@@ -89,7 +89,7 @@ export class AuthService {
       '/' +
       this.config.get<string>('app.apiVersion');
 
-    const verifyEmailAddressUrl = `${this.config.get(
+    const verifyEmailUrl = `${this.config.get(
       'app.appURL',
     )}/${apiPrefix}/auth/verify?token=${token}`;
 
@@ -97,10 +97,10 @@ export class AuthService {
       to: email,
       from: 'elearningapp@gmail.com',
       subject: 'Email confirmation for leaning app',
-      template: './index',
+      template: './verify-mail',
       context: {
         name,
-        verifyEmailAddressUrl,
+        verifyEmailUrl,
       },
     });
   }
