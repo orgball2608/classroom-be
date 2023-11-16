@@ -23,4 +23,4 @@ COPY --from=development /app/package*.json ./
 COPY --from=development /app/dist ./dist
 COPY --from=development /app/prisma ./prisma
 
-CMD [ "yarn", "build:docker" ]
+CMD [ "node", "dist/main.js" ]
