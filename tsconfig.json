@@ -24,6 +24,12 @@
       "@src/*": [
         "src/*"
       ],
+    },
+    "compilerOptions": {
+      "baseUrl": "./",
+      "@src/*": [
+        "src/*"
+      ],
     }
   }
 }
