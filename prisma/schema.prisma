@@ -23,7 +23,6 @@ model User {
   role                UserRole     @default(USER)
   isEmailConfirmed    Boolean      @default(false)
   forgotPasswordToken String?
-  resendEmailToken    String?
   verify              VerifyStatus @default(UNVERIFY)
 
   sessions Session[] @relation("userSession")
