@@ -1,4 +1,4 @@
-import { EmailField, StringField } from '@src/decorators';
+import { EmailField, PasswordField, StringField } from '@src/decorators';
 
 export class RegisterDto {
   @StringField({
@@ -16,8 +16,7 @@ export class RegisterDto {
   })
   email!: string;
 
-  @StringField({
-    minLength: 6,
+  @PasswordField({
     example: 'password',
   })
   password!: string;

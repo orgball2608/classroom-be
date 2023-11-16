@@ -7,7 +7,6 @@ import {
 import { Reflector } from '@nestjs/core';
 import { type ValidationError } from 'class-validator';
 import { type Response } from 'express';
-import _ from 'lodash';
 
 @Catch(UnprocessableEntityException)
 export class HttpExceptionFilter
