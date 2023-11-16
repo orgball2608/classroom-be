@@ -1,12 +1,12 @@
 import { StringField } from '@src/decorators';
 
 export class ChangePasswordDto {
-  @StringField({ minLength: 6, maxLength: 20 })
+  @StringField()
   oldPassword: string;
 
-  @StringField({ minLength: 6, maxLength: 20 })
+  @StringField()
   newPassword: string;
 
-  @StringField({ minLength: 6, maxLength: 20 })
+  @StringField()
   confirmPassword: string;
 }

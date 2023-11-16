@@ -8,6 +8,8 @@ import {
   ParseIntPipe,
   Query,
   ValidationPipe,
+  Res,
+  Req,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -46,6 +48,14 @@ export class UserController {
     return omit(await this.userService.findOne(id), ['password']);
   }
 
+  @ApiBody({ type: ChangePasswordDto })
+  @Patch('/change-password')
+  changePassword(@Req() req, @Body() changePasswordDto: ChangePasswordDto) {
+    const id = req.user['id'];
+    console.log('id', id, changePasswordDto);
+    return this.userService.changePassword(id, changePasswordDto);
+  }
+
   @ApiBody({ type: UpdateUserDto })
   @Patch(':id')
   update(
@@ -53,15 +63,6 @@ export class UserController {
     @Body() updateUserDto: UpdateUserDto,
   ) {
     return this.userService.update(id, updateUserDto);
-  }
-
-  @ApiParam({ name: 'id', type: Number, example: 1 })
-  @Patch(':id')
-  changePassword(
-    @Param('id', ParseIntPipe) id: number,
-    changePasswordDto: ChangePasswordDto,
-  ) {
-    return this.userService.changePassword(id, changePasswordDto);
   }
 
   @ApiParam({ name: 'id', type: Number, example: 1 })

@@ -9,6 +9,7 @@ import {
   Req,
   Query,
   Delete,
+  Redirect,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from '../../guards/local-auth.guard';
@@ -28,6 +29,8 @@ import { RegisterDto } from './dto/register.dto';
 import { UserRequest } from '@src/interfaces';
 import { RefreshTokenGuard } from '@src/guards/refresh-token.guard';
 import { ResendConfirmEmailDto } from './dto/resend-confirm-email.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -110,30 +113,6 @@ export class AuthController {
     ]);
   }
 
-  @ApiBearerAuth()
-  @ApiOkResponse({
-    schema: {
-      type: 'object',
-      properties: {
-        message: { type: 'string', example: 'Logged out successfully' },
-      },
-    },
-  })
-  @ApiUnauthorizedResponse({
-    schema: {
-      type: 'object',
-      properties: {
-        statusCode: { type: 'number', example: 401 },
-        message: { type: 'string', example: 'Unauthorized' },
-      },
-    },
-  })
-  @HttpCode(HttpStatus.OK)
-  @Delete('/logout')
-  async signOut() {
-    return this.authService.logout();
-  }
-
   @UseGuards(RefreshTokenGuard)
   @ApiBearerAuth()
   @ApiOkResponse({
@@ -172,5 +151,49 @@ export class AuthController {
   @ApiBody({ type: ResendConfirmEmailDto })
   resendConfirmEmail(@Body() resendConfirmEmailDto: ResendConfirmEmailDto) {
     this.authService.resendConfirmEmail(resendConfirmEmailDto);
+  }
+
+  @Post('forgot-password')
+  forotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(forgotPasswordDto);
+  }
+
+  @Get('verify-forgot-password')
+  @Redirect()
+  verifyForgotPassword(@Query('token') token: string) {
+    const url = this.authService.verifyForgotPassword(token);
+    return {
+      url: url,
+    };
+  }
+
+  @ApiBody({ type: ResetPasswordDto })
+  @Post('reset-password')
+  resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    return this.authService.resetPassword(resetPasswordDto);
+  }
+
+  @ApiBearerAuth()
+  @ApiOkResponse({
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Logged out successfully' },
+      },
+    },
+  })
+  @ApiUnauthorizedResponse({
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 401 },
+        message: { type: 'string', example: 'Unauthorized' },
+      },
+    },
+  })
+  @HttpCode(HttpStatus.OK)
+  @Delete('/logout')
+  async signOut() {
+    return this.authService.logout();
   }
 }
