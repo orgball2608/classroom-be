@@ -9,12 +9,13 @@ export const createUser = async () => {
     update: {},
     create: {
       email: 'quanghuynh@gmail.com',
-      password: await generateHash('password'),
+      password: generateHash('password'),
       firstName: 'Nguyen',
       lastName: 'Van Anh',
       status: true,
       phoneNumber: '0123456789',
       address: 'address',
+      isEmailConfirmed: true,
     },
   });
 };

@@ -25,6 +25,7 @@ import { UserEntity } from './entities/user.entity';
 import { UsersPageOptionsDto } from './dto/user-page-options.dto';
 import { PageDto } from '@src/common/dto/page.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { UserRequest } from '@src/interfaces';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -50,18 +51,19 @@ export class UserController {
 
   @ApiBody({ type: ChangePasswordDto })
   @Patch('/change-password')
-  changePassword(@Req() req, @Body() changePasswordDto: ChangePasswordDto) {
-    const id = req.user['id'];
+  changePassword(
+    @Req() req: UserRequest,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ) {
+    const id = req.user.id;
     console.log('id', id, changePasswordDto);
     return this.userService.changePassword(id, changePasswordDto);
   }
 
   @ApiBody({ type: UpdateUserDto })
-  @Patch(':id')
-  update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateUserDto: UpdateUserDto,
-  ) {
+  @Patch('me')
+  update(@Req() req: UserRequest, @Body() updateUserDto: UpdateUserDto) {
+    const id = req.user.id;
     return this.userService.update(id, updateUserDto);
   }
 
