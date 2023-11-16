@@ -13,11 +13,13 @@ import {
 } from '@src/common/utils';
 
 import { ConfigService } from '@nestjs/config';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { ResendConfirmEmailDto } from './dto/resend-confirm-email.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { USERS_MESSAGES } from '@src/constants/message';
 import { USER_NOT_FOUND } from '@src/errors/errors.constant';
 import { VerifyStatus } from '@prisma/client';
@@ -32,7 +34,12 @@ export class AuthService {
     private readonly mailerService: MailerService,
   ) {}
   async register(registerDto: RegisterDto) {
-    const { password } = registerDto;
+    const { email, password } = registerDto;
+
+    const checkExistEmail = await this.isEmailTaken(email);
+
+    if (checkExistEmail)
+      throw new BadRequestException(USERS_MESSAGES.EMAIL_ALREADY_EXISTS);
 
     const securedPassword = generateHash(password);
 
@@ -41,7 +48,7 @@ export class AuthService {
       registerDto.firstName + '' + registerDto.lastName,
     );
 
-    const user = await this.prisma.user.create({
+    await this.prisma.user.create({
       data: {
         ...registerDto,
         password: securedPassword,
@@ -49,25 +56,19 @@ export class AuthService {
       },
     });
 
-    const resendConfirmToken = this.jwtService.sign(
-      {
-        userId: user.id,
-        email: user.email,
-      },
-      {
-        secret: this.config.get('auth.jwtMailSecret'),
-        expiresIn: `${this.config.get('auth.jwtMailExpires')}s`,
-      },
-    );
-
-    //TODO: update resend token
-
     return {
       message: USERS_MESSAGES.REGISTER_SUCCESSFUL,
-      data: {
-        token: resendConfirmToken,
-      },
     };
+  }
+
+  private async isEmailTaken(email: string): Promise<boolean> {
+    const existingUser = await this.prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    return Boolean(existingUser);
   }
 
   private signEmailConfirmToken(email: string) {
@@ -89,7 +90,7 @@ export class AuthService {
       this.config.get<string>('app.apiVersion');
 
     const verifyEmailAddressUrl = `${this.config.get(
-      'APP_URL',
+      'app.appURL',
     )}/${apiPrefix}/auth/verify?token=${token}`;
 
     return this.mailerService.sendMail({
@@ -275,17 +276,9 @@ export class AuthService {
   }
 
   async resendConfirmEmail(resendConfirmEmailDto: ResendConfirmEmailDto) {
-    const payload: {
-      userId: number;
-      email: string;
-    } = this.jwtService.verify(resendConfirmEmailDto.token, {
-      secret: this.config.get<string>('auth.jwtMailSecret'),
-      ignoreExpiration: false,
-    });
-
     const user = await this.prisma.user.findUnique({
       where: {
-        email: payload.email,
+        email: resendConfirmEmailDto.email,
       },
     });
 
@@ -298,15 +291,9 @@ export class AuthService {
     };
   }
 
-  private signForgotPasswordToken({
-    userId,
-    verifyStatus,
-  }: {
-    userId: number;
-    verifyStatus: VerifyStatus;
-  }) {
+  private signForgotPasswordToken({ userId }: { userId: number }) {
     return this.jwtService.sign(
-      { userId, verifyStatus },
+      { userId },
       {
         secret: this.config.get('auth.jwtForgotPasswordSecret'),
         expiresIn: `${this.config.get('auth.jwtForgotPasswordExpires')}s`,
@@ -328,29 +315,23 @@ export class AuthService {
       '/' +
       this.config.get<string>('app.apiVersion');
 
-    const forgotPasswordEmailAddressUrl = `${this.config.get(
-      'APP_URL',
-    )}/${apiPrefix}/auth/forgot-passwordx?token=${token}`;
+    const resetLink = `${this.config.get(
+      'app.appURL',
+    )}/${apiPrefix}/auth/verify-forgot-password?token=${token}`;
 
     return this.mailerService.sendMail({
       to: email,
       from: 'elearningapp@gmail.com',
       subject: 'Email reset forgot password for leaning app',
-      template: './index',
+      template: './forgot-password',
       context: {
         name,
-        forgotPasswordEmailAddressUrl,
+        resetLink: resetLink,
       },
     });
   }
 
-  async resetPassword({
-    email,
-    verifyStatus,
-  }: {
-    email: string;
-    verifyStatus: VerifyStatus;
-  }) {
+  async forgotPassword({ email }: ForgotPasswordDto) {
     const user = await this.prisma.user.findUnique({
       where: {
         email,
@@ -359,12 +340,8 @@ export class AuthService {
 
     if (!user) throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
 
-    if (user.verify !== verifyStatus)
-      throw new BadRequestException(USERS_MESSAGES.VERIFY_STATUS_INCORRECT);
-
     const token = this.signForgotPasswordToken({
       userId: user.id,
-      verifyStatus,
     });
 
     await this.prisma.user.update({
@@ -382,6 +359,48 @@ export class AuthService {
 
     return {
       message: USERS_MESSAGES.CHECK_EMAIL_TO_RESET_PASSWORD,
+    };
+  }
+
+  verifyForgotPassword(token: string) {
+    const frontendURL = this.config.get('app.frontendURL');
+    return `${frontendURL}/reset-password/${token}`;
+  }
+
+  async resetPassword(resetPasswordDto: ResetPasswordDto) {
+    const { token, password } = resetPasswordDto;
+    const payload: {
+      userId: number;
+    } = this.jwtService.verify(token, {
+      secret: this.config.get<string>('auth.jwtForgotPasswordSecret'),
+      ignoreExpiration: false,
+    });
+
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: payload.userId,
+      },
+    });
+
+    if (!user) throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
+
+    if (user.forgotPasswordToken != token)
+      throw new BadRequestException(
+        USERS_MESSAGES.FORGOT_PASSWORD_TOKEN_INVALID,
+      );
+
+    await this.prisma.user.update({
+      where: {
+        email: user.email,
+      },
+      data: {
+        password: generateHash(password),
+        forgotPasswordToken: null,
+      },
+    });
+
+    return {
+      message: USERS_MESSAGES.RESET_PASSWORD_SUCCESSFULL,
     };
   }
 

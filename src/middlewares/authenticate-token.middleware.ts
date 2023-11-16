@@ -20,7 +20,7 @@ export class AuthenticateTokenMiddleware implements NestMiddleware {
     private readonly config: ConfigService,
     private jwtService: JwtService,
   ) {}
-  async use(req: Request, next: NextFunction) {
+  async use(req: Request, res: Response, next: NextFunction) {
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1];
 
