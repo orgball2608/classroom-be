@@ -26,8 +26,9 @@ export class HttpExceptionFilter
       message: validationErrors.map((err) => ({
         fieldName: err.property,
         errorMessage: `${
-          err.property.charAt(0).toUpperCase() + err.property.slice(1)
-        } is invalid`,
+          Object.values(err.constraints)[0].charAt(0).toUpperCase() +
+          Object.values(err.constraints)[0].slice(1)
+        }`,
       })),
       error: 'Unprocessable Entity',
       statusCode: statusCode,
