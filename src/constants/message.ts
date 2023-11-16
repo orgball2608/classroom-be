@@ -4,6 +4,7 @@ export const USERS_MESSAGES = {
   REGISTER_SUCCESSFUL: 'Register successful',
   USER_NOT_FOUND: 'User not found',
   USER_IS_TAKEN: 'User is taken',
+  EMAIL_ALREADY_EXISTS: 'Email already exists',
   EMAIL_ALREADY_VERIFIED: 'Email already verified',
   VERIFY_EMAIL_SUCCESSFULLY: 'Verify email successfully',
   LOGOUT_SUCESSFULL: 'Logout successfull',
@@ -22,4 +23,6 @@ export const USERS_MESSAGES = {
   RESEND_CONFIRM_EMAIL_SUCCESSLY: 'Resend cofirm email successly',
   VERIFY_STATUS_INCORRECT: 'Verify status incorrect',
   CHECK_EMAIL_TO_RESET_PASSWORD: 'Check mail to reset password',
+  FORGOT_PASSWORD_TOKEN_INVALID: 'Forgot password token invalid',
+  RESET_PASSWORD_SUCCESSFULL: 'Reset password successfull',
 } as const;

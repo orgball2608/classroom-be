@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { generateHash, validateHash } from '@src/common/utils';
 
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { PageDto } from '@src/common/dto/page.dto';
@@ -12,10 +13,8 @@ import { USERS_MESSAGES } from '@src/constants/message';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from '@prisma/client';
 import { UserEntity } from './entities/user.entity';
-import { UserTakenException } from '@src/exceptions/user-taken.exception';
 import { UsersPageOptionsDto } from './dto/user-page-options.dto';
 import _ from 'lodash';
-import { generateHash } from '@src/common/utils';
 
 @Injectable()
 export class UserService {
@@ -64,14 +63,6 @@ export class UserService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    const { email } = updateUserDto;
-
-    const isEmailTaken = await this.isEmailTaken(email);
-
-    if (isEmailTaken) {
-      throw new UserTakenException();
-    }
-
     const user = await this.prisma.user.update({
       where: { id },
       data: updateUserDto,
@@ -107,9 +98,7 @@ export class UserService {
       throw new BadRequestException(USERS_MESSAGES.PASSWORD_NOT_MATCH);
     }
 
-    const hashedOldPassword = generateHash(oldPassword);
-
-    if (hashedOldPassword !== user.password) {
+    if (!(await validateHash(oldPassword, user.password))) {
       throw new BadRequestException(USERS_MESSAGES.PASSWORD_NOT_MATCH);
     }
 
@@ -137,15 +126,5 @@ export class UserService {
     return {
       message: USERS_MESSAGES.DELETE_USER_SUCCESSFULLY,
     };
-  }
-
-  private async isEmailTaken(email: string): Promise<boolean> {
-    const existingUser = await this.prisma.user.findUnique({
-      where: {
-        email,
-      },
-    });
-
-    return Boolean(existingUser);
   }
 }

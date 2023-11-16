@@ -15,7 +15,7 @@ export class BlackListTokenMiddleware implements NestMiddleware {
     private readonly config: ConfigService,
     private jwtService: JwtService,
   ) {}
-  async use(req: Request, next: NextFunction) {
+  async use(req: Request, res: Response, next: NextFunction) {
     const authHeader: string | undefined = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
