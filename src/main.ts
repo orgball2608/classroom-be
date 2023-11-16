@@ -28,7 +28,6 @@ async function bootstrap(): Promise<NestExpressApplication> {
     new ValidationPipe({
       whitelist: true, // Remove all non-whitelisted properties
       transform: true, // Automatically transform payloads to DTO instances
-      dismissDefaultMessages: true,
       exceptionFactory: (errors) => new UnprocessableEntityException(errors),
     }),
   );
