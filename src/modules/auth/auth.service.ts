@@ -43,16 +43,19 @@ export class AuthService {
 
     const securedPassword = generateHash(password);
 
-    await this.sendVerificationLink(
-      registerDto.email,
-      registerDto.firstName + '' + registerDto.lastName,
-    );
+    const verifyEmailToken = this.signEmailConfirmToken(email);
+
+    await this.sendVerificationLink({
+      email: registerDto.email,
+      name: registerDto.firstName + '' + registerDto.lastName,
+      token: verifyEmailToken,
+    });
 
     await this.prisma.user.create({
       data: {
         ...registerDto,
         password: securedPassword,
-        isEmailConfirmed: false,
+        verifyEmailToken: verifyEmailToken,
       },
     });
 
@@ -81,9 +84,15 @@ export class AuthService {
     );
   }
 
-  private sendVerificationLink(email: string, name: string) {
-    const token = this.signEmailConfirmToken(email);
-
+  private sendVerificationLink({
+    email,
+    name,
+    token,
+  }: {
+    email: string;
+    name: string;
+    token: string;
+  }) {
     const apiPrefix =
       this.config.get<string>('app.apiPrefix') +
       '/' +
@@ -225,7 +234,7 @@ export class AuthService {
         USERS_MESSAGES.PASSWORD_OR_USERNAME_INCORRECT,
       );
 
-    return { id: user.id, isEmailConfirmed: user.isEmailConfirmed };
+    return { id: user.id, VerifyStatus: user.verify };
   }
 
   async refreshToken(userId: number) {
@@ -262,12 +271,16 @@ export class AuthService {
 
       if (!user) throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
 
+      if (user.verify === VerifyStatus.VERIFY)
+        throw new BadRequestException(USERS_MESSAGES.ACCOUNT_IS_VERIFIED);
+
       await this.prisma.user.update({
         where: {
           email: payload.email,
         },
         data: {
-          isEmailConfirmed: true,
+          verify: VerifyStatus.VERIFY,
+          verifyEmailToken: null,
         },
       });
 
@@ -288,7 +301,22 @@ export class AuthService {
 
     if (!user) throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
 
-    await this.sendVerificationLink(user.email, user.firstName + user.lastName);
+    const verifyEmailToken = this.signEmailConfirmToken(user.email);
+
+    await this.sendVerificationLink({
+      email: user.email,
+      name: user.firstName + user.lastName,
+      token: verifyEmailToken,
+    });
+
+    await this.prisma.user.update({
+      where: {
+        email: user.email,
+      },
+      data: {
+        verifyEmailToken: verifyEmailToken,
+      },
+    });
 
     return {
       message: USERS_MESSAGES.RESEND_CONFIRM_EMAIL_SUCCESSLY,

@@ -11,7 +11,7 @@ export class UserEntity
       | 'password'
       | 'status'
       | 'forgotPasswordToken'
-      | 'isEmailConfirmed'
+      | 'verifyEmailToken'
       | 'verify'
     >
 {

@@ -15,7 +15,6 @@ export const createUser = async () => {
       status: true,
       phoneNumber: '0123456789',
       address: 'address',
-      isEmailConfirmed: true,
     },
   });
 };
