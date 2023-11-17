@@ -8,13 +8,16 @@ import {
   ParseIntPipe,
   Query,
   ValidationPipe,
+  UseInterceptors,
   Req,
+  UploadedFile,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiConsumes,
   ApiOkResponse,
   ApiParam,
   ApiTags,
@@ -25,6 +28,10 @@ import { UsersPageOptionsDto } from './dto/user-page-options.dto';
 import { PageDto } from '@src/common/dto/page.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UserRequest } from '@src/interfaces';
+import {
+  FileFieldsInterceptor,
+  FileInterceptor,
+} from '@nestjs/platform-express';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -58,11 +65,37 @@ export class UserController {
     return this.userService.changePassword(id, changePasswordDto);
   }
 
-  @ApiBody({ type: UpdateUserDto })
+  @ApiBody({schema: {
+    type: 'object',
+    properties: {
+      firstName: {
+        type: 'string',
+      },
+      lastName: {
+        type: 'string',
+      },
+      phoneNumber: {
+        type: 'string',
+      },
+      addresss: {
+        type: 'string',
+      },
+      avatar: {
+        type: 'string',
+        format: 'binary',
+      },
+    },
+  }})
+  @ApiConsumes('multipart/form-data')
   @Patch('me')
-  update(@Req() req: UserRequest, @Body() updateUserDto: UpdateUserDto) {
+  @UseInterceptors(FileInterceptor('avatar'))
+  update(
+    @Req() req: UserRequest,
+    @Body() updateUserDto: UpdateUserDto,
+    @UploadedFile() avatar: Express.Multer.File,
+  ) {
     const id = req.user.id;
-    return this.userService.update(id, updateUserDto);
+    return this.userService.update(id, avatar, updateUserDto);
   }
 
   @ApiParam({ name: 'id', type: Number, example: 1 })
