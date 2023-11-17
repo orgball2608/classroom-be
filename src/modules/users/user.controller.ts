@@ -55,7 +55,6 @@ export class UserController {
     @Body() changePasswordDto: ChangePasswordDto,
   ) {
     const id = req.user.id;
-    console.log('id', id, changePasswordDto);
     return this.userService.changePassword(id, changePasswordDto);
   }
 
