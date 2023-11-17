@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -15,10 +16,16 @@ import { User } from '@prisma/client';
 import { UserEntity } from './entities/user.entity';
 import { UsersPageOptionsDto } from './dto/user-page-options.dto';
 import _ from 'lodash';
+import { SERVICES } from '@src/constants/service';
+import { StorageService } from '@src/shared/storage/services/storage.service';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Inject(SERVICES.STORAGE) private readonly storageService: StorageService,
+  ) {}
 
   async findAll(
     pageOptionsDto: UsersPageOptionsDto,
@@ -62,17 +69,21 @@ export class UserService {
     return user;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(id: number, avatar: Express.Multer.File, updateUserDto: UpdateUserDto) {
     const user = await this.prisma.user.update({
       where: { id },
       data: updateUserDto,
     });
 
+    const key = uuidv4()
+
+    console.log(await this.storageService.uploadFile({key, file: avatar}))
+
     if (!user) throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
 
     return {
       message: USERS_MESSAGES.UPDATE_PROFILE_SUCCESSFULLY,
-      data: _.omit(user, ['password', 'status', 'isEmailConfirmed']),
+      data: _.omit(user, ['password', 'status', 'verifyEmailToken','forgotPasswordToken']),
     };
   }
 
