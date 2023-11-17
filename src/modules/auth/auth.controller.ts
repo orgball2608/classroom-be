@@ -107,9 +107,8 @@ export class AuthController {
     return omit(req.user, [
       'password',
       'status',
-      'isEmailConfirmed',
-      'resetPasswordToken',
-      'resetPasswordExpires',
+      'verifyEmailToken',
+      'forgotPasswordToken',
     ]);
   }
 
@@ -150,7 +149,7 @@ export class AuthController {
   @Post('resend-confirm-email')
   @ApiBody({ type: ResendConfirmEmailDto })
   resendConfirmEmail(@Body() resendConfirmEmailDto: ResendConfirmEmailDto) {
-    this.authService.resendConfirmEmail(resendConfirmEmailDto);
+    return this.authService.resendConfirmEmail(resendConfirmEmailDto);
   }
 
   @Post('forgot-password')

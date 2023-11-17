@@ -44,7 +44,7 @@ export class UserService {
         'password',
         'status',
         'forgotPasswordToken',
-        'isEmailConfirmed',
+        'verifyEmailToken',
         'verify',
       ]),
     );
