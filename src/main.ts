@@ -18,7 +18,7 @@ async function bootstrap(): Promise<NestExpressApplication> {
   const app = await NestFactory.create<NestExpressApplication>(
     AppModule,
     new ExpressAdapter(),
-    { cors: true },
+    { cors: true , },
   );
 
   const configService = app.get(ConfigService);
@@ -31,6 +31,8 @@ async function bootstrap(): Promise<NestExpressApplication> {
       exceptionFactory: (errors) => new UnprocessableEntityException(errors),
     }),
   );
+
+  app.set('trust proxy', 1);
 
   app.use(helmet());
   app.use(
