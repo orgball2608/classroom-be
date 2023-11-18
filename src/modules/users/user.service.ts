@@ -9,16 +9,21 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { PageDto } from '@src/common/dto/page.dto';
 import { PageMetaDto } from '@src/common/dto/page-meta.dto';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
+import { StorageService } from '@src/shared/storage/services/storage.service';
 import { USERS_MESSAGES } from '@src/constants/message';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from '@prisma/client';
 import { UserEntity } from './entities/user.entity';
 import { UsersPageOptionsDto } from './dto/user-page-options.dto';
 import _ from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly storageService: StorageService,
+  ) {}
 
   async findAll(
     pageOptionsDto: UsersPageOptionsDto,
@@ -62,17 +67,41 @@ export class UserService {
     return user;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
-    const user = await this.prisma.user.update({
-      where: { id },
-      data: updateUserDto,
+  async update(
+    id: number,
+    updateUserDto: UpdateUserDto,
+    avatar: Express.Multer.File,
+  ) {
+    let user: User;
+
+    await this.prisma.$transaction(async (tx) => {
+      const key = uuidv4();
+
+      const avatarURL = await this.storageService.uploadFile({
+        key,
+        file: avatar,
+      });
+
+      user = await this.prisma.user.update({
+        where: { id },
+        data: {
+          ...updateUserDto,
+          avatar: avatarURL,
+        },
+      });
     });
 
     if (!user) throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
 
     return {
       message: USERS_MESSAGES.UPDATE_PROFILE_SUCCESSFULLY,
-      data: _.omit(user, ['password', 'status', 'isEmailConfirmed']),
+      data: _.omit(user, [
+        'password',
+        'status',
+        'verifyEmailToken',
+        'forgotPasswordToken',
+        'verify',
+      ]),
     };
   }
 

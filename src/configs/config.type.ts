@@ -26,3 +26,11 @@ export type DatabaseConfig = {
   name?: string;
   username?: string;
 };
+
+export type AwsConfig = {
+  awsAccessKeyID: string;
+  awsSerectAccessKey: string;
+  awsPublicBucketsKey: string;
+  awsCloudfrontURL: string;
+  awsRegion: string;
+};
