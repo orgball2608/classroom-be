@@ -109,6 +109,7 @@ export class AuthController {
       'status',
       'verifyEmailToken',
       'forgotPasswordToken',
+      'verify',
     ]);
   }
 
