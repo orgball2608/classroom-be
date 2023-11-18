@@ -12,6 +12,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { RedisService } from '@src/shared/redis/redis.service';
+import { TokenInvalidException } from '@src/exceptions';
 
 @Injectable()
 export class AuthenticateTokenMiddleware implements NestMiddleware {
@@ -74,7 +75,7 @@ export class AuthenticateTokenMiddleware implements NestMiddleware {
         next();
       }
     } catch (error) {
-      throw new BadRequestException(TOKEN_MESSAGES.TOKEN_IS_INVALID);
+      throw new TokenInvalidException(TOKEN_MESSAGES.TOKEN_IS_INVALID);
     }
   }
 }
