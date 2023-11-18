@@ -65,27 +65,34 @@ export class UserController {
     return this.userService.changePassword(id, changePasswordDto);
   }
 
-  @ApiBody({schema: {
-    type: 'object',
-    properties: {
-      firstName: {
-        type: 'string',
-      },
-      lastName: {
-        type: 'string',
-      },
-      phoneNumber: {
-        type: 'string',
-      },
-      addresss: {
-        type: 'string',
-      },
-      avatar: {
-        type: 'string',
-        format: 'binary',
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        firstName: {
+          type: 'string',
+          nullable: true,
+        },
+        lastName: {
+          type: 'string',
+          nullable: true,
+        },
+        phoneNumber: {
+          type: 'string',
+          nullable: true,
+        },
+        addresss: {
+          type: 'string',
+          nullable: true,
+        },
+        avatar: {
+          type: 'string',
+          format: 'binary',
+          nullable: true,
+        },
       },
     },
-  }})
+  })
   @ApiConsumes('multipart/form-data')
   @Patch('me')
   @UseInterceptors(FileInterceptor('avatar'))
@@ -95,7 +102,7 @@ export class UserController {
     @UploadedFile() avatar: Express.Multer.File,
   ) {
     const id = req.user.id;
-    return this.userService.update(id, avatar, updateUserDto);
+    return this.userService.update(id, updateUserDto, avatar);
   }
 
   @ApiParam({ name: 'id', type: Number, example: 1 })

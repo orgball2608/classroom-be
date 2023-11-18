@@ -1,31 +1,42 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { SERVICES } from '@src/constants/service';
 import { S3 } from 'aws-sdk';
-import * as process from 'process';
 
 @Injectable()
 export class StorageService {
   constructor(
     @Inject(SERVICES.STORAGE)
     private readonly storageClient: S3,
+    private readonly configService: ConfigService,
   ) {}
 
   async uploadFile(params: { key: string; file: Express.Multer.File }) {
-    const { key } = params;
+    const { key, file } = params;
+    const bucketName = this.configService.get<string>(
+      'aws.awsPublicBucketsKey',
+    );
     const uploadParams = {
-      Bucket: process.env.AWS_PUBLIC_BUCKET_KEY,
+      Bucket: bucketName,
       Key: key,
-      Body: params.file.buffer,
-      ContentType: 'image/jpeg',
+      Body: file.buffer,
+      ContentType: file.mimetype,
     };
     await this.storageClient.putObject(uploadParams).promise();
-    return key;
+    const cloudfrontURL = this.configService.get<string>(
+      'aws.awsCloudfrontURL',
+    );
+    return `${cloudfrontURL}${key}`;
   }
+
   deleteFile(key: string) {
+    const bucketName = this.configService.get<string>(
+      'aws.awsPublicBucketsKey',
+    );
     return this.storageClient
       .deleteObject({
-        Bucket: process.env.AWS_PUBLIC_BUCKET_KEY,
-        Key: String(key),
+        Bucket: bucketName,
+        Key: key,
       })
       .promise();
   }
