@@ -18,9 +18,11 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
+import { RefeshTokenDto } from './dto/refresh-token.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ResendConfirmEmailDto } from './dto/resend-confirm-email.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { TokenInvalidException } from '@src/exceptions';
 import { USER_NOT_FOUND } from '@src/errors/errors.constant';
 import { VerifyStatus } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
@@ -237,21 +239,32 @@ export class AuthService {
     return { id: user.id, VerifyStatus: user.verify };
   }
 
-  async refreshToken(userId: number) {
-    const tokenId: string = uuidv4();
+  async refreshToken(refreshTokenDto: RefeshTokenDto) {
+    try {
+      const payload: {
+        id: number;
+      } = this.jwtService.verify(refreshTokenDto.refreshToken, {
+        secret: this.config.get<string>('auth.refreshTokenSecret'),
+        ignoreExpiration: false,
+      });
 
-    const accessToken = this.signAccessToken({
-      tokenId,
-      userId,
-      verifyStatus: VerifyStatus.VERIFY,
-    });
+      const tokenId: string = uuidv4();
 
-    return {
-      message: USERS_MESSAGES.REFRESH_TOKEN_SUCCESSFULLY,
-      data: {
-        accessToken,
-      },
-    };
+      const accessToken = this.signAccessToken({
+        tokenId,
+        userId: payload.id,
+        verifyStatus: VerifyStatus.VERIFY,
+      });
+
+      return {
+        message: USERS_MESSAGES.REFRESH_TOKEN_SUCCESSFULLY,
+        data: {
+          accessToken,
+        },
+      };
+    } catch (error) {
+      throw new TokenInvalidException(TOKEN_MESSAGES.TOKEN_IS_INVALID);
+    }
   }
 
   async confirmEmail(token: string) {
@@ -288,7 +301,7 @@ export class AuthService {
         message: USERS_MESSAGES.VERIFY_EMAIL_SUCCESSFULLY,
       };
     } catch (error) {
-      throw new BadRequestException(TOKEN_MESSAGES.TOKEN_IS_INVALID);
+      throw new TokenInvalidException(TOKEN_MESSAGES.TOKEN_IS_INVALID);
     }
   }
 
@@ -436,7 +449,7 @@ export class AuthService {
         message: USERS_MESSAGES.RESET_PASSWORD_SUCCESSFULL,
       };
     } catch (error) {
-      throw new BadRequestException(TOKEN_MESSAGES.TOKEN_IS_INVALID);
+      throw new TokenInvalidException(TOKEN_MESSAGES.TOKEN_IS_INVALID);
     }
   }
 
