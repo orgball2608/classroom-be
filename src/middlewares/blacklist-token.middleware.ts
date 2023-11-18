@@ -17,30 +17,76 @@ export class BlackListTokenMiddleware implements NestMiddleware {
     private jwtService: JwtService,
   ) {}
   async use(req: Request, res: Response, next: NextFunction) {
-    try {
-      const authHeader: string | undefined = req.headers['authorization'];
-      const token = authHeader && authHeader.split(' ')[1];
+    const authHeader: string | undefined = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
 
-      if (!token) {
-        throw new ForbiddenException();
-      }
+    if (!token) {
+      throw new TokenInvalidException(TOKEN_MESSAGES.TOKEN_IS_INVALID);
+    }
 
-      const payload: {
-        id: number;
-        tokenId: string;
-        exp: number;
-      } = this.jwtService.verify(token, {
-        secret: this.config.get<string>('auth.accessTokenSecret'),
-        ignoreExpiration: true,
+    const payload: {
+      id: number;
+      tokenId: string;
+      exp: number;
+    } = this.jwtService.verify(token, {
+      secret: this.config.get<string>('auth.accessTokenSecret'),
+      ignoreExpiration: true,
+    });
+
+    if (!payload) {
+      throw new TokenInvalidException(TOKEN_MESSAGES.TOKEN_IS_INVALID);
+    }
+
+    const currentTimeInSeconds = Math.floor(Date.now() / 1000);
+
+    if (payload.exp <= currentTimeInSeconds) {
+      const session = await this.prisma.session.findUnique({
+        where: {
+          userId_tokenId: {
+            userId: payload.id,
+            tokenId: payload.tokenId,
+          },
+        },
       });
 
-      if (!payload) {
-        throw new ForbiddenException();
-      }
+      if (session && !session.tokenDeleted) {
+        await this.prisma.session.update({
+          where: {
+            userId_tokenId: {
+              userId: payload.id,
+              tokenId: payload.tokenId,
+            },
+          },
+          data: {
+            tokenDeleted: true,
+            loggedOut: true,
+            loggedOutAt: new Date(),
+          },
+        });
+        next();
+      } else throw new ForbiddenException();
+    } else {
+      const timeRemainingInSeconds = payload.exp - currentTimeInSeconds;
 
-      const currentTimeInSeconds = Math.floor(Date.now() / 1000);
+      const isTokenBlacklisted = await this.redis.get(token);
 
-      if (payload.exp <= currentTimeInSeconds) {
+      if (isTokenBlacklisted) {
+        await this.prisma.session.update({
+          where: {
+            userId_tokenId: {
+              userId: payload.id,
+              tokenId: payload.tokenId,
+            },
+          },
+          data: {
+            tokenDeleted: true,
+            loggedOut: true,
+            loggedOutAt: new Date(),
+          },
+        });
+
+        throw new ForbiddenException(TOKEN_MESSAGES.TOKEN_IS_BLACKLIST);
+      } else {
         const session = await this.prisma.session.findUnique({
           where: {
             userId_tokenId: {
@@ -50,7 +96,7 @@ export class BlackListTokenMiddleware implements NestMiddleware {
           },
         });
 
-        if (session && !session.tokenDeleted) {
+        if (session && session.tokenDeleted) {
           await this.prisma.session.update({
             where: {
               userId_tokenId: {
@@ -59,80 +105,30 @@ export class BlackListTokenMiddleware implements NestMiddleware {
               },
             },
             data: {
-              tokenDeleted: true,
               loggedOut: true,
               loggedOutAt: new Date(),
             },
           });
-          next();
-        } else throw new ForbiddenException();
-      } else {
-        const timeRemainingInSeconds = payload.exp - currentTimeInSeconds;
-
-        const isTokenBlacklisted = await this.redis.get(token);
-
-        if (isTokenBlacklisted) {
-          await this.prisma.session.update({
-            where: {
-              userId_tokenId: {
-                userId: payload.id,
-                tokenId: payload.tokenId,
-              },
-            },
-            data: {
-              tokenDeleted: true,
-              loggedOut: true,
-              loggedOutAt: new Date(),
-            },
-          });
-
-          throw new ForbiddenException(TOKEN_MESSAGES.TOKEN_IS_EXPIRED);
         } else {
-          const session = await this.prisma.session.findUnique({
+          await this.prisma.session.update({
             where: {
               userId_tokenId: {
                 userId: payload.id,
                 tokenId: payload.tokenId,
               },
             },
+            data: {
+              tokenDeleted: true,
+              loggedOut: true,
+              loggedOutAt: new Date(),
+            },
           });
-
-          if (session && session.tokenDeleted) {
-            await this.prisma.session.update({
-              where: {
-                userId_tokenId: {
-                  userId: payload.id,
-                  tokenId: payload.tokenId,
-                },
-              },
-              data: {
-                loggedOut: true,
-                loggedOutAt: new Date(),
-              },
-            });
-          } else {
-            await this.prisma.session.update({
-              where: {
-                userId_tokenId: {
-                  userId: payload.id,
-                  tokenId: payload.tokenId,
-                },
-              },
-              data: {
-                tokenDeleted: true,
-                loggedOut: true,
-                loggedOutAt: new Date(),
-              },
-            });
-          }
-
-          await this.redis.set(token, 'true', timeRemainingInSeconds);
-
-          next();
         }
+
+        await this.redis.set(token, 'true', timeRemainingInSeconds);
+
+        next();
       }
-    } catch (error) {
-      throw new TokenInvalidException(TOKEN_MESSAGES.TOKEN_IS_INVALID);
     }
   }
 }
