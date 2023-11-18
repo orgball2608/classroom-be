@@ -31,6 +31,7 @@ import { RefreshTokenGuard } from '@src/guards/refresh-token.guard';
 import { ResendConfirmEmailDto } from './dto/resend-confirm-email.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { RefeshTokenDto } from './dto/refresh-token.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -113,8 +114,6 @@ export class AuthController {
     ]);
   }
 
-  @UseGuards(RefreshTokenGuard)
-  @ApiBearerAuth()
   @ApiOkResponse({
     schema: {
       type: 'object',
@@ -136,10 +135,9 @@ export class AuthController {
       },
     },
   })
-  @Get('refresh')
-  refreshToken(@Req() req: UserRequest) {
-    const userId = req.user['id'];
-    return this.authService.refreshToken(userId);
+  @Post('refresh')
+  refreshToken(@Body() refreshTokenDto: RefeshTokenDto) {
+    return this.authService.refreshToken(refreshTokenDto);
   }
 
   @Get('verify')
