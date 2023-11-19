@@ -10,6 +10,8 @@ COPY .env.docker .env
 
 RUN yarn
 
+RUN yarn prisma generate
+
 COPY . .
 
 RUN yarn build
