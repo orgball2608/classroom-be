@@ -34,9 +34,9 @@ yarn
 
 ```
 
-### Development
+# Development
 
-# 4. Run development server and open http://localhost:3001
+## Run development server and open http://localhost:3001
 
 ```
 
@@ -48,7 +48,7 @@ or
 
 ```
 
-docker-compose up -d
+docker-compose up --detach --build; docker-compose exec api yarn run dev:migrate
 
 ```
 

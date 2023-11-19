@@ -12,7 +12,6 @@ export const createUser = async () => {
       password: generateHash('password'),
       firstName: 'Nguyen',
       lastName: 'Van Anh',
-      status: true,
       phoneNumber: '0123456789',
       address: 'address',
     },
