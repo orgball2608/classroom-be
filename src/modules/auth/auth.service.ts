@@ -409,7 +409,7 @@ export class AuthService {
 
   verifyForgotPassword(token: string) {
     const frontendURL = this.config.get('app.frontendURL');
-    return `${frontendURL}/reset-password/${token}`;
+    return `${frontendURL}/reset-password?token=${token}`;
   }
 
   async resetPassword(resetPasswordDto: ResetPasswordDto) {
