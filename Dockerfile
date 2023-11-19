@@ -6,7 +6,7 @@ WORKDIR /app
 COPY package*.json ./
 COPY prisma ./prisma/
 COPY /templates ./templates
-COPY .env .env
+COPY .env.docker .env
 
 RUN yarn
 
