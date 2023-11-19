@@ -13,6 +13,7 @@ import { SharedModule } from './shared/shared.module';
 import { UserModule } from './modules/users/user.module';
 import appConfig from '@src/configs/app.config';
 import authConfig from './configs/auth.config';
+import awsConfig from './configs/aws.config';
 import databaseConfig from './configs/database.config';
 import redisConfig from './configs/redis.config';
 
@@ -20,7 +21,7 @@ import redisConfig from './configs/redis.config';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, authConfig, databaseConfig, redisConfig],
+      load: [appConfig, authConfig, databaseConfig, redisConfig, awsConfig],
       cache: true,
       expandVariables: true,
       envFilePath: process.env.NODE_ENV === 'development' ? '.env.dev' : '.env',
