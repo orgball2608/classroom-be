@@ -84,6 +84,6 @@ export function getIpAddressFromRequest(req): string {
   return ip;
 }
 
-export function getDevideInfoFromRequest(req: Request): string {
+export function getDivideInfoFromRequest(req: Request): string {
   return req.headers['user-agent'];
 }

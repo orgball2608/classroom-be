@@ -27,11 +27,11 @@ import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 import { UserEntity } from './entities/user.entity';
 import { RegisterDto } from './dto/register.dto';
 import { UserRequest } from '@src/interfaces';
-import { RefreshTokenGuard } from '@src/guards/refresh-token.guard';
 import { ResendConfirmEmailDto } from './dto/resend-confirm-email.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { RefeshTokenDto } from './dto/refresh-token.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { FacebookAuthGuard } from '@src/guards/facebook.guard';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -45,7 +45,7 @@ export class AuthController {
       properties: {
         message: {
           type: 'string',
-          example: 'Register sucesssfull',
+          example: 'Register successful',
         },
       },
     },
@@ -53,6 +53,18 @@ export class AuthController {
   @Post('/register')
   create(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
+  }
+
+  @UseGuards(FacebookAuthGuard)
+  @Get('facebook')
+  LoginWithFacebook() {
+    return HttpStatus.OK;
+  }
+
+  @UseGuards(FacebookAuthGuard)
+  @Get('facebook/callback')
+  async LoginWithFacebookCallback(@Req() req) {
+    return this.authService.facebookLogin(req);
   }
 
   @UseGuards(LocalAuthGuard)
@@ -136,7 +148,7 @@ export class AuthController {
     },
   })
   @Post('refresh')
-  refreshToken(@Body() refreshTokenDto: RefeshTokenDto) {
+  refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
     return this.authService.refreshToken(refreshTokenDto);
   }
 

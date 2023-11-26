@@ -7,10 +7,10 @@ export const USERS_MESSAGES = {
   EMAIL_ALREADY_EXISTS: 'Email already exists',
   EMAIL_ALREADY_VERIFIED: 'Email already verified',
   VERIFY_EMAIL_SUCCESSFULLY: 'Verify email successfully',
-  LOGOUT_SUCESSFULL: 'Logout successfull',
+  LOGOUT_SUCCESSFUL: 'Logout successful',
   USER_LOGGED_OUT: 'User logged out',
   REFRESH_TOKEN_SUCCESSFULLY: 'Refresh token successfully',
-  PASSWORD_OR_USERNAME_INCORRECT: 'Password or username is uncorrect',
+  PASSWORD_OR_USERNAME_INCORRECT: 'Password or username is incorrect',
   UPDATE_PROFILE_SUCCESSFULLY: 'Update profile successfully',
   DELETE_USER_SUCCESSFULLY: 'Delete user successfully',
   VERIFY_TOKEN_BEFORE_LOGIN: 'Please verify token before login ',
@@ -18,11 +18,11 @@ export const USERS_MESSAGES = {
   CONFIRM_PASSWORD_MUST_BE_THE_SAME_AS_A_PASSWORD:
     'Confirm password must be the same as password',
   CHANGE_PASSWORD_SUCCESSFULLY: 'Change password successfully',
-  RESEND_CONFIRM_EMAIL_SUCCESSLY: 'Resend cofirm email successly',
+  RESEND_CONFIRM_EMAIL_SUCCESSFULLY: 'Resend confirm email successfully',
   VERIFY_STATUS_INCORRECT: 'Verify status incorrect',
   CHECK_EMAIL_TO_RESET_PASSWORD: 'Check mail to reset password',
   FORGOT_PASSWORD_TOKEN_INVALID: 'Forgot password token invalid',
-  RESET_PASSWORD_SUCCESSFULL: 'Reset password successfull',
+  RESET_PASSWORD_SUCCESSFUL: 'Reset password successful',
   ACCOUNT_IS_VERIFIED: 'Account is verified, cant verify again',
 } as const;
 

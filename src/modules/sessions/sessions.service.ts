@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { UserRequest } from '@src/interfaces';
-import { getDevideInfoFromRequest } from '@src/common/utils';
+import { getDivideInfoFromRequest } from '@src/common/utils';
 
 @Injectable()
 export class SessionsService {
@@ -11,7 +11,7 @@ export class SessionsService {
   async findAll(req: UserRequest, ip: string) {
     const { tokenId, id } = req.user;
 
-    const devide: string = getDevideInfoFromRequest(req);
+    const devide: string = getDivideInfoFromRequest(req);
 
     const sessions = await this.prisma.session.findMany({
       where: {
@@ -75,7 +75,7 @@ export class SessionsService {
       data: { tokenDeleted: true },
     });
 
-    const devide: string = getDevideInfoFromRequest(req);
+    const devide: string = getDivideInfoFromRequest(req);
 
     if (
       tokenId == session.tokenId &&
@@ -106,7 +106,7 @@ export class SessionsService {
       data: { tokenDeleted: true },
     });
 
-    const devide: string = getDevideInfoFromRequest(req);
+    const devide: string = getDivideInfoFromRequest(req);
 
     const response = sessions.map((session) => {
       if (
@@ -134,7 +134,7 @@ export class SessionsService {
       },
     });
 
-    const devide: string = getDevideInfoFromRequest(req);
+    const devide: string = getDivideInfoFromRequest(req);
 
     let currentUserId: number;
 
