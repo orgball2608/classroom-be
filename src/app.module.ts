@@ -24,18 +24,11 @@ import redisConfig from './configs/redis.config';
       load: [appConfig, authConfig, databaseConfig, redisConfig, awsConfig],
       cache: true,
       expandVariables: true,
-      envFilePath: process.env.NODE_ENV === 'development' ? '.env.dev' : '.env',
+      envFilePath: process.env.NODE_ENV == 'development' ? '.env.dev' : '.env',
       validationOptions: {
         abortEarly: false,
       },
     }),
-    PrismaModule,
-    RedisModule,
-    SharedModule,
-    AuthModule,
-    UserModule,
-    JwtModule.register({}),
-    SessionsModule,
     MailerModule.forRoot({
       transport: {
         host: process.env.MAIL_HOST,
@@ -57,6 +50,13 @@ import redisConfig from './configs/redis.config';
         },
       },
     }),
+    JwtModule.register({}),
+    PrismaModule,
+    RedisModule,
+    SharedModule,
+    AuthModule,
+    UserModule,
+    SessionsModule,
   ],
 })
 export class AppModule implements NestModule {
