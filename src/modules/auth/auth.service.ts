@@ -86,7 +86,7 @@ export class AuthService {
     );
   }
 
-  async login(req: UserRequest) {. 
+  async login(req: UserRequest) {
     const user: AccessTokenParsed = req.user;
 
     const tokenId: string = uuidv4();
@@ -145,7 +145,7 @@ export class AuthService {
   }
 
   async facebookLogin(req) {
-    const {profile} = req.user
+    const { profile } = req.user;
     const isExistUser = await this.prisma.user.findUnique({
       where: { facebookId: profile.id },
     });
@@ -154,7 +154,7 @@ export class AuthService {
       const tokenId: string = uuidv4();
       const ip: string = getIpAddressFromRequest(req);
       const device: string = getDivideInfoFromRequest(req);
-  
+
       await this.prisma.$transaction(async (tx) => {
         await tx.session.updateMany({
           where: {
@@ -167,9 +167,9 @@ export class AuthService {
             tokenDeleted: true,
           },
         });
-  
+
         const tokenSecret: string = uuidv4();
-  
+
         await tx.session.create({
           data: {
             user: {
@@ -185,13 +185,13 @@ export class AuthService {
           },
         });
       });
-  
+
       const accessToken = this.signAccessToken({
         userId: isExistUser.id,
         tokenId,
         verifyStatus: VerifyStatus.VERIFY,
       });
-  
+
       const refreshToken = this.signRefreshToken({
         userId: isExistUser.id,
         verifyStatus: VerifyStatus.VERIFY,
