@@ -8,7 +8,7 @@ import {
 import { TOKEN_MESSAGES, USERS_MESSAGES } from '@src/constants/message';
 import {
   generateHash,
-  getDevideInfoFromRequest,
+  getDivideInfoFromRequest,
   getIpAddressFromRequest,
   validateHash,
 } from '@src/common/utils';
@@ -18,7 +18,7 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
-import { RefeshTokenDto } from './dto/refresh-token.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ResendConfirmEmailDto } from './dto/resend-confirm-email.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -86,42 +86,12 @@ export class AuthService {
     );
   }
 
-  private sendVerificationLink({
-    email,
-    name,
-    token,
-  }: {
-    email: string;
-    name: string;
-    token: string;
-  }) {
-    const apiPrefix =
-      this.config.get<string>('app.apiPrefix') +
-      '/' +
-      this.config.get<string>('app.apiVersion');
-
-    const verifyEmailUrl = `${this.config.get(
-      'app.appURL',
-    )}/${apiPrefix}/auth/verify?token=${token}`;
-
-    return this.mailerService.sendMail({
-      to: email,
-      from: 'elearningapp@gmail.com',
-      subject: 'Email confirmation for leaning app',
-      template: './verify-mail',
-      context: {
-        name,
-        verifyEmailUrl,
-      },
-    });
-  }
-
-  async login(req: UserRequest) {
+  async login(req: UserRequest) {. 
     const user: AccessTokenParsed = req.user;
 
     const tokenId: string = uuidv4();
     const ip: string = getIpAddressFromRequest(req);
-    const device: string = getDevideInfoFromRequest(req);
+    const device: string = getDivideInfoFromRequest(req);
 
     await this.prisma.$transaction(async (tx) => {
       await tx.session.updateMany({
@@ -160,7 +130,7 @@ export class AuthService {
       verifyStatus: VerifyStatus.VERIFY,
     });
 
-    const refreshToken = this.signRefeshToken({
+    const refreshToken = this.signRefreshToken({
       userId: user.id,
       verifyStatus: VerifyStatus.VERIFY,
     });
@@ -172,6 +142,114 @@ export class AuthService {
         refreshToken: refreshToken,
       },
     };
+  }
+
+  async facebookLogin(req) {
+    const {profile} = req.user
+    const isExistUser = await this.prisma.user.findUnique({
+      where: { facebookId: profile.id },
+    });
+
+    if (isExistUser) {
+      const tokenId: string = uuidv4();
+      const ip: string = getIpAddressFromRequest(req);
+      const device: string = getDivideInfoFromRequest(req);
+  
+      await this.prisma.$transaction(async (tx) => {
+        await tx.session.updateMany({
+          where: {
+            userId: isExistUser.id,
+            tokenDeleted: false,
+            ipAddress: ip,
+            device,
+          },
+          data: {
+            tokenDeleted: true,
+          },
+        });
+  
+        const tokenSecret: string = uuidv4();
+  
+        await tx.session.create({
+          data: {
+            user: {
+              connect: {
+                id: isExistUser.id,
+              },
+            },
+            tokenId: tokenId,
+            tokenSecret: tokenSecret,
+            ipAddress: ip,
+            loggedInAt: new Date(),
+            device: device,
+          },
+        });
+      });
+  
+      const accessToken = this.signAccessToken({
+        userId: isExistUser.id,
+        tokenId,
+        verifyStatus: VerifyStatus.VERIFY,
+      });
+  
+      const refreshToken = this.signRefreshToken({
+        userId: isExistUser.id,
+        verifyStatus: VerifyStatus.VERIFY,
+      });
+
+      return {
+        message: USERS_MESSAGES.LOGIN_SUCCESSFUL,
+        data: {
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+        },
+      };
+    } else {
+      const firstName = profile.displayName.split(' ')[0];
+      const lastName = profile.displayName.split(' ')[1];
+
+      const newUser = await this.prisma.user.create({
+        data: {
+          firstName,
+          lastName,
+          email: profile.emails[0].value,
+          facebookId: profile.id,
+          avatar: profile.profileUrl,
+        },
+      });
+
+      return newUser;
+    }
+  }
+
+  private sendVerificationLink({
+    email,
+    name,
+    token,
+  }: {
+    email: string;
+    name: string;
+    token: string;
+  }) {
+    const apiPrefix =
+      this.config.get<string>('app.apiPrefix') +
+      '/' +
+      this.config.get<string>('app.apiVersion');
+
+    const verifyEmailUrl = `${this.config.get(
+      'app.appURL',
+    )}/${apiPrefix}/auth/verify?token=${token}`;
+
+    return this.mailerService.sendMail({
+      to: email,
+      from: 'elearningapp@gmail.com',
+      subject: 'Email confirmation for leaning app',
+      template: './verify-mail',
+      context: {
+        name,
+        verifyEmailUrl,
+      },
+    });
   }
 
   private signAccessToken({
@@ -193,7 +271,7 @@ export class AuthService {
     );
   }
 
-  private signRefeshToken({
+  private signRefreshToken({
     userId,
     verifyStatus,
   }: {
@@ -239,7 +317,7 @@ export class AuthService {
     return { id: user.id, VerifyStatus: user.verify };
   }
 
-  async refreshToken(refreshTokenDto: RefeshTokenDto) {
+  async refreshToken(refreshTokenDto: RefreshTokenDto) {
     try {
       const payload: {
         id: number;
@@ -332,7 +410,7 @@ export class AuthService {
     });
 
     return {
-      message: USERS_MESSAGES.RESEND_CONFIRM_EMAIL_SUCCESSLY,
+      message: USERS_MESSAGES.RESEND_CONFIRM_EMAIL_SUCCESSFULLY,
     };
   }
 
@@ -446,7 +524,7 @@ export class AuthService {
       });
 
       return {
-        message: USERS_MESSAGES.RESET_PASSWORD_SUCCESSFULL,
+        message: USERS_MESSAGES.RESET_PASSWORD_SUCCESSFUL,
       };
     } catch (error) {
       throw new TokenInvalidException(TOKEN_MESSAGES.TOKEN_IS_INVALID);
@@ -455,7 +533,7 @@ export class AuthService {
 
   async logout() {
     return {
-      message: USERS_MESSAGES.LOGOUT_SUCESSFULL,
+      message: USERS_MESSAGES.LOGOUT_SUCCESSFUL,
     };
   }
 }

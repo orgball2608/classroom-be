@@ -8,6 +8,7 @@ import { AccessTokenStrategy } from './strategies/access-token.strategy';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { ConfigService } from '@nestjs/config';
+import { FacebookStrategy } from './strategies/facebook.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { LocalStrategy } from './strategies/local.strategy';
 import { PassportModule } from '@nestjs/passport';
@@ -23,6 +24,7 @@ import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
     LocalStrategy,
     AccessTokenStrategy,
     RefreshTokenStrategy,
+    FacebookStrategy,
     ConfigService,
   ],
   controllers: [AuthController],
