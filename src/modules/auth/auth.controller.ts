@@ -26,12 +26,13 @@ import {
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 import { UserEntity } from './entities/user.entity';
 import { RegisterDto } from './dto/register.dto';
-import { UserRequest } from '@src/interfaces';
+import { OAuthRequest, UserRequest } from '@src/interfaces';
 import { ResendConfirmEmailDto } from './dto/resend-confirm-email.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { FacebookAuthGuard } from '@src/guards/facebook.guard';
+import { GoogleAuthGuard } from '@src/guards/google.guard';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -57,14 +58,26 @@ export class AuthController {
 
   @UseGuards(FacebookAuthGuard)
   @Get('facebook')
-  LoginWithFacebook() {
+  loginWithFacebook() {
     return HttpStatus.OK;
   }
 
   @UseGuards(FacebookAuthGuard)
-  @Get('facebook/callback')
-  async LoginWithFacebookCallback(@Req() req) {
-    return this.authService.facebookLogin(req);
+  @Get('facebook/redirect')
+  loginWithFacebookCallback(@Req() req: OAuthRequest) {
+    return this.authService.loginFacebook(req);
+  }
+
+  @UseGuards(GoogleAuthGuard)
+  @Get('google')
+  loginGoogle() {
+    return HttpStatus.OK;
+  }
+
+  @UseGuards(GoogleAuthGuard)
+  @Get('google/redirect')
+  async loginWithGoogleCallback(@Req() req: OAuthRequest) {
+    return this.authService.loginGoogle(req);
   }
 
   @UseGuards(LocalAuthGuard)
@@ -75,7 +88,7 @@ export class AuthController {
       properties: {
         message: {
           type: 'string',
-          example: 'Login sucesssfull',
+          example: 'Login successfully',
         },
         data: {
           type: 'object',
@@ -109,7 +122,7 @@ export class AuthController {
       properties: {
         statusCode: { type: 'number', example: 404 },
         message: { type: 'string', example: 'User not found' },
-        error: { type: 'string', example: 'Not Found' },
+        error: { type: 'string', example: 'Not found' },
       },
     },
   })
@@ -134,7 +147,7 @@ export class AuthController {
       properties: {
         message: {
           type: 'string',
-          example: 'Register sucesssfull',
+          example: 'Register successfully',
         },
         data: {
           type: 'object',
@@ -166,7 +179,7 @@ export class AuthController {
   }
 
   @Post('forgot-password')
-  forotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+  forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
     return this.authService.forgotPassword(forgotPasswordDto);
   }
 

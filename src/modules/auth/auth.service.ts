@@ -1,4 +1,4 @@
-import { AccessTokenParsed, UserRequest } from '@src/interfaces';
+import { AccessTokenParsed, OAuthRequest, UserRequest } from '@src/interfaces';
 import {
   BadRequestException,
   Injectable,
@@ -102,46 +102,92 @@ export class AuthService {
     };
   }
 
-  async facebookLogin(req) {
+  async loginFacebook(req: OAuthRequest) {
     const { profile } = req.user;
-    const isExistUser = await this.prisma.user.findUnique({
+    const existingUser = await this.prisma.user.findUnique({
       where: { facebookId: profile.id },
     });
 
-    if (isExistUser) {
-      const accessToken = this.signAccessToken({
-        userId: isExistUser.id,
-        verifyStatus: VerifyStatus.VERIFY,
-      });
+    let userId: number;
 
-      const refreshToken = this.signRefreshToken({
-        userId: isExistUser.id,
-        verifyStatus: VerifyStatus.VERIFY,
-      });
-
-      return {
-        message: USERS_MESSAGES.LOGIN_SUCCESSFUL,
-        data: {
-          accessToken: accessToken,
-          refreshToken: refreshToken,
-        },
-      };
-    } else {
-      const firstName = profile.displayName.split(' ')[0];
-      const lastName = profile.displayName.split(' ')[1];
-
+    if (!existingUser) {
       const newUser = await this.prisma.user.create({
         data: {
-          firstName,
-          lastName,
+          firstName: profile.name.familyName,
+          lastName: profile.name.givenName,
           email: profile.emails[0].value,
           facebookId: profile.id,
-          avatar: profile.profileUrl,
+          avatar: profile.photos[0].value,
+          verify: VerifyStatus.VERIFY,
         },
       });
 
-      return newUser;
+      userId = newUser.id;
+    } else {
+      userId = existingUser.id;
     }
+
+    const accessToken = this.signAccessToken({
+      userId,
+      verifyStatus: VerifyStatus.VERIFY,
+    });
+
+    const refreshToken = this.signRefreshToken({
+      userId,
+      verifyStatus: VerifyStatus.VERIFY,
+    });
+
+    return {
+      message: USERS_MESSAGES.LOGIN_SUCCESSFUL,
+      data: {
+        accessToken,
+        refreshToken,
+      },
+    };
+  }
+
+  async loginGoogle(req: OAuthRequest) {
+    const { profile } = req.user;
+    const existingUser = await this.prisma.user.findUnique({
+      where: { googleId: profile.id },
+    });
+
+    let userId: number;
+
+    if (!existingUser) {
+      const newUser = await this.prisma.user.create({
+        data: {
+          firstName: profile.name.familyName,
+          lastName: profile.name.givenName,
+          email: profile.emails[0].value,
+          googleId: profile.id,
+          avatar: profile.photos[0].value,
+          verify: VerifyStatus.VERIFY,
+        },
+      });
+
+      userId = newUser.id;
+    } else {
+      userId = existingUser.id;
+    }
+
+    const accessToken = this.signAccessToken({
+      userId,
+      verifyStatus: VerifyStatus.VERIFY,
+    });
+
+    const refreshToken = this.signRefreshToken({
+      userId,
+      verifyStatus: VerifyStatus.VERIFY,
+    });
+
+    return {
+      message: USERS_MESSAGES.LOGIN_SUCCESSFUL,
+      data: {
+        accessToken,
+        refreshToken,
+      },
+    };
   }
 
   private sendVerificationLink({
