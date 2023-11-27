@@ -14,11 +14,11 @@ datasource db {
 model User {
   id                  Int          @id @default(autoincrement())
   email               String?      @unique
+  googleId            String?      @unique
+  facebookId          String?      @unique
   password            String?
   firstName           String
   lastName            String
-  googleId            String?      @unique
-  facebookId          String?      @unique
   status              Boolean      @default(true)
   phoneNumber         String?
   address             String?
@@ -33,7 +33,6 @@ model User {
 
   @@map("users")
 }
-
 
 enum UserRole {
   COMPANY
