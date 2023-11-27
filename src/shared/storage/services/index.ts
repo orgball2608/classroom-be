@@ -8,7 +8,7 @@ export const StorageServiceProvider: Provider<AWS.S3> = {
   useFactory: (configService: ConfigService) => {
     return new AWS.S3({
       accessKeyId: configService.get<string>('aws.awsAccessKeyID'),
-      secretAccessKey: configService.get<string>('aws.awsSerectAccessKey'),
+      secretAccessKey: configService.get<string>('aws.awsSecretAccessKey'),
       region: configService.get<string>('aws.awsRegion'),
     });
   },

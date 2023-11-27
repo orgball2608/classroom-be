@@ -16,6 +16,12 @@ export type AuthConfig = {
   jwtMailExpires: number;
   jwtForgotPasswordSecret: string;
   jwtForgotPasswordExpires: number;
+  facebookClientID: string;
+  facebookClientSecret: string;
+  facebookCallbackURL: string;
+  googleClientID: string;
+  googleClientSecret: string;
+  googleCallbackURL: string;
 };
 
 export type DatabaseConfig = {
@@ -29,7 +35,7 @@ export type DatabaseConfig = {
 
 export type AwsConfig = {
   awsAccessKeyID: string;
-  awsSerectAccessKey: string;
+  awsSecretAccessKey: string;
   awsPublicBucketsKey: string;
   awsCloudfrontURL: string;
   awsRegion: string;

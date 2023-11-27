@@ -25,7 +25,7 @@ export default registerAs<AwsConfig>('aws', () => {
 
   return {
     awsAccessKeyID: process.env.AWS_ACCESS_KEY_ID,
-    awsSerectAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
     awsPublicBucketsKey: process.env.AWS_PUBLIC_BUCKET_KEY,
     awsCloudfrontURL: process.env.AWS_CLOUDFRONT_URL,
     awsRegion: process.env.AWS_REGION,

@@ -138,6 +138,7 @@ export class AuthController {
       'verify',
       'facebookId',
       'googleId',
+      'role',
     ]);
   }
 
