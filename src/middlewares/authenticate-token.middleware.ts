@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  ForbiddenException,
   Injectable,
   NestMiddleware,
   UnauthorizedException,
@@ -11,14 +10,12 @@ import { TOKEN_MESSAGES, USERS_MESSAGES } from '@src/constants/message';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
-import { RedisService } from '@src/shared/redis/redis.service';
 import { TokenInvalidException } from '@src/exceptions';
 
 @Injectable()
 export class AuthenticateTokenMiddleware implements NestMiddleware {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly redis: RedisService,
     private readonly config: ConfigService,
     private jwtService: JwtService,
   ) {}
@@ -30,48 +27,39 @@ export class AuthenticateTokenMiddleware implements NestMiddleware {
       throw new TokenInvalidException(TOKEN_MESSAGES.TOKEN_IS_INVALID);
     }
 
-    const isTokenBlacklisted = await this.redis.get(token);
+    const payload: {
+      id: number;
+      exp: number;
+    } = this.jwtService.verify(token, {
+      secret: this.config.get<string>('auth.accessTokenSecret'),
+      ignoreExpiration: true,
+    });
 
-    if (isTokenBlacklisted) {
-      throw new ForbiddenException(TOKEN_MESSAGES.TOKEN_IS_BLACKLIST);
-    } else {
-      const payload: {
-        id: number;
-        tokenId: string;
-        exp: number;
-      } = this.jwtService.verify(token, {
-        secret: this.config.get<string>('auth.accessTokenSecret'),
-        ignoreExpiration: true,
-      });
-
-      if (!payload) {
-        throw new TokenInvalidException(TOKEN_MESSAGES.TOKEN_IS_INVALID);
-      }
-
-      const currentTimeInSeconds = Math.floor(Date.now() / 1000);
-
-      if (payload.exp <= currentTimeInSeconds) {
-        throw new UnauthorizedException(TOKEN_MESSAGES.TOKEN_IS_EXPIRED);
-      }
-
-      const timeRemainingInSeconds = payload.exp - currentTimeInSeconds;
-
-      const session = await this.prisma.session.findUnique({
-        where: {
-          userId_tokenId: {
-            userId: payload.id,
-            tokenId: payload.tokenId,
-          },
-        },
-      });
-
-      if (session && session.tokenDeleted) {
-        await this.redis.set(token, 'true', timeRemainingInSeconds);
-        throw new UnauthorizedException(USERS_MESSAGES.USER_LOGGED_OUT);
-      }
-
-      req.user = payload;
-      next();
+    if (!payload) {
+      throw new TokenInvalidException(TOKEN_MESSAGES.TOKEN_IS_INVALID);
     }
+
+    const currentTimeInSeconds = Math.floor(Date.now() / 1000);
+
+    if (payload.exp <= currentTimeInSeconds) {
+      throw new UnauthorizedException(TOKEN_MESSAGES.TOKEN_IS_EXPIRED);
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: payload.id,
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException(USERS_MESSAGES.USER_NOT_FOUND);
+    }
+
+    if (user.status === false) {
+      throw new BadRequestException(USERS_MESSAGES.USER_IS_BANNED);
+    }
+
+    req.user = payload;
+    next();
   }
 }

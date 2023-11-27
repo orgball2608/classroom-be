@@ -24,6 +24,7 @@ export const USERS_MESSAGES = {
   FORGOT_PASSWORD_TOKEN_INVALID: 'Forgot password token invalid',
   RESET_PASSWORD_SUCCESSFUL: 'Reset password successful',
   ACCOUNT_IS_VERIFIED: 'Account is verified, cant verify again',
+  USER_IS_BANNED: 'User is banned',
 } as const;
 
 export const TOKEN_MESSAGES = {

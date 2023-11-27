@@ -1,12 +1,9 @@
-import {
-  AuthenticateTokenMiddleware,
-  BlackListTokenMiddleware,
-} from '@src/middlewares';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 
 import { AccessTokenStrategy } from './strategies/access-token.strategy';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { AuthenticateTokenMiddleware } from '@src/middlewares';
 import { ConfigService } from '@nestjs/config';
 import { FacebookStrategy } from './strategies/facebook.strategy';
 import { JwtModule } from '@nestjs/jwt';
@@ -32,7 +29,8 @@ import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
 })
 export class AuthModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(BlackListTokenMiddleware).forRoutes('/auth/logout');
-    consumer.apply(AuthenticateTokenMiddleware).forRoutes('/auth/me');
+    consumer
+      .apply(AuthenticateTokenMiddleware)
+      .forRoutes('/auth/me', '/auth/logout');
   }
 }
