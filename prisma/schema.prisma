@@ -13,7 +13,7 @@ datasource db {
 
 model User {
   id                  Int          @id @default(autoincrement())
-  email               String ?     @unique
+  email               String?      @unique
   password            String?
   firstName           String
   lastName            String
@@ -28,33 +28,12 @@ model User {
   forgotPasswordToken String?
   verify              VerifyStatus @default(UNVERIFY)
 
-  sessions Session[] @relation("userSession")
-
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("users")
 }
 
-model Session {
-  id           Int     @id @default(autoincrement())
-  userId       Int
-  loggedOut    Boolean @default(false)
-  ipAddress    String?
-  tokenId      String?
-  tokenSecret  String?
-  tokenDeleted Boolean @default(false)
-  device       String?
-
-  loggedInAt  DateTime  @default(now())
-  loggedOutAt DateTime?
-
-  user User @relation("userSession", fields: [userId], references: [id])
-
-  @@unique([userId, tokenId])
-  @@index([userId, tokenId])
-  @@map("session")
-}
 
 enum UserRole {
   COMPANY
