@@ -82,7 +82,7 @@ export class UserService {
         file: avatar,
       });
 
-      user = await this.prisma.user.update({
+      user = await tx.user.update({
         where: { id },
         data: {
           ...updateUserDto,

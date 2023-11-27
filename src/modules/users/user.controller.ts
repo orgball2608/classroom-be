@@ -28,10 +28,7 @@ import { UsersPageOptionsDto } from './dto/user-page-options.dto';
 import { PageDto } from '@src/common/dto/page.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UserRequest } from '@src/interfaces';
-import {
-  FileFieldsInterceptor,
-  FileInterceptor,
-} from '@nestjs/platform-express';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -81,7 +78,7 @@ export class UserController {
           type: 'string',
           nullable: true,
         },
-        addresss: {
+        address: {
           type: 'string',
           nullable: true,
         },

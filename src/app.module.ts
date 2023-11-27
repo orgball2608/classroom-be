@@ -8,7 +8,6 @@ import { JwtModule } from '@nestjs/jwt';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { PrismaModule } from './shared/prisma/prisma.module';
 import { RedisModule } from './shared/redis/redis.module';
-import { SessionsModule } from './modules/sessions/sessions.module';
 import { SharedModule } from './shared/shared.module';
 import { UserModule } from './modules/users/user.module';
 import appConfig from '@src/configs/app.config';
@@ -56,7 +55,6 @@ import redisConfig from './configs/redis.config';
     SharedModule,
     AuthModule,
     UserModule,
-    SessionsModule,
   ],
 })
 export class AppModule implements NestModule {

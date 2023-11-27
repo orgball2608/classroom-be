@@ -123,6 +123,8 @@ export class AuthController {
       'verifyEmailToken',
       'forgotPasswordToken',
       'verify',
+      'facebookId',
+      'googleId',
     ]);
   }
 

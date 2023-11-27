@@ -6,12 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { TOKEN_MESSAGES, USERS_MESSAGES } from '@src/constants/message';
-import {
-  generateHash,
-  getDivideInfoFromRequest,
-  getIpAddressFromRequest,
-  validateHash,
-} from '@src/common/utils';
+import { generateHash, validateHash } from '@src/common/utils';
 
 import { ConfigService } from '@nestjs/config';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
@@ -25,7 +20,6 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { TokenInvalidException } from '@src/exceptions';
 import { USER_NOT_FOUND } from '@src/errors/errors.constant';
 import { VerifyStatus } from '@prisma/client';
-import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class AuthService {
@@ -89,44 +83,8 @@ export class AuthService {
   async login(req: UserRequest) {
     const user: AccessTokenParsed = req.user;
 
-    const tokenId: string = uuidv4();
-    const ip: string = getIpAddressFromRequest(req);
-    const device: string = getDivideInfoFromRequest(req);
-
-    await this.prisma.$transaction(async (tx) => {
-      await tx.session.updateMany({
-        where: {
-          userId: user.id,
-          tokenDeleted: false,
-          ipAddress: ip,
-          device,
-        },
-        data: {
-          tokenDeleted: true,
-        },
-      });
-
-      const tokenSecret: string = uuidv4();
-
-      await tx.session.create({
-        data: {
-          user: {
-            connect: {
-              id: user.id,
-            },
-          },
-          tokenId: tokenId,
-          tokenSecret: tokenSecret,
-          ipAddress: ip,
-          loggedInAt: new Date(),
-          device: device,
-        },
-      });
-    });
-
     const accessToken = this.signAccessToken({
       userId: user.id,
-      tokenId,
       verifyStatus: VerifyStatus.VERIFY,
     });
 
@@ -151,44 +109,8 @@ export class AuthService {
     });
 
     if (isExistUser) {
-      const tokenId: string = uuidv4();
-      const ip: string = getIpAddressFromRequest(req);
-      const device: string = getDivideInfoFromRequest(req);
-
-      await this.prisma.$transaction(async (tx) => {
-        await tx.session.updateMany({
-          where: {
-            userId: isExistUser.id,
-            tokenDeleted: false,
-            ipAddress: ip,
-            device,
-          },
-          data: {
-            tokenDeleted: true,
-          },
-        });
-
-        const tokenSecret: string = uuidv4();
-
-        await tx.session.create({
-          data: {
-            user: {
-              connect: {
-                id: isExistUser.id,
-              },
-            },
-            tokenId: tokenId,
-            tokenSecret: tokenSecret,
-            ipAddress: ip,
-            loggedInAt: new Date(),
-            device: device,
-          },
-        });
-      });
-
       const accessToken = this.signAccessToken({
         userId: isExistUser.id,
-        tokenId,
         verifyStatus: VerifyStatus.VERIFY,
       });
 
@@ -254,15 +176,13 @@ export class AuthService {
 
   private signAccessToken({
     userId,
-    tokenId,
     verifyStatus,
   }: {
     userId: number;
-    tokenId: string;
     verifyStatus: VerifyStatus;
   }) {
     return this.jwtService.sign(
-      { id: userId, tokenId: tokenId, verifyStatus },
+      { id: userId, verifyStatus },
       {
         secret: this.config.get<string>('auth.accessTokenSecret'),
         // change expires unit to seconds
@@ -326,10 +246,7 @@ export class AuthService {
         ignoreExpiration: false,
       });
 
-      const tokenId: string = uuidv4();
-
       const accessToken = this.signAccessToken({
-        tokenId,
         userId: payload.id,
         verifyStatus: VerifyStatus.VERIFY,
       });

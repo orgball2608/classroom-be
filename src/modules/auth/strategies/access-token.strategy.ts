@@ -6,7 +6,6 @@ import { PassportStrategy } from '@nestjs/passport';
 
 type JwtPayload = {
   id: number;
-  tokenId: number;
 };
 
 @Injectable()
