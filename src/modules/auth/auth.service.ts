@@ -104,8 +104,11 @@ export class AuthService {
 
   async loginFacebook(req: OAuthRequest) {
     const { profile } = req.user;
+
     const existingUser = await this.prisma.user.findUnique({
-      where: { facebookId: profile.id },
+      where: {
+        facebookId: profile.id,
+      },
     });
 
     let userId: number;
@@ -115,9 +118,7 @@ export class AuthService {
         data: {
           firstName: profile.name.familyName,
           lastName: profile.name.givenName,
-          email: profile.emails[0].value,
           facebookId: profile.id,
-          avatar: profile.photos[0].value,
           verify: VerifyStatus.VERIFY,
         },
       });
@@ -159,7 +160,6 @@ export class AuthService {
         data: {
           firstName: profile.name.familyName,
           lastName: profile.name.givenName,
-          email: profile.emails[0].value,
           googleId: profile.id,
           avatar: profile.photos[0].value,
           verify: VerifyStatus.VERIFY,
