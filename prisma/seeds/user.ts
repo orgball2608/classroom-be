@@ -1,11 +1,12 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, VerifyStatus } from '@prisma/client';
+
 import { generateHash } from '../../src/common/utils';
 
 const prisma = new PrismaClient();
 
 export const createUser = async () => {
   await prisma.user.upsert({
-    where: { email: 'admin' },
+    where: { email: 'quanghuynh@gmail.com' },
     update: {},
     create: {
       email: 'quanghuynh@gmail.com',
@@ -14,6 +15,7 @@ export const createUser = async () => {
       lastName: 'Van Anh',
       phoneNumber: '0123456789',
       address: 'address',
+      verify: VerifyStatus.VERIFY,
     },
   });
 };

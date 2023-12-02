@@ -13,8 +13,6 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from '../../guards/local-auth.guard';
-import { Auth } from '../../decorators/auth.decorator';
-import { omit } from 'lodash';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -64,8 +62,12 @@ export class AuthController {
 
   @UseGuards(FacebookAuthGuard)
   @Get('facebook/redirect')
-  loginWithFacebookCallback(@Req() req: OAuthRequest) {
-    return this.authService.loginFacebook(req);
+  @Redirect()
+  async loginWithFacebookCallback(@Req() req: OAuthRequest) {
+    const url = await this.authService.loginFacebook(req);
+    return {
+      url: url,
+    };
   }
 
   @UseGuards(GoogleAuthGuard)
@@ -76,8 +78,12 @@ export class AuthController {
 
   @UseGuards(GoogleAuthGuard)
   @Get('google/redirect')
+  @Redirect()
   async loginWithGoogleCallback(@Req() req: OAuthRequest) {
-    return this.authService.loginGoogle(req);
+    const url = await this.authService.loginGoogle(req);
+    return {
+      url: url,
+    };
   }
 
   @UseGuards(LocalAuthGuard)
@@ -114,7 +120,6 @@ export class AuthController {
     return this.authService.login(req);
   }
 
-  @Auth()
   @ApiBearerAuth()
   @ApiNotFoundResponse({
     schema: {
@@ -130,16 +135,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Get('/me')
   async me(@Req() req: UserRequest) {
-    return omit(req.user, [
-      'password',
-      'status',
-      'verifyEmailToken',
-      'forgotPasswordToken',
-      'verify',
-      'facebookId',
-      'googleId',
-      'role',
-    ]);
+    return this.authService.getMe(req.user.id);
   }
 
   @ApiOkResponse({
