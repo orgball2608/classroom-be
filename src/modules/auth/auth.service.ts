@@ -20,6 +20,7 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { TokenInvalidException } from '@src/exceptions';
 import { USER_NOT_FOUND } from '@src/errors/errors.constant';
 import { VerifyStatus } from '@prisma/client';
+import { omit } from 'lodash';
 
 @Injectable()
 export class AuthService {
@@ -138,13 +139,9 @@ export class AuthService {
       verifyStatus: VerifyStatus.VERIFY,
     });
 
-    return {
-      message: USERS_MESSAGES.LOGIN_SUCCESSFUL,
-      data: {
-        accessToken,
-        refreshToken,
-      },
-    };
+    const frontendURL = this.config.get('app.frontendURL');
+
+    return `${frontendURL}/signin?access_token=${accessToken}&refresh_token=${refreshToken}`;
   }
 
   async loginGoogle(req: OAuthRequest) {
@@ -181,13 +178,9 @@ export class AuthService {
       verifyStatus: VerifyStatus.VERIFY,
     });
 
-    return {
-      message: USERS_MESSAGES.LOGIN_SUCCESSFUL,
-      data: {
-        accessToken,
-        refreshToken,
-      },
-    };
+    const frontendURL = this.config.get('app.frontendURL');
+
+    return `${frontendURL}/signin?access_token=${accessToken}&refresh_token=${refreshToken}`;
   }
 
   private sendVerificationLink({
@@ -494,7 +487,25 @@ export class AuthService {
     }
   }
 
-  async logout() {
+  async getMe(id: number) {
+    const user = await this.prisma.user.findUniqueOrThrow({
+      where: {
+        id,
+      },
+    });
+    return omit(user, [
+      'password',
+      'status',
+      'verifyEmailToken',
+      'forgotPasswordToken',
+      'verify',
+      'facebookId',
+      'googleId',
+      'role',
+    ]);
+  }
+
+  logout() {
     return {
       message: USERS_MESSAGES.LOGOUT_SUCCESSFUL,
     };

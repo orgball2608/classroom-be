@@ -1,4 +1,3 @@
-export * from './auth.decorator';
 export * from './field.decorator';
 export * from './transform.decorator';
 export * from './token.decorator';
