@@ -3,6 +3,7 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AuthModule } from './modules/auth/auth.module';
 import { AuthenticateTokenMiddleware } from './middlewares';
 import { ConfigModule } from '@nestjs/config';
+import { GatewayModule } from './shared/gateway/gateway.module';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { JwtModule } from '@nestjs/jwt';
 import { MailerModule } from '@nestjs-modules/mailer';
@@ -52,6 +53,7 @@ import redisConfig from './configs/redis.config';
     JwtModule.register({}),
     PrismaModule,
     RedisModule,
+    GatewayModule,
     SharedModule,
     AuthModule,
     UserModule,
