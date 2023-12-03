@@ -8,7 +8,6 @@
     "seed": "ts-node prisma/seed.ts"
   },
   "scripts": {
-    "postbuild": "cp firebase-admin-sdk.json dist/firebase-admin-sdk.json",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
