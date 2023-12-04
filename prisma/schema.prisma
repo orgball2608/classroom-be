@@ -28,10 +28,55 @@ model User {
   forgotPasswordToken String?
   verify              VerifyStatus @default(UNVERIFY)
 
+  notificationTokens NotificationToken[]
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("users")
+}
+
+model Notification {
+  id                  Int                @id @default(autoincrement())
+  notificationTokenId Int                @map("notification_token_id")
+  title               String
+  body                String
+  status              NotificationStatus @default(UNREAD)
+  createdBy           String             @map("created_by")
+
+  notificationToken NotificationToken @relation(fields: [notificationTokenId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("notifications")
+}
+
+model NotificationToken {
+  id                Int                  @id @default(autoincrement())
+  userId            Int
+  deviceType        String               @map("device_type")
+  notificationToken String               @map("notification_token")
+  status            FirsebaseTokenStatus @default(INACTIVE)
+
+  user          User           @relation(fields: [userId], references: [id])
+  notifications Notification[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, status])
+  @@map("notification_tokens")
+}
+
+enum NotificationStatus {
+  UNREAD
+  READ
+}
+
+enum FirsebaseTokenStatus {
+  ACTIVE
+  INACTIVE
 }
 
 enum UserRole {
