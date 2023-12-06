@@ -19,16 +19,21 @@ model User {
   password            String?
   firstName           String
   lastName            String
-  status              Boolean      @default(true)
   phoneNumber         String?
   address             String?
   avatar              String?
-  role                UserRole     @default(USER)
   verifyEmailToken    String?
   forgotPasswordToken String?
+  studentId           String?      @map("student_id")
   verify              VerifyStatus @default(UNVERIFY)
+  sex                 Sex          @default(NONE)
+  role                UserRole     @default(USER)
+  status              Boolean      @default(true)
 
+  createdClasses     Class[]
   notificationTokens NotificationToken[]
+  teachers           Class[]             @relation("class_teachers")
+  studentEnrollments Enrollment[]        @relation("student_enrollments")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -57,10 +62,10 @@ model NotificationToken {
   userId            Int
   deviceType        String               @map("device_type")
   notificationToken String               @map("notification_token")
-  status            FirsebaseTokenStatus @default(INACTIVE)
+  status            FirebaseTokenStatus @default(INACTIVE)
 
-  user          User           @relation(fields: [userId], references: [id])
   notifications Notification[]
+  user          User           @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -69,22 +74,84 @@ model NotificationToken {
   @@map("notification_tokens")
 }
 
+model Class {
+  id          Int     @id @default(autoincrement())
+  name        String
+  avatar      String?
+  description String? @db.Text
+  room        String?
+  topic       String?
+  code        String
+  year        Int
+  createdById Int     @map("created_by_id")
+  status      Boolean @default(true)
+
+  students  Enrollment[] @relation("class_students")
+  teachers  User[]       @relation("class_teachers")
+  createdBy User         @relation(fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("classes")
+}
+
+//Add role for teacher
+// model TeacherClass {
+//   id        Int     @id @default(autoincrement())
+//   classId   Int     @map("class_id")
+//   teacherId Int     @map("teacher_id")
+//   role      String  
+
+//   teacher User  @relation(fields: [teacherId], references: [id])
+//   class   Class @relation(fields: [classId], references: [id])
+
+//   createdAt DateTime @default(now()) @map("created_at")
+//   updatedAt DateTime @updatedAt @map("updated_at")
+
+//   @@unique([teacherId, classId])
+//   @@map("teacher_classes")
+// }
+
+model Enrollment {
+  id        Int     @id @default(autoincrement())
+  classId   Int     @map("class_id")
+  studentId Int     @map("student_id")
+  createdBy String  @map("created_by")
+  status    Boolean @default(true)
+
+  student User  @relation(name: "student_enrollments", fields: [studentId], references: [id])
+  class   Class @relation(name: "class_students", fields: [classId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([studentId, classId])
+  @@map("enrollments")
+}
+
 enum NotificationStatus {
   UNREAD
   READ
 }
 
-enum FirsebaseTokenStatus {
+enum FirebaseTokenStatus {
   ACTIVE
   INACTIVE
 }
 
 enum UserRole {
-  COMPANY
+  ADMIN
   USER
 }
 
 enum VerifyStatus {
   UNVERIFY
   VERIFY
+}
+
+enum Sex {
+  MALE
+  FEMALE
+  NONE
 }
