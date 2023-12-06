@@ -32,3 +32,14 @@ export const TOKEN_MESSAGES = {
   TOKEN_IS_BLACKLIST: 'Token is blacklist',
   TOKEN_IS_INVALID: 'Token is invalid',
 };
+
+export const COURSES_MESSAGES = {
+  COURSE_NOT_FOUND: 'Course not found',
+  COURSE_IS_BANNED: 'Course is banned',
+  COURSE_IS_TAKEN: 'Course is taken',
+  COURSES_CREATED_SUCCESSFULLY: 'Courses created successfully',
+  GET_COURSES_SUCCESSFULLY: 'Get courses successfully',
+  GET_COURSE_BY_ID_SUCCESSFULLY: 'Get course by id successfully',
+  UPDATE_COURSE_SUCCESSFULLY: 'Update course successfully',
+  DELETE_COURSE_SUCCESSFULLY: 'Delete course successfully',
+};

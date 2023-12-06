@@ -3,6 +3,7 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AuthModule } from './modules/auth/auth.module';
 import { AuthenticateTokenMiddleware } from './middlewares';
 import { ConfigModule } from '@nestjs/config';
+import { CourseModule } from './modules/course/course.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { GatewayModule } from './shared/gateway/gateway.module';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
@@ -61,6 +62,7 @@ import redisConfig from './configs/redis.config';
     SharedModule,
     AuthModule,
     UserModule,
+    CourseModule,
   ],
 })
 export class AppModule implements NestModule {

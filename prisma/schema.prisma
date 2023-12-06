@@ -30,9 +30,9 @@ model User {
   role                UserRole     @default(USER)
   status              Boolean      @default(true)
 
-  createdClasses     Class[]
+  createdCourses     Course[]
   notificationTokens NotificationToken[]
-  teachers           Class[]             @relation("class_teachers")
+  teachers           Course[]            @relation("course_teachers")
   studentEnrollments Enrollment[]        @relation("student_enrollments")
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -58,10 +58,10 @@ model Notification {
 }
 
 model NotificationToken {
-  id                Int                  @id @default(autoincrement())
+  id                Int                 @id @default(autoincrement())
   userId            Int
-  deviceType        String               @map("device_type")
-  notificationToken String               @map("notification_token")
+  deviceType        String              @map("device_type")
+  notificationToken String              @map("notification_token")
   status            FirebaseTokenStatus @default(INACTIVE)
 
   notifications Notification[]
@@ -74,7 +74,7 @@ model NotificationToken {
   @@map("notification_tokens")
 }
 
-model Class {
+model Course {
   id          Int     @id @default(autoincrement())
   name        String
   avatar      String?
@@ -86,47 +86,30 @@ model Class {
   createdById Int     @map("created_by_id")
   status      Boolean @default(true)
 
-  students  Enrollment[] @relation("class_students")
-  teachers  User[]       @relation("class_teachers")
+  students  Enrollment[] @relation("course_students")
+  teachers  User[]       @relation("course_teachers")
   createdBy User         @relation(fields: [createdById], references: [id])
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@map("classes")
+  @@map("courses")
 }
-
-//Add role for teacher
-// model TeacherClass {
-//   id        Int     @id @default(autoincrement())
-//   classId   Int     @map("class_id")
-//   teacherId Int     @map("teacher_id")
-//   role      String  
-
-//   teacher User  @relation(fields: [teacherId], references: [id])
-//   class   Class @relation(fields: [classId], references: [id])
-
-//   createdAt DateTime @default(now()) @map("created_at")
-//   updatedAt DateTime @updatedAt @map("updated_at")
-
-//   @@unique([teacherId, classId])
-//   @@map("teacher_classes")
-// }
 
 model Enrollment {
   id        Int     @id @default(autoincrement())
-  classId   Int     @map("class_id")
+  courseId  Int     @map("course_id")
   studentId Int     @map("student_id")
   createdBy String  @map("created_by")
   status    Boolean @default(true)
 
-  student User  @relation(name: "student_enrollments", fields: [studentId], references: [id])
-  class   Class @relation(name: "class_students", fields: [classId], references: [id])
+  student User   @relation(name: "student_enrollments", fields: [studentId], references: [id])
+  course  Course @relation(name: "course_students", fields: [courseId], references: [id])
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@unique([studentId, classId])
+  @@unique([studentId, courseId])
   @@map("enrollments")
 }
 
