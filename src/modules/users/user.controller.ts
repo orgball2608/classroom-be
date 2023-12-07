@@ -27,7 +27,7 @@ import { UserEntity } from './entities/user.entity';
 import { UsersPageOptionsDto } from './dto/user-page-options.dto';
 import { PageDto } from '@src/common/dto/page.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
-import { UserRequest } from '@src/interfaces';
+import { IUserRequest } from '@src/interfaces';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Users')
@@ -55,7 +55,7 @@ export class UserController {
   @ApiBody({ type: ChangePasswordDto })
   @Patch('/change-password')
   changePassword(
-    @Req() req: UserRequest,
+    @Req() req: IUserRequest,
     @Body() changePasswordDto: ChangePasswordDto,
   ) {
     const id = req.user.id;
@@ -94,7 +94,7 @@ export class UserController {
   @Patch('me')
   @UseInterceptors(FileInterceptor('avatar'))
   update(
-    @Req() req: UserRequest,
+    @Req() req: IUserRequest,
     @Body() updateUserDto: UpdateUserDto,
     @UploadedFile() avatar: Express.Multer.File,
   ) {
