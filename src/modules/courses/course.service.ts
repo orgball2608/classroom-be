@@ -38,6 +38,36 @@ export class CourseService {
     };
   }
 
+  async findAllCourseByTeacherId(teacherId: number) {
+    const courses = await this.prisma.course.findMany({
+      where: {
+        createdById: teacherId,
+      },
+    });
+
+    return {
+      message: COURSES_MESSAGES.GET_COURSES_BY_TEACHER_ID_SUCCESSFULLY,
+      data: courses,
+    };
+  }
+
+  async findAllCourseByStudentId(studentId: number) {
+    const courses = await this.prisma.course.findMany({
+      where: {
+        students: {
+          some: {
+            id: studentId,
+          },
+        },
+      },
+    });
+
+    return {
+      message: COURSES_MESSAGES.GET_COURSES_ENROLLED_SUCCESSFULLY,
+      data: courses,
+    };
+  }
+
   async findOne(id: number) {
     const course = await this.prisma.course.findUnique({
       where: {
@@ -66,6 +96,7 @@ export class CourseService {
       data: course,
     };
   }
+
   async updateCourseImage(id: number, avatar: Express.Multer.File) {
     const updatedCourse = await this.prisma.$transaction(async (tx) => {
       const key = uuid4();

@@ -43,4 +43,14 @@ export const COURSES_MESSAGES = {
   UPDATE_COURSE_SUCCESSFULLY: 'Update course successfully',
   DELETE_COURSE_SUCCESSFULLY: 'Delete course successfully',
   UPDATE_COURSE_IMAGE_SUCCESSFULLY: 'Update course image successfully',
+  GET_COURSES_BY_TEACHER_ID_SUCCESSFULLY:
+    'Get courses by teacher id successfully',
+  GET_COURSES_ENROLLED_SUCCESSFULLY: 'Get courses enrolled successfully',
+};
+
+export const AUTHORIZATION_MESSAGES = {
+  UNAUTHORIZED: 'Unauthorized',
+  FORBIDDEN: 'Forbidden',
+  DO_NOT_HAVE_PERMISSION_TO_ACCESS_THIS_RESOURCE:
+    'You do not have permission to access this resource',
 };

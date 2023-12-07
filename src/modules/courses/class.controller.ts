@@ -50,6 +50,18 @@ export class CourseController {
     return this.courseService.findOne(id);
   }
 
+  @Get('teacher/:id')
+  @ApiParam({ name: 'id', type: 'number', example: 1 })
+  findAllCourseByTeacherId(@Param('id', ParseIntPipe) id: number) {
+    return this.courseService.findAllCourseByTeacherId(id);
+  }
+
+  @Get('student/:id')
+  @ApiParam({ name: 'id', type: 'number', example: 1 })
+  findAllCourseByStudentId(@Param('id', ParseIntPipe) id: number) {
+    return this.courseService.findAllCourseByStudentId(id);
+  }
+
   @Patch(':id/avatar')
   @ApiBody({
     schema: {
