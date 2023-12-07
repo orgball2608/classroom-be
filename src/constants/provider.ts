@@ -1,0 +1,4 @@
+export const PROVIDERS = {
+  STORAGE: 'STORAGE',
+  ROLE_CHECKER: 'ROLE_CHECKER',
+};

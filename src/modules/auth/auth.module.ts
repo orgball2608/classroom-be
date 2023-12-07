@@ -3,7 +3,7 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AccessTokenStrategy } from './strategies/access-token.strategy';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { AuthenticateTokenMiddleware } from '@src/middlewares';
+import { AuthenticateMiddleware } from '@src/middlewares';
 import { ConfigService } from '@nestjs/config';
 import { FacebookStrategy } from './strategies/facebook.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
@@ -32,7 +32,7 @@ import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
 export class AuthModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply(AuthenticateTokenMiddleware)
+      .apply(AuthenticateMiddleware)
       .forRoutes('/auth/me', '/auth/logout');
   }
 }

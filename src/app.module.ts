@@ -1,7 +1,7 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 
 import { AuthModule } from './modules/auth/auth.module';
-import { AuthenticateTokenMiddleware } from './middlewares';
+import { AuthenticateMiddleware } from './middlewares';
 import { ConfigModule } from '@nestjs/config';
 import { CourseModule } from './modules/course/course.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -67,9 +67,6 @@ import redisConfig from './configs/redis.config';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(AuthenticateTokenMiddleware)
-      .exclude('auth/(.*)')
-      .forRoutes('*');
+    consumer.apply(AuthenticateMiddleware).exclude('auth/(.*)').forRoutes('*');
   }
 }
