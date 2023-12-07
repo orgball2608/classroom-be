@@ -87,3 +87,15 @@ export function getIpAddressFromRequest(req): string {
 export function getDivideInfoFromRequest(req: Request): string {
   return req.headers['user-agent'];
 }
+
+export function generateCourseCode() {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let classCode = '';
+
+  for (let i = 0; i < 6; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    classCode += characters.charAt(randomIndex);
+  }
+
+  return classCode;
+}
