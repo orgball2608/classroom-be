@@ -3,7 +3,7 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AuthModule } from './modules/auth/auth.module';
 import { AuthenticateMiddleware } from './middlewares';
 import { ConfigModule } from '@nestjs/config';
-import { CourseModule } from './modules/course/course.module';
+import { CourseModule } from './modules/courses/course.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { GatewayModule } from './shared/gateway/gateway.module';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';

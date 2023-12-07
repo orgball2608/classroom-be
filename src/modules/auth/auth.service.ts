@@ -1,11 +1,12 @@
-import { AccessTokenParsed, OAuthRequest, UserRequest } from '@src/interfaces';
 import {
   BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { OAuthRequest, UserRequest } from '@src/interfaces';
 import { TOKEN_MESSAGES, USERS_MESSAGES } from '@src/constants/message';
+import { User, VerifyStatus } from '@prisma/client';
 import { generateHash, validateHash } from '@src/common/utils';
 
 import { ConfigService } from '@nestjs/config';
@@ -19,7 +20,6 @@ import { ResendConfirmEmailDto } from './dto/resend-confirm-email.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { TokenInvalidException } from '@src/exceptions';
 import { USER_NOT_FOUND } from '@src/errors/errors.constant';
-import { VerifyStatus } from '@prisma/client';
 import { omit } from 'lodash';
 
 @Injectable()
@@ -82,7 +82,7 @@ export class AuthService {
   }
 
   async login(req: UserRequest) {
-    const user: AccessTokenParsed = req.user;
+    const user: User = req.user;
 
     const accessToken = this.signAccessToken({
       userId: user.id,

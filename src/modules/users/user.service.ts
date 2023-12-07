@@ -101,6 +101,10 @@ export class UserService {
         'verifyEmailToken',
         'forgotPasswordToken',
         'verify',
+        'googleId',
+        'facebookId',
+        'role',
+        'status',
       ]),
     };
   }

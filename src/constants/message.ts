@@ -42,4 +42,5 @@ export const COURSES_MESSAGES = {
   GET_COURSE_BY_ID_SUCCESSFULLY: 'Get course by id successfully',
   UPDATE_COURSE_SUCCESSFULLY: 'Update course successfully',
   DELETE_COURSE_SUCCESSFULLY: 'Delete course successfully',
+  UPDATE_COURSE_IMAGE_SUCCESSFULLY: 'Update course image successfully',
 };
