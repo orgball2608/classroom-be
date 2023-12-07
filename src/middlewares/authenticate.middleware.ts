@@ -13,7 +13,7 @@ import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { TokenInvalidException } from '@src/exceptions';
 
 @Injectable()
-export class AuthenticateTokenMiddleware implements NestMiddleware {
+export class AuthenticateMiddleware implements NestMiddleware {
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
@@ -59,7 +59,7 @@ export class AuthenticateTokenMiddleware implements NestMiddleware {
       throw new BadRequestException(USERS_MESSAGES.USER_IS_BANNED);
     }
 
-    req.user = payload;
+    req.user = user;
     next();
   }
 }

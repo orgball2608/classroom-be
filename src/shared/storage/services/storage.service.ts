@@ -1,12 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { SERVICES } from '@src/constants/service';
+import { PROVIDERS } from '@src/constants';
 import { S3 } from 'aws-sdk';
 
 @Injectable()
 export class StorageService {
   constructor(
-    @Inject(SERVICES.STORAGE)
+    @Inject(PROVIDERS.STORAGE)
     private readonly storageClient: S3,
     private readonly configService: ConfigService,
   ) {}

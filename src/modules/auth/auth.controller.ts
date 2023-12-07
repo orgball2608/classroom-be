@@ -24,7 +24,7 @@ import {
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 import { UserEntity } from './entities/user.entity';
 import { RegisterDto } from './dto/register.dto';
-import { OAuthRequest, UserRequest } from '@src/interfaces';
+import { IOAuthRequest, IUserRequest } from '@src/interfaces';
 import { ResendConfirmEmailDto } from './dto/resend-confirm-email.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -63,7 +63,7 @@ export class AuthController {
   @UseGuards(FacebookAuthGuard)
   @Get('facebook/redirect')
   @Redirect()
-  async loginWithFacebookCallback(@Req() req: OAuthRequest) {
+  async loginWithFacebookCallback(@Req() req: IOAuthRequest) {
     const url = await this.authService.loginFacebook(req);
     return {
       url: url,
@@ -79,7 +79,7 @@ export class AuthController {
   @UseGuards(GoogleAuthGuard)
   @Get('google/redirect')
   @Redirect()
-  async loginWithGoogleCallback(@Req() req: OAuthRequest) {
+  async loginWithGoogleCallback(@Req() req: IOAuthRequest) {
     const url = await this.authService.loginGoogle(req);
     return {
       url: url,
@@ -116,7 +116,7 @@ export class AuthController {
   })
   @HttpCode(HttpStatus.OK)
   @Post('/login')
-  async signIn(@Req() req: UserRequest) {
+  async signIn(@Req() req: IUserRequest) {
     return this.authService.login(req);
   }
 
@@ -134,7 +134,7 @@ export class AuthController {
   @ApiOkResponse({ type: UserEntity })
   @HttpCode(HttpStatus.OK)
   @Get('/me')
-  async me(@Req() req: UserRequest) {
+  async me(@Req() req: IUserRequest) {
     return this.authService.getMe(req.user.id);
   }
 

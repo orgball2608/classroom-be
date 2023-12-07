@@ -1,20 +1,8 @@
-import { User, UserRole } from '@prisma/client';
-
 import { AbstractEntity } from '@src/common/entity/abstract.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { UserRole } from '@prisma/client';
 
-export class UserEntity
-  extends AbstractEntity
-  implements
-    Omit<
-      User,
-      | 'password'
-      | 'status'
-      | 'forgotPasswordToken'
-      | 'verifyEmailToken'
-      | 'verify'
-    >
-{
+export class UserEntity extends AbstractEntity {
   @ApiProperty({
     type: String,
     example: 'Nguyen Van',
