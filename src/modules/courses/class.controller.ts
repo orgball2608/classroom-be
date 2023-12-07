@@ -21,7 +21,7 @@ import {
   ApiBody,
   ApiParam,
 } from '@nestjs/swagger';
-import { UserRequest } from '@src/interfaces';
+import { IUserRequest } from '@src/interfaces';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Course } from './entities/course.entity';
 import { ApiResponseWithMessage } from '@src/decorators';
@@ -35,7 +35,7 @@ export class CourseController {
   @Post()
   @ApiBody({ type: CreateCourseDto })
   @ApiResponseWithMessage(Course)
-  create(@Req() req: UserRequest, @Body() createCourseDto: CreateCourseDto) {
+  create(@Req() req: IUserRequest, @Body() createCourseDto: CreateCourseDto) {
     return this.courseService.create(req.user.id, createCourseDto);
   }
 

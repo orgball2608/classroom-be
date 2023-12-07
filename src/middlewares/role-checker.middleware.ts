@@ -4,15 +4,15 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 
+import { IUserRequest } from '@src/interfaces';
 import { PROVIDERS } from '@src/constants';
-import { UserRequest } from '@src/interfaces';
 import { UserRole } from '@prisma/client';
 
 @Injectable()
 export class RoleCheckerMiddleware implements NestMiddleware {
   constructor(private readonly allowedRoles: string[]) {}
 
-  use(req: UserRequest, res: any, next: () => void) {
+  use(req: IUserRequest, res: any, next: () => void) {
     const userRole = req.user.role;
 
     const hasRole = () => this.allowedRoles.includes(userRole);

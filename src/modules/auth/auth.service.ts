@@ -4,7 +4,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { OAuthRequest, UserRequest } from '@src/interfaces';
+import { IOAuthRequest, IUserRequest } from '@src/interfaces';
 import { TOKEN_MESSAGES, USERS_MESSAGES } from '@src/constants/message';
 import { User, VerifyStatus } from '@prisma/client';
 import { generateHash, validateHash } from '@src/common/utils';
@@ -19,7 +19,6 @@ import { RegisterDto } from './dto/register.dto';
 import { ResendConfirmEmailDto } from './dto/resend-confirm-email.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { TokenInvalidException } from '@src/exceptions';
-import { USER_NOT_FOUND } from '@src/errors/errors.constant';
 import { omit } from 'lodash';
 
 @Injectable()
@@ -81,7 +80,7 @@ export class AuthService {
     );
   }
 
-  async login(req: UserRequest) {
+  async login(req: IUserRequest) {
     const user: User = req.user;
 
     const accessToken = this.signAccessToken({
@@ -103,7 +102,7 @@ export class AuthService {
     };
   }
 
-  async loginFacebook(req: OAuthRequest) {
+  async loginFacebook(req: IOAuthRequest) {
     const { profile } = req.user;
 
     const existingUser = await this.prisma.user.findUnique({
@@ -144,7 +143,7 @@ export class AuthService {
     return `${frontendURL}/signin?access_token=${accessToken}&refresh_token=${refreshToken}`;
   }
 
-  async loginGoogle(req: OAuthRequest) {
+  async loginGoogle(req: IOAuthRequest) {
     const { profile } = req.user;
     const existingUser = await this.prisma.user.findUnique({
       where: { googleId: profile.id },
@@ -264,7 +263,7 @@ export class AuthService {
       },
     });
 
-    if (!user) throw new NotFoundException(USER_NOT_FOUND);
+    if (!user) throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
 
     const valid = await validateHash(password, user.password);
 
