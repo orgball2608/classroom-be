@@ -4,11 +4,10 @@ import { AuthModule } from './modules/auth/auth.module';
 import { AuthenticateMiddleware } from './middlewares';
 import { ConfigModule } from '@nestjs/config';
 import { CourseModule } from './modules/courses/course.module';
+import { CustomMailerModule } from './shared/mailer/mailer.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { GatewayModule } from './shared/gateway/gateway.module';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { JwtModule } from '@nestjs/jwt';
-import { MailerModule } from '@nestjs-modules/mailer';
 import { NotificationModule } from './shared/notification/notification.module';
 import { PrismaModule } from './shared/prisma/prisma.module';
 import { RedisModule } from './shared/redis/redis.module';
@@ -32,27 +31,7 @@ import redisConfig from './configs/redis.config';
         abortEarly: false,
       },
     }),
-    MailerModule.forRoot({
-      transport: {
-        host: process.env.MAIL_HOST,
-        port: parseInt(process.env.MAIL_PORT, 10),
-        secure: true,
-        auth: {
-          user: process.env.MAIL_USERNAME,
-          pass: process.env.MAIL_PASSWORD,
-        },
-      },
-      defaults: {
-        from: '"nest-modules" <modules@nestjs.com>',
-      },
-      template: {
-        dir: process.cwd() + '/templates/',
-        adapter: new HandlebarsAdapter(),
-        options: {
-          strict: true,
-        },
-      },
-    }),
+    CustomMailerModule,
     JwtModule.register({}),
     EventEmitterModule.forRoot(),
     PrismaModule,
