@@ -1,1 +1,2 @@
-export * from './authenticate-token.middleware';
+export * from './authenticate.middleware';
+export * from './role-checker.middleware';

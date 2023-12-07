@@ -2,12 +2,17 @@ import { COURSES_MESSAGES } from '@src/constants/message';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
+import { StorageService } from '@src/shared/storage/services/storage.service';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { generateCourseCode } from '@src/common/utils';
+import { v4 as uuid4 } from 'uuid';
 
 @Injectable()
 export class CourseService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storageService: StorageService,
+  ) {}
   async create(userId: number, createCourseDto: CreateCourseDto) {
     const courseCode = generateCourseCode();
     const course = await this.prisma.course.create({
@@ -30,6 +35,36 @@ export class CourseService {
     return {
       message: COURSES_MESSAGES.GET_COURSES_SUCCESSFULLY,
       data: course,
+    };
+  }
+
+  async findAllCourseByTeacherId(teacherId: number) {
+    const courses = await this.prisma.course.findMany({
+      where: {
+        createdById: teacherId,
+      },
+    });
+
+    return {
+      message: COURSES_MESSAGES.GET_COURSES_BY_TEACHER_ID_SUCCESSFULLY,
+      data: courses,
+    };
+  }
+
+  async findAllCourseByStudentId(studentId: number) {
+    const courses = await this.prisma.course.findMany({
+      where: {
+        students: {
+          some: {
+            id: studentId,
+          },
+        },
+      },
+    });
+
+    return {
+      message: COURSES_MESSAGES.GET_COURSES_ENROLLED_SUCCESSFULLY,
+      data: courses,
     };
   }
 
@@ -59,6 +94,31 @@ export class CourseService {
     return {
       message: COURSES_MESSAGES.UPDATE_COURSE_SUCCESSFULLY,
       data: course,
+    };
+  }
+
+  async updateCourseImage(id: number, avatar: Express.Multer.File) {
+    const updatedCourse = await this.prisma.$transaction(async (tx) => {
+      const key = uuid4();
+
+      const avatarURL = await this.storageService.uploadFile({
+        key,
+        file: avatar,
+      });
+
+      return tx.course.update({
+        where: {
+          id,
+        },
+        data: {
+          avatar: avatarURL,
+        },
+      });
+    });
+
+    return {
+      message: COURSES_MESSAGES.UPDATE_COURSE_IMAGE_SUCCESSFULLY,
+      data: updatedCourse,
     };
   }
 

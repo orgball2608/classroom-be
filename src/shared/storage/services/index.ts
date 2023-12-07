@@ -1,8 +1,8 @@
 import * as AWS from 'aws-sdk';
 
 import { ConfigService } from '@nestjs/config';
+import { PROVIDERS } from '@src/constants';
 import { Provider } from '@nestjs/common';
-import { SERVICES } from '@src/constants/service';
 
 export const StorageServiceProvider: Provider<AWS.S3> = {
   useFactory: (configService: ConfigService) => {
@@ -12,7 +12,7 @@ export const StorageServiceProvider: Provider<AWS.S3> = {
       region: configService.get<string>('aws.awsRegion'),
     });
   },
-  provide: SERVICES.STORAGE,
+  provide: PROVIDERS.STORAGE,
   inject: [ConfigService],
 };
 
