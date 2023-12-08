@@ -102,4 +102,16 @@ export class CourseController {
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.courseService.remove(id);
   }
+
+  // get list of student and teacher in class
+  @Get(':id/users')
+  @ApiParam({ name: 'id', type: 'number', example: 1 })
+  findAllUserInCourse(@Param('id', ParseIntPipe) id: number) {
+    return this.courseService.findAllUserInCourse(id);
+  }
+
+  @Get('/mycourses/list')
+  findAllCourseOfMe(@Req() req: IUserRequest) {
+    return this.courseService.findAllCourseOfMe(req.user.id);
+  }
 }

@@ -46,6 +46,8 @@ export const COURSES_MESSAGES = {
   GET_COURSES_BY_TEACHER_ID_SUCCESSFULLY:
     'Get courses by teacher id successfully',
   GET_COURSES_ENROLLED_SUCCESSFULLY: 'Get courses enrolled successfully',
+  GET_USERS_IN_COURSE_SUCCESSFULLY: 'Get users in course successfully',
+  INVALID_COURSE_ID: 'Invalid course id',
 };
 
 export const AUTHORIZATION_MESSAGES = {

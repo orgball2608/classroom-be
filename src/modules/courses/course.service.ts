@@ -21,6 +21,11 @@ export class CourseService {
         code: courseCode,
         year: new Date().getFullYear(),
         createdById: userId,
+        teachers: {
+          connect: {
+            id: userId,
+          },
+        },
       },
     });
 
@@ -131,6 +136,70 @@ export class CourseService {
 
     return {
       message: COURSES_MESSAGES.DELETE_COURSE_SUCCESSFULLY,
+    };
+  }
+
+  async findAllUserInCourse(id: number) {
+    const course = await this.prisma.course.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        students: true,
+        teachers: {
+          select: {
+            id: true,
+            email: true,
+            avatar: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+    });
+
+    return {
+      message: COURSES_MESSAGES.GET_USERS_IN_COURSE_SUCCESSFULLY,
+      data: course,
+    };
+  }
+
+  async findAllCourseOfMe(id: number) {
+    const courses = await this.prisma.course.findMany({
+      where: {
+        OR: [
+          {
+            students: {
+              some: {
+                id: id,
+              },
+            },
+          },
+          {
+            teachers: {
+              some: {
+                id: id,
+              },
+            },
+          },
+        ],
+      },
+      include: {
+        createdBy: {
+          select: {
+            id: true,
+            email: true,
+            avatar: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+    });
+
+    return {
+      message: COURSES_MESSAGES.GET_COURSES_ENROLLED_SUCCESSFULLY,
+      data: courses,
     };
   }
 }
