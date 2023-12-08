@@ -13,12 +13,12 @@ export class CreateCourseDto {
   })
   description: string;
 
-  @StringField({
+  @StringFieldOptional({
     example: '101',
   })
   room: string;
 
-  @StringField({
+  @StringFieldOptional({
     example: 'Tin học',
   })
   topic: string;
