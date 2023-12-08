@@ -20,7 +20,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-import { type Constructor } from '../types';
+import { type Constructor } from '../common/types';
 import { ApiEnumProperty } from './property.decorator';
 import {
   PhoneNumberSerializer,
