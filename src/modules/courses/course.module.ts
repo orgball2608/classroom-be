@@ -10,6 +10,7 @@ import { CourseService } from './course.service';
 import { RoleChecker } from '@src/middlewares/role-checker.middleware';
 import { StorageModule } from '@src/shared/storage/storage.module';
 import { UserRole } from '@prisma/client';
+import { CourseMiddleware } from '@src/middlewares/course.middleware';
 
 @Module({
   imports: [StorageModule],
@@ -23,6 +24,17 @@ export class CourseModule implements NestModule {
       {
         path: 'courses/:id',
         method: RequestMethod.DELETE,
+      },
+    );
+
+    consumer.apply(CourseMiddleware).forRoutes(
+      {
+        path: 'courses/:id',
+        method: RequestMethod.GET,
+      },
+      {
+        path: 'courses/:id/users',
+        method: RequestMethod.GET,
       },
     );
   }
