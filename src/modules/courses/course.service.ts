@@ -229,7 +229,7 @@ export class CourseService {
       },
     });
 
-    await this.prisma.enrollment.create({
+    const enrollment = await this.prisma.enrollment.create({
       data: {
         course: {
           connect: {
@@ -248,7 +248,8 @@ export class CourseService {
     });
 
     return {
-      message: COURSES_MESSAGES.USER_ENROLLED_COURSE,
+      message: COURSES_MESSAGES.ENROLLED_TO_COURSE_SUCCESSFULLY,
+      data: enrollment,
     };
   }
 }
