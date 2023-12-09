@@ -57,6 +57,7 @@ export class CourseController {
   }
 
   @Get('student/:id')
+  @ApiResponseWithMessage(Course)
   @ApiParam({ name: 'id', type: 'number', example: 1 })
   findAllCourseByStudentId(@Param('id', ParseIntPipe) id: number) {
     return this.courseService.findAllCourseByStudentId(id);
@@ -110,7 +111,7 @@ export class CourseController {
     return this.courseService.findAllUserInCourse(id);
   }
 
-  @Get('/mycourses/list')
+  @Get('/my-courses/list')
   findAllCourseOfMe(@Req() req: IUserRequest) {
     return this.courseService.findAllCourseOfMe(req.user.id);
   }

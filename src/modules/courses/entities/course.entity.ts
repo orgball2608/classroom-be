@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 import { AbstractEntity } from '@src/common/entity/abstract.entity';
+import { SimpleUserEntity } from '@src/common/entity/simple-user.entity';
 
 export class Course extends AbstractEntity {
   @ApiProperty({
@@ -52,8 +53,7 @@ export class Course extends AbstractEntity {
   createdById: number;
 
   @ApiProperty({
-    type: String,
-    example: 'John Doe',
+    type: SimpleUserEntity,
   })
-  createdBy: string;
+  createdBy: SimpleUserEntity;
 }
