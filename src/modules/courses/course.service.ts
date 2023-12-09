@@ -78,6 +78,17 @@ export class CourseService {
       where: {
         id,
       },
+      include: {
+        createdBy: {
+          select: {
+            id: true,
+            email: true,
+            avatar: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
     });
 
     return {
