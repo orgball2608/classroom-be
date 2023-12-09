@@ -48,6 +48,8 @@ export const COURSES_MESSAGES = {
   GET_COURSES_ENROLLED_SUCCESSFULLY: 'Get courses enrolled successfully',
   GET_USERS_IN_COURSE_SUCCESSFULLY: 'Get users in course successfully',
   INVALID_COURSE_ID: 'Invalid course id',
+  USER_NOT_IN_COURSE: 'User not in course',
+  USER_ENROLLED_COURSE: 'User in course',
 };
 
 export const AUTHORIZATION_MESSAGES = {

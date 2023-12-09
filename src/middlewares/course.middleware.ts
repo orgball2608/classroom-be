@@ -5,17 +5,16 @@ import {
   NestMiddleware,
   NotFoundException,
 } from '@nestjs/common';
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { COURSES_MESSAGES } from '@src/constants/message';
+import { IUserRequest } from '@src/interfaces';
 
 @Injectable()
 export class CourseMiddleware implements NestMiddleware {
   constructor(private readonly prisma: PrismaService) {}
 
-  async use(req: Request, res: Response, next: NextFunction) {
-    console.log('CourseMiddleware');
-
+  async use(req: IUserRequest, res: Response, next: NextFunction) {
     const courseId = req.params.id;
     const courseIdNumber = Number(courseId);
 
@@ -33,6 +32,39 @@ export class CourseMiddleware implements NestMiddleware {
       throw new NotFoundException(COURSES_MESSAGES.COURSE_NOT_FOUND);
     }
 
+    const userId = req.user.id;
+
+    const userCourse = await this.prisma.course.findUnique({
+      where: {
+        id: courseIdNumber,
+        OR: [
+          {
+            students: {
+              some: {
+                id: userId,
+              },
+            },
+          },
+          {
+            teachers: {
+              some: {
+                id: userId,
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    if (
+      !userCourse &&
+      !req.url.includes('checkEnrolled') &&
+      !req.url.includes('enroll')
+    ) {
+      throw new NotFoundException(COURSES_MESSAGES.COURSE_NOT_FOUND);
+    }
+
+    req.isEnrolled = userCourse !== null;
     next();
   }
 }

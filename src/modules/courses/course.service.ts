@@ -140,7 +140,7 @@ export class CourseService {
   }
 
   async findAllUserInCourse(id: number) {
-    const course = await this.prisma.course.findUnique({
+    const course = await this.prisma.course.findMany({
       where: {
         id,
       },
@@ -196,10 +196,40 @@ export class CourseService {
         },
       },
     });
+    console.log(courses);
 
     return {
       message: COURSES_MESSAGES.GET_COURSES_ENROLLED_SUCCESSFULLY,
       data: courses,
+    };
+  }
+
+  //enroll the courses
+  async enrollToCourse(userId: number, courseId: number) {
+    const course = await this.prisma.course.findUnique({
+      where: {
+        id: courseId,
+      },
+    });
+    const enrollment = await this.prisma.enrollment.create({
+      data: {
+        course: {
+          connect: {
+            id: courseId,
+          },
+        },
+        createdBy: String(course.createdById),
+        student: {
+          connect: {
+            id: userId,
+          },
+        },
+      },
+    });
+
+    return {
+      message: COURSES_MESSAGES.USER_ENROLLED_COURSE,
+      data: enrollment,
     };
   }
 }
