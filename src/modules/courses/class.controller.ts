@@ -117,11 +117,13 @@ export class CourseController {
   }
 
   @Get('/checkEnrolled/:id')
-  checkEnrolled(@Req() req: IUserRequest) {
+  async checkEnrolled(@Req() req: IUserRequest) {
+    const course = await this.courseService.findOne(Number(req.params.id));
     const result = {
       message: COURSES_MESSAGES.USER_NOT_IN_COURSE,
       data: {
         isEnrolled: false,
+        course,
       },
     };
 

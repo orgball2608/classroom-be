@@ -11,7 +11,7 @@ export interface IOAuthRequestUser {
 type CombinedRequest = ExpressRequest & typeof NestRequest;
 export interface IUserRequest extends CombinedRequest {
   user: User;
-  isEnrolled: boolean;
+  isEnrolled?: boolean;
 }
 
 export interface IOAuthRequest extends CombinedRequest {
