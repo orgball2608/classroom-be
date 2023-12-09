@@ -25,6 +25,7 @@ import { IUserRequest } from '@src/interfaces';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Course } from './entities/course.entity';
 import { ApiResponseWithMessage } from '@src/decorators';
+import { COURSES_MESSAGES } from '@src/constants';
 
 @ApiTags('Course')
 @ApiBearerAuth()
@@ -114,5 +115,35 @@ export class CourseController {
   @Get('/my-courses/list')
   findAllCourseOfMe(@Req() req: IUserRequest) {
     return this.courseService.findAllCourseOfMe(req.user.id);
+  }
+
+  @Get('/checkEnrolled/:id')
+  @ApiParam({ name: 'id', type: 'number', example: 1 })
+  async checkEnrolled(@Req() req: IUserRequest) {
+    const course = await this.courseService.findOne(Number(req.params.id));
+    const result = {
+      message: COURSES_MESSAGES.USER_NOT_IN_COURSE,
+      data: {
+        isEnrolled: false,
+        course,
+      },
+    };
+
+    if (req.isEnrolled === true) {
+      result.message = COURSES_MESSAGES.USER_ENROLLED_COURSE;
+      result.data.isEnrolled = true;
+    }
+    return result;
+  }
+
+  @Patch(':id/enroll')
+  @ApiParam({ name: 'id', type: 'number', example: 1 })
+  enroll(@Req() req: IUserRequest, @Param('id', ParseIntPipe) id: number) {
+    if (req.isEnrolled === true) {
+      return {
+        message: COURSES_MESSAGES.USER_ENROLLED_COURSE,
+      };
+    }
+    return this.courseService.enrollToCourse(req.user.id, id);
   }
 }
