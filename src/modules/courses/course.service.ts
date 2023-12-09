@@ -196,7 +196,6 @@ export class CourseService {
         },
       },
     });
-    console.log(courses);
 
     return {
       message: COURSES_MESSAGES.GET_COURSES_ENROLLED_SUCCESSFULLY,
@@ -204,21 +203,31 @@ export class CourseService {
     };
   }
 
-  //enroll the courses
   async enrollToCourse(userId: number, courseId: number) {
     const course = await this.prisma.course.findUnique({
       where: {
         id: courseId,
       },
+      include: {
+        createdBy: {
+          select: {
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
     });
-    const enrollment = await this.prisma.enrollment.create({
+
+    await this.prisma.enrollment.create({
       data: {
         course: {
           connect: {
             id: courseId,
           },
         },
-        createdBy: String(course.createdById),
+        createdBy: String(
+          course.createdBy.firstName + ' ' + course.createdBy.lastName,
+        ),
         student: {
           connect: {
             id: userId,
@@ -229,7 +238,6 @@ export class CourseService {
 
     return {
       message: COURSES_MESSAGES.USER_ENROLLED_COURSE,
-      data: enrollment,
     };
   }
 }

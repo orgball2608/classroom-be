@@ -1,14 +1,14 @@
-// import { Injectable, NestMiddleware, BadRequestException, NextFunction} from '@nestjs/common';
 import {
   BadRequestException,
   Injectable,
   NestMiddleware,
   NotFoundException,
 } from '@nestjs/common';
-import { Response, NextFunction } from 'express';
-import { PrismaService } from '@src/shared/prisma/prisma.service';
+import { NextFunction, Response } from 'express';
+
 import { COURSES_MESSAGES } from '@src/constants/message';
 import { IUserRequest } from '@src/interfaces';
+import { PrismaService } from '@src/shared/prisma/prisma.service';
 
 @Injectable()
 export class CourseMiddleware implements NestMiddleware {
