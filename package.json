@@ -19,6 +19,7 @@
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "dev:migrate": "yarn prisma migrate reset -f",
     "caddy": "caddy reverse-proxy --from waang.localhost --to 127.0.0.1:3001",
+    "visualize": "atlas schema inspect -u 'postgres://webnc_user:UTQKPBUNc1molDUXwbARQplS7XykjFzT@dpg-cli98rfjc5ks73er70f0-a.oregon-postgres.render.com/webnc' -w",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
