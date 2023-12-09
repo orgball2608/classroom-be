@@ -156,7 +156,19 @@ export class CourseService {
         id,
       },
       select: {
-        students: true,
+        students: {
+          select: {
+            student: {
+              select: {
+                id: true,
+                email: true,
+                avatar: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        },
         teachers: {
           select: {
             id: true,
