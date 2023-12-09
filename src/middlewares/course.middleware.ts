@@ -34,37 +34,24 @@ export class CourseMiddleware implements NestMiddleware {
 
     const userId = req.user.id;
 
-    const userCourse = await this.prisma.course.findUnique({
+    const enrollment = await this.prisma.enrollment.findUnique({
       where: {
-        id: courseIdNumber,
-        OR: [
-          {
-            students: {
-              some: {
-                id: userId,
-              },
-            },
-          },
-          {
-            teachers: {
-              some: {
-                id: userId,
-              },
-            },
-          },
-        ],
+        studentId_courseId: {
+          courseId: courseIdNumber,
+          studentId: userId,
+        },
       },
     });
 
     if (
-      !userCourse &&
+      !enrollment &&
       !req.url.includes('checkEnrolled') &&
       !req.url.includes('enroll')
     ) {
       throw new NotFoundException(COURSES_MESSAGES.COURSE_NOT_FOUND);
     }
 
-    req.isEnrolled = userCourse !== null;
+    req.isEnrolled = enrollment !== null;
     next();
   }
 }
