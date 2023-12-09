@@ -112,7 +112,7 @@ export class CourseController {
     return this.courseService.findAllUserInCourse(id);
   }
 
-  @Get('/mycourses/list')
+  @Get('/my-courses/list')
   findAllCourseOfMe(@Req() req: IUserRequest) {
     return this.courseService.findAllCourseOfMe(req.user.id);
   }
