@@ -6,12 +6,12 @@ import {
 } from '@nestjs/common';
 
 import { CourseController } from './class.controller';
+import { CourseMiddleware } from '@src/middlewares/course.middleware';
 import { CourseService } from './course.service';
+import { JwtModule } from '@nestjs/jwt';
 import { RoleChecker } from '@src/middlewares/role-checker.middleware';
 import { StorageModule } from '@src/shared/storage/storage.module';
 import { UserRole } from '@prisma/client';
-import { CourseMiddleware } from '@src/middlewares/course.middleware';
-import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [StorageModule, JwtModule.register({})],
@@ -20,13 +20,9 @@ import { JwtModule } from '@nestjs/jwt';
 })
 export class CourseModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(RoleChecker([UserRole.ADMIN])).forRoutes(
-      { path: 'courses', method: RequestMethod.GET },
-      {
-        path: 'courses/:id',
-        method: RequestMethod.DELETE,
-      },
-    );
+    consumer
+      .apply(RoleChecker([UserRole.ADMIN]))
+      .forRoutes({ path: 'courses', method: RequestMethod.GET });
 
     consumer.apply(CourseMiddleware).forRoutes(
       {
