@@ -1,17 +1,27 @@
-import { COURSES_MESSAGES } from '@src/constants/message';
+import { COURSES_MESSAGES, USERS_MESSAGES } from '@src/constants/message';
 import { CreateCourseDto } from './dto/create-course.dto';
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { StorageService } from '@src/shared/storage/services/storage.service';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { generateCourseCode } from '@src/common/utils';
 import { v4 as uuid4 } from 'uuid';
+import { MailerService } from '@nestjs-modules/mailer';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class CourseService {
   constructor(
-    private readonly prisma: PrismaService,
+    private prisma: PrismaService,
     private readonly storageService: StorageService,
+    private readonly mailerService: MailerService,
+    private readonly jwtService: JwtService,
+    private readonly config: ConfigService,
   ) {}
   async create(userId: number, createCourseDto: CreateCourseDto) {
     const courseCode = generateCourseCode();
@@ -262,6 +272,163 @@ export class CourseService {
     return {
       message: COURSES_MESSAGES.ENROLLED_TO_COURSE_SUCCESSFULLY,
       data: enrollment,
+    };
+  }
+
+  async inviteByEmail(
+    email: string,
+    courseId: number,
+    role: string,
+    fullName: string,
+  ) {
+    const course = await this.prisma.course.findUnique({
+      where: {
+        id: courseId,
+      },
+    });
+
+    const user = await this.prisma.course.findUnique({
+      where: {
+        id: courseId,
+        OR: [
+          {
+            students: {
+              some: {
+                student: {
+                  email: email,
+                },
+              },
+            },
+          },
+          {
+            teachers: {
+              some: {
+                email: email,
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    if (!course) {
+      throw new NotFoundException(COURSES_MESSAGES.COURSE_NOT_FOUND);
+    } else if (user) {
+      throw new BadRequestException(COURSES_MESSAGES.USER_ENROLLED_COURSE);
+    }
+
+    const Role = role === 'student' ? 'học sinh' : 'giáo viên';
+
+    const verifyEmailToken = this.signJoinCourseToken(email, courseId, role);
+    const inviteLink = `${process.env.FRONTEND_URL}/class/join?token=${verifyEmailToken}`;
+
+    return this.mailerService.sendMail({
+      to: email,
+      from: 'elearningapp@gmail.com',
+      subject: 'Lời Mời Tham gia lớp học',
+      template: './invitation-email.hbs',
+      context: {
+        name: fullName,
+        inviteLink: inviteLink,
+        className: course.name,
+        role: Role,
+      },
+    });
+  }
+
+  private signJoinCourseToken(email: string, courseId: number, role: string) {
+    return this.jwtService.sign(
+      {
+        email,
+        courseId,
+        role,
+      },
+      {
+        secret: this.config.get('auth.jwtMailSecret'),
+        expiresIn: 315360000,
+      },
+    );
+  }
+
+  async verifyInvitationEmailToken(id: number, token: string) {
+    const { email, courseId, role } = this.jwtService.verify(token, {
+      secret: this.config.get('auth.jwtMailSecret'),
+    });
+    console.log(email);
+
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    const course = await this.prisma.course.findUnique({
+      where: {
+        id: courseId,
+      },
+      include: {
+        createdBy: {
+          select: {
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
+    }
+
+    if (role === 'student') {
+      const enrollment = await this.prisma.enrollment.create({
+        data: {
+          course: {
+            connect: {
+              id: courseId,
+            },
+          },
+          createdBy: String(
+            course.createdBy.firstName + ' ' + course.createdBy.lastName,
+          ),
+          student: {
+            connect: {
+              id: user.id,
+            },
+          },
+        },
+      });
+      console.log(course);
+
+      return {
+        message: COURSES_MESSAGES.ENROLLED_TO_COURSE_SUCCESSFULLY,
+        data: enrollment,
+      };
+    }
+
+    if (role === 'teacher') {
+      const course = await this.prisma.course.update({
+        where: {
+          id: courseId,
+        },
+        data: {
+          teachers: {
+            connect: {
+              id: user.id,
+            },
+          },
+        },
+      });
+      console.log(course);
+
+      return {
+        message: COURSES_MESSAGES.ENROLLED_TO_COURSE_SUCCESSFULLY,
+        data: course,
+      };
+    }
+
+    return {
+      message: COURSES_MESSAGES.ENROLLED_TO_COURSE_SUCCESSFULLY,
     };
   }
 }

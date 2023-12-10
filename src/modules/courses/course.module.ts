@@ -11,9 +11,10 @@ import { RoleChecker } from '@src/middlewares/role-checker.middleware';
 import { StorageModule } from '@src/shared/storage/storage.module';
 import { UserRole } from '@prisma/client';
 import { CourseMiddleware } from '@src/middlewares/course.middleware';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-  imports: [StorageModule],
+  imports: [StorageModule, JwtModule.register({})],
   controllers: [CourseController],
   providers: [CourseService],
 })

@@ -26,6 +26,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { Course } from './entities/course.entity';
 import { ApiResponseWithMessage } from '@src/decorators';
 import { COURSES_MESSAGES } from '@src/constants';
+import { InviteEmailDto } from './dto/invite-email.dto';
 
 @ApiTags('Course')
 @ApiBearerAuth()
@@ -145,5 +146,27 @@ export class CourseController {
       };
     }
     return this.courseService.enrollToCourse(req.user.id, id);
+  }
+
+  // send email for
+  @Post('/invite/email')
+  @ApiBody({ type: InviteEmailDto })
+  // @ApiResponseWithMessage(Course)
+  inviteByEmail(@Req() req: IUserRequest, @Body() body: InviteEmailDto) {
+    const fullName = req.user.firstName + ' ' + req.user.lastName;
+    return this.courseService.inviteByEmail(
+      body.email,
+      body.courseId,
+      body.role,
+      fullName,
+    );
+  }
+
+  //verify email
+  @Post('/join/:token')
+  joinCourse(@Req() req: IUserRequest, @Param() token: { token: string }) {
+    console.log(token);
+    const t = token.token as string;
+    return this.courseService.verifyInvitationEmailToken(req.user.id, t);
   }
 }
