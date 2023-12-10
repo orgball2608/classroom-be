@@ -380,6 +380,41 @@ export class CourseService {
       throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
     }
 
+    if (!course) {
+      throw new NotFoundException(COURSES_MESSAGES.COURSE_NOT_FOUND);
+    }
+
+    const user_course = await this.prisma.course.findUnique({
+      where: {
+        id: courseId,
+        OR: [
+          {
+            students: {
+              some: {
+                student: {
+                  email: email,
+                },
+              },
+            },
+          },
+          {
+            teachers: {
+              some: {
+                email: email,
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    if (user_course) {
+      return {
+        message: COURSES_MESSAGES.ENROLLED_TO_COURSE_SUCCESSFULLY,
+        data: course,
+      };
+    }
+
     if (role === 'student') {
       const enrollment = await this.prisma.enrollment.create({
         data: {
