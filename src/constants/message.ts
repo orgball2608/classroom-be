@@ -51,6 +51,10 @@ export const COURSES_MESSAGES = {
   USER_NOT_IN_COURSE: 'User not in course',
   USER_ENROLLED_COURSE: 'User in course',
   ENROLLED_TO_COURSE_SUCCESSFULLY: 'Enrolled to course successfully',
+  LEAVE_COURSE_SUCCESSFULLY: 'Leave course successfully',
+  YOU_NOT_ENROLLED_IN_THIS_COURSE: 'You not enrolled in this course',
+  YOU_ARE_OWNER_OF_THIS_COURSE_CAN_NOT_LEAVE:
+    'You are owner of this course can not leave',
 };
 
 export const AUTHORIZATION_MESSAGES = {
