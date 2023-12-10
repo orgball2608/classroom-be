@@ -26,6 +26,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { Course } from './entities/course.entity';
 import { ApiResponseWithMessage } from '@src/decorators';
 import { COURSES_MESSAGES } from '@src/constants';
+import { InviteEmailDto } from './dto/invite-email.dto';
 
 @ApiTags('Course')
 @ApiBearerAuth()
@@ -138,12 +139,44 @@ export class CourseController {
 
   @Patch(':id/enroll')
   @ApiParam({ name: 'id', type: 'number', example: 1 })
-  enroll(@Req() req: IUserRequest, @Param('id', ParseIntPipe) id: number) {
+  enrollCourse(
+    @Req() req: IUserRequest,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
     if (req.isEnrolled === true) {
       return {
         message: COURSES_MESSAGES.USER_ENROLLED_COURSE,
       };
     }
     return this.courseService.enrollToCourse(req.user.id, id);
+  }
+
+  @Delete(':id/enrollments/me/leave')
+  @ApiParam({ name: 'id', type: 'number', example: 1 })
+  leaveCourse(
+    @Req() req: IUserRequest,
+    @Param('id', ParseIntPipe) courseId: number,
+  ) {
+    return this.courseService.leaveCourse(req.user.id, courseId);
+  }
+
+  @Post('/invite/email')
+  @ApiBody({ type: InviteEmailDto })
+  // @ApiResponseWithMessage(Course)
+  inviteByEmail(@Req() req: IUserRequest, @Body() body: InviteEmailDto) {
+    const fullName = req.user.firstName + ' ' + req.user.lastName;
+    return this.courseService.inviteByEmail(
+      body.email,
+      body.courseId,
+      body.role,
+      fullName,
+    );
+  }
+
+  @Post('/join/:token')
+  joinCourse(@Req() req: IUserRequest, @Param() token: { token: string }) {
+    console.log(token);
+    const t = token.token as string;
+    return this.courseService.verifyInvitationEmailToken(req.user.id, t);
   }
 }
