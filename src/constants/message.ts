@@ -55,6 +55,7 @@ export const COURSES_MESSAGES = {
   YOU_NOT_ENROLLED_IN_THIS_COURSE: 'You not enrolled in this course',
   YOU_ARE_OWNER_OF_THIS_COURSE_CAN_NOT_LEAVE:
     'You are owner of this course can not leave',
+  INVALID_TOKEN: 'Invalid token',
 };
 
 export const AUTHORIZATION_MESSAGES = {
