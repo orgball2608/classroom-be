@@ -139,7 +139,10 @@ export class CourseController {
 
   @Patch(':id/enroll')
   @ApiParam({ name: 'id', type: 'number', example: 1 })
-  enroll(@Req() req: IUserRequest, @Param('id', ParseIntPipe) id: number) {
+  enrollCourse(
+    @Req() req: IUserRequest,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
     if (req.isEnrolled === true) {
       return {
         message: COURSES_MESSAGES.USER_ENROLLED_COURSE,
@@ -148,7 +151,15 @@ export class CourseController {
     return this.courseService.enrollToCourse(req.user.id, id);
   }
 
-  // send email for
+  @Delete(':id/enrollments/me/leave')
+  @ApiParam({ name: 'id', type: 'number', example: 1 })
+  leaveCourse(
+    @Req() req: IUserRequest,
+    @Param('id', ParseIntPipe) courseId: number,
+  ) {
+    return this.courseService.leaveCourse(req.user.id, courseId);
+  }
+
   @Post('/invite/email')
   @ApiBody({ type: InviteEmailDto })
   // @ApiResponseWithMessage(Course)
@@ -162,7 +173,6 @@ export class CourseController {
     );
   }
 
-  //verify email
   @Post('/join/:token')
   joinCourse(@Req() req: IUserRequest, @Param() token: { token: string }) {
     console.log(token);
