@@ -441,118 +441,123 @@ export class CourseService {
   }
 
   async verifyInvitationEmailToken(id: number, token: string) {
-    const { email, courseId, role } = this.jwtService.verify(token, {
-      secret: this.config.get('auth.jwtMailSecret'),
-    });
+    try {
+      const { email, courseId, role } = this.jwtService.verify(token, {
+        secret: this.config.get('auth.jwtMailSecret'),
+      });
+      console.log(email, courseId, role);
 
-    const user = await this.prisma.user.findUnique({
-      where: {
-        email,
-      },
-    });
+      const user = await this.prisma.user.findUnique({
+        where: {
+          email,
+        },
+      });
 
-    const course = await this.prisma.course.findUnique({
-      where: {
-        id: courseId,
-      },
-      include: {
-        createdBy: {
-          select: {
-            firstName: true,
-            lastName: true,
+      const course = await this.prisma.course.findUnique({
+        where: {
+          id: courseId,
+        },
+        include: {
+          createdBy: {
+            select: {
+              firstName: true,
+              lastName: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    if (!user) {
-      throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
-    }
+      if (!user) {
+        throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
+      }
 
-    if (!course) {
-      throw new NotFoundException(COURSES_MESSAGES.COURSE_NOT_FOUND);
-    }
+      if (!course) {
+        throw new NotFoundException(COURSES_MESSAGES.COURSE_NOT_FOUND);
+      }
 
-    const user_course = await this.prisma.course.findUnique({
-      where: {
-        id: courseId,
-        OR: [
-          {
-            students: {
-              some: {
-                student: {
+      const user_course = await this.prisma.course.findUnique({
+        where: {
+          id: courseId,
+          OR: [
+            {
+              students: {
+                some: {
+                  student: {
+                    email: email,
+                  },
+                },
+              },
+            },
+            {
+              teachers: {
+                some: {
                   email: email,
                 },
               },
             },
-          },
-          {
-            teachers: {
-              some: {
-                email: email,
+          ],
+        },
+      });
+
+      if (user_course) {
+        return {
+          message: COURSES_MESSAGES.ENROLLED_TO_COURSE_SUCCESSFULLY,
+          data: course,
+        };
+      }
+
+      //TODO: refactor this
+
+      if (role === 'student') {
+        const enrollment = await this.prisma.enrollment.create({
+          data: {
+            course: {
+              connect: {
+                id: courseId,
+              },
+            },
+            createdBy: String(
+              course.createdBy.firstName + ' ' + course.createdBy.lastName,
+            ),
+            student: {
+              connect: {
+                id: user.id,
               },
             },
           },
-        ],
-      },
-    });
+        });
 
-    if (user_course) {
-      return {
-        message: COURSES_MESSAGES.ENROLLED_TO_COURSE_SUCCESSFULLY,
-        data: course,
-      };
-    }
+        return {
+          message: COURSES_MESSAGES.ENROLLED_TO_COURSE_SUCCESSFULLY,
+          data: enrollment,
+        };
+      }
 
-    //TODO: refactor this
-
-    if (role === 'student') {
-      const enrollment = await this.prisma.enrollment.create({
-        data: {
-          course: {
-            connect: {
-              id: courseId,
+      if (role === 'teacher') {
+        const course = await this.prisma.course.update({
+          where: {
+            id: courseId,
+          },
+          data: {
+            teachers: {
+              connect: {
+                id: user.id,
+              },
             },
           },
-          createdBy: String(
-            course.createdBy.firstName + ' ' + course.createdBy.lastName,
-          ),
-          student: {
-            connect: {
-              id: user.id,
-            },
-          },
-        },
-      });
+        });
+
+        return {
+          message: COURSES_MESSAGES.ENROLLED_TO_COURSE_SUCCESSFULLY,
+          data: course,
+        };
+      }
 
       return {
         message: COURSES_MESSAGES.ENROLLED_TO_COURSE_SUCCESSFULLY,
-        data: enrollment,
       };
+    } catch (error) {
+      throw new BadRequestException(COURSES_MESSAGES.INVALID_TOKEN);
     }
-
-    if (role === 'teacher') {
-      const course = await this.prisma.course.update({
-        where: {
-          id: courseId,
-        },
-        data: {
-          teachers: {
-            connect: {
-              id: user.id,
-            },
-          },
-        },
-      });
-
-      return {
-        message: COURSES_MESSAGES.ENROLLED_TO_COURSE_SUCCESSFULLY,
-        data: course,
-      };
-    }
-
-    return {
-      message: COURSES_MESSAGES.ENROLLED_TO_COURSE_SUCCESSFULLY,
-    };
   }
 }

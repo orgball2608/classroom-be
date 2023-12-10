@@ -175,7 +175,6 @@ export class CourseController {
 
   @Post('/join/:token')
   joinCourse(@Req() req: IUserRequest, @Param() token: { token: string }) {
-    console.log(token);
     const t = token.token as string;
     return this.courseService.verifyInvitationEmailToken(req.user.id, t);
   }
