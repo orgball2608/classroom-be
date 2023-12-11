@@ -64,6 +64,7 @@ export class CourseMiddleware implements NestMiddleware {
     ) {
       throw new NotFoundException(COURSES_MESSAGES.COURSE_NOT_FOUND);
     }
+    console.log(enrollment);
 
     req.isEnrolled = enrollment !== null;
     next();
