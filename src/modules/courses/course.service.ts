@@ -153,21 +153,27 @@ export class CourseService {
   }
 
   async remove(id: number) {
-    await this.prisma.course.delete({
-      where: {
-        id,
-      },
-    });
+    try {
+      await this.prisma.course.delete({
+        where: {
+          id,
+        },
+      });
 
-    return {
-      message: COURSES_MESSAGES.DELETE_COURSE_SUCCESSFULLY,
-    };
+      return {
+        message: COURSES_MESSAGES.DELETE_COURSE_SUCCESSFULLY,
+      };
+    } catch (error) {
+      throw new NotFoundException(
+        COURSES_MESSAGES.CANNOT_DELETE_COURSE_WITH_STUDENTS,
+      );
+    }
   }
 
-  async findAllUserInCourse(id: number) {
+  async findAllUserInCourse(userId: number) {
     const course = await this.prisma.course.findMany({
       where: {
-        id,
+        id: userId,
       },
       select: {
         enrollments: {
@@ -433,7 +439,7 @@ export class CourseService {
     );
   }
 
-  async verifyInvitationEmailToken(id: number, token: string) {
+  async verifyInvitationEmailToken(userId: number, token: string) {
     try {
       const { email, courseId, role } = this.jwtService.verify(token, {
         secret: this.config.get('auth.jwtMailSecret'),
@@ -445,21 +451,27 @@ export class CourseService {
         },
       });
 
+      if (!user) {
+        throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
+      }
+
+      if (user.id !== userId) {
+        throw new ForbiddenException(
+          COURSES_MESSAGES.ACCOUNT_ENROLL_NOT_CORRECT_WITH_LOGIN_ACCOUNT,
+        );
+      }
+
       const course = await this.prisma.course.findUnique({
         where: {
           id: courseId,
         },
       });
 
-      if (!user) {
-        throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
-      }
-
       if (!course) {
         throw new NotFoundException(COURSES_MESSAGES.COURSE_NOT_FOUND);
       }
 
-      const user_course = await this.prisma.course.findUnique({
+      const userCourse = await this.prisma.course.findUnique({
         where: {
           id: courseId,
           OR: [
@@ -483,7 +495,7 @@ export class CourseService {
         },
       });
 
-      if (user_course) {
+      if (userCourse) {
         return {
           message: COURSES_MESSAGES.ENROLLED_TO_COURSE_SUCCESSFULLY,
           data: course,
@@ -522,11 +534,10 @@ export class CourseService {
             },
           },
         });
-        const result = enrollment.course;
 
         return {
           message: COURSES_MESSAGES.ENROLLED_TO_COURSE_SUCCESSFULLY,
-          data: result,
+          data: enrollment.course,
         };
       }
 

@@ -56,6 +56,9 @@ export const COURSES_MESSAGES = {
   YOU_ARE_OWNER_OF_THIS_COURSE_CAN_NOT_LEAVE:
     'You are owner of this course can not leave',
   INVALID_TOKEN: 'Invalid token',
+  CANNOT_DELETE_COURSE_WITH_STUDENTS: 'Cannot delete course with students',
+  ACCOUNT_ENROLL_NOT_CORRECT_WITH_LOGIN_ACCOUNT:
+    'Account enroll not correct with login account',
 };
 
 export const AUTHORIZATION_MESSAGES = {
