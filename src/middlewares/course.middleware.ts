@@ -15,7 +15,6 @@ export class CourseMiddleware implements NestMiddleware {
   constructor(private readonly prisma: PrismaService) {}
 
   async use(req: IUserRequest, res: Response, next: NextFunction) {
-    console.log('CourseMiddleware');
     const courseId = req.params.id;
     const courseIdNumber = Number(courseId);
 
@@ -40,7 +39,7 @@ export class CourseMiddleware implements NestMiddleware {
         id: courseIdNumber,
         OR: [
           {
-            students: {
+            enrollments: {
               some: {
                 studentId: userId,
               },

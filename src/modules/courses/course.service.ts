@@ -8,6 +8,7 @@ import { COURSES_MESSAGES, USERS_MESSAGES } from '@src/constants/message';
 
 import { ConfigService } from '@nestjs/config';
 import { CreateCourseDto } from './dto/create-course.dto';
+import { EnrollmentRole } from './course.enum';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
@@ -72,7 +73,7 @@ export class CourseService {
   async findAllCourseByStudentId(studentId: number) {
     const courses = await this.prisma.course.findMany({
       where: {
-        students: {
+        enrollments: {
           some: {
             id: studentId,
           },
@@ -169,7 +170,7 @@ export class CourseService {
         id,
       },
       select: {
-        students: {
+        enrollments: {
           select: {
             student: {
               select: {
@@ -206,7 +207,7 @@ export class CourseService {
       where: {
         OR: [
           {
-            students: {
+            enrollments: {
               some: {
                 studentId: id,
               },
@@ -245,14 +246,6 @@ export class CourseService {
       where: {
         id: courseId,
       },
-      include: {
-        createdBy: {
-          select: {
-            firstName: true,
-            lastName: true,
-          },
-        },
-      },
     });
 
     const enrollment = await this.prisma.enrollment.create({
@@ -262,9 +255,11 @@ export class CourseService {
             id: courseId,
           },
         },
-        createdBy: String(
-          course.createdBy.firstName + ' ' + course.createdBy.lastName,
-        ),
+        createdBy: {
+          connect: {
+            id: course.createdById,
+          },
+        },
         student: {
           connect: {
             id: userId,
@@ -301,7 +296,7 @@ export class CourseService {
         id: courseId,
         OR: [
           {
-            students: {
+            enrollments: {
               some: {
                 studentId: userId,
               },
@@ -327,7 +322,6 @@ export class CourseService {
       );
     }
 
-    //Remove teacher or student from course
     if (
       enrollment.teachers.some(
         (teacher: User): boolean => teacher.id === userId,
@@ -364,7 +358,7 @@ export class CourseService {
   async inviteByEmail(
     email: string,
     courseId: number,
-    role: string,
+    role: EnrollmentRole,
     fullName: string,
   ) {
     const course = await this.prisma.course.findUnique({
@@ -382,7 +376,7 @@ export class CourseService {
         id: courseId,
         OR: [
           {
-            students: {
+            enrollments: {
               some: {
                 student: {
                   email: email,
@@ -405,8 +399,8 @@ export class CourseService {
       throw new BadRequestException(COURSES_MESSAGES.USER_ENROLLED_COURSE);
     }
 
-    //TODO: change to enum instead of string
-    const Role = role === 'student' ? 'học sinh' : 'giáo viên';
+    const enrollmentRole =
+      role === EnrollmentRole.STUDENT ? 'học sinh' : 'giáo viên';
 
     const verifyEmailToken = this.signJoinCourseToken(email, courseId, role);
     const inviteLink = `${process.env.FRONTEND_URL}/class/join?token=${verifyEmailToken}`;
@@ -420,7 +414,7 @@ export class CourseService {
         name: fullName,
         inviteLink: inviteLink,
         className: course.name,
-        role: Role,
+        role: enrollmentRole,
       },
     });
   }
@@ -433,9 +427,8 @@ export class CourseService {
         role,
       },
       {
-        //TODO: get from config
-        secret: this.config.get('auth.jwtMailSecret'),
-        expiresIn: 315360000,
+        secret: this.config.get<string>('auth.jwtMailSecret'),
+        expiresIn: this.config.get<number>('auth.jwtMailExpires'),
       },
     );
   }
@@ -456,14 +449,6 @@ export class CourseService {
         where: {
           id: courseId,
         },
-        include: {
-          createdBy: {
-            select: {
-              firstName: true,
-              lastName: true,
-            },
-          },
-        },
       });
 
       if (!user) {
@@ -479,7 +464,7 @@ export class CourseService {
           id: courseId,
           OR: [
             {
-              students: {
+              enrollments: {
                 some: {
                   student: {
                     email: email,
@@ -505,9 +490,7 @@ export class CourseService {
         };
       }
 
-      //TODO: refactor this
-
-      if (role === 'student') {
+      if (role === EnrollmentRole.STUDENT) {
         const enrollment = await this.prisma.enrollment.create({
           data: {
             course: {
@@ -515,9 +498,11 @@ export class CourseService {
                 id: courseId,
               },
             },
-            createdBy: String(
-              course.createdBy.firstName + ' ' + course.createdBy.lastName,
-            ),
+            createdBy: {
+              connect: {
+                id: course.createdById,
+              },
+            },
             student: {
               connect: {
                 id: user.id,
@@ -545,7 +530,7 @@ export class CourseService {
         };
       }
 
-      if (role === 'teacher') {
+      if (role === EnrollmentRole.TEACHER) {
         const course = await this.prisma.course.update({
           where: {
             id: courseId,

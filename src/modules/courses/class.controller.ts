@@ -162,7 +162,6 @@ export class CourseController {
 
   @Post('/invite/email')
   @ApiBody({ type: InviteEmailDto })
-  // @ApiResponseWithMessage(Course)
   inviteByEmail(@Req() req: IUserRequest, @Body() body: InviteEmailDto) {
     const fullName = req.user.firstName + ' ' + req.user.lastName;
     return this.courseService.inviteByEmail(
