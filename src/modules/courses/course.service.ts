@@ -445,7 +445,6 @@ export class CourseService {
       const { email, courseId, role } = this.jwtService.verify(token, {
         secret: this.config.get('auth.jwtMailSecret'),
       });
-      console.log(email, courseId, role);
 
       const user = await this.prisma.user.findUnique({
         where: {
@@ -525,11 +524,24 @@ export class CourseService {
               },
             },
           },
+          select: {
+            course: {
+              select: {
+                id: true,
+                name: true,
+                code: true,
+                description: true,
+                avatar: true,
+                createdBy: true,
+              },
+            },
+          },
         });
+        const result = enrollment.course;
 
         return {
           message: COURSES_MESSAGES.ENROLLED_TO_COURSE_SUCCESSFULLY,
-          data: enrollment,
+          data: result,
         };
       }
 
