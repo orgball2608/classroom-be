@@ -5,6 +5,7 @@ export type AppConfig = {
   apiVersion: string;
   appURL: string;
   frontendURL: string;
+  documentEnabled: boolean;
 };
 
 export type AuthConfig = {

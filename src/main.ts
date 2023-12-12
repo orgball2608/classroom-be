@@ -13,6 +13,7 @@ import { UnprocessableEntityException, ValidationPipe } from '@nestjs/common';
 
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
+import { Environment } from './common/enum/node-env';
 import { WebsocketAdapter } from './shared/gateway/gateway.adapter';
 import compression from 'compression';
 import helmet from 'helmet';
@@ -29,8 +30,6 @@ async function bootstrap(): Promise<NestExpressApplication> {
 
   const configService = app.get(ConfigService);
   const PORT = configService.getOrThrow<number>('app.port') || 3001;
-
-  app.enableShutdownHooks();
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -75,7 +74,21 @@ async function bootstrap(): Promise<NestExpressApplication> {
   app.setGlobalPrefix(apiPrefix);
 
   //Swagger
-  setupSwagger(app, PORT);
+  const isDocumentEnabled = configService.getOrThrow<boolean>(
+    'app.documentEnabled',
+  );
+
+  if (isDocumentEnabled) {
+    setupSwagger(app, PORT);
+  }
+
+  //Enable shutdown hooks
+  const isDevelopment =
+    configService.getOrThrow<string>('app.nodeEnv') === Environment.DEVELOPMENT;
+
+  if (!isDevelopment) {
+    app.enableShutdownHooks();
+  }
 
   await app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
 
