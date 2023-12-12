@@ -148,7 +148,7 @@ export class CourseController {
         message: COURSES_MESSAGES.USER_ENROLLED_COURSE,
       };
     }
-    return this.courseService.enrollToCourse(req.user.id, id);
+    return this.courseService.enrollToCourse(req.user, id);
   }
 
   @Delete(':id/enrollments/me/leave')

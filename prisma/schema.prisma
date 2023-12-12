@@ -30,11 +30,12 @@ model User {
   role                UserRole     @default(STUDENT)
   status              Boolean      @default(true)
 
+  notifications      Notification[]     @relation(name: "user_notifications")
   createdCourses     Course[]
   createdEnrollments Enrollment[]
   courseTeachers     CourseTeacher[]
-  studentEnrollments Enrollment[]        @relation("student_enrollments")
-  notificationTokens NotificationToken[]
+  studentEnrollments Enrollment[]       @relation("student_enrollments")
+  gradeCompositions  GradeComposition[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -43,36 +44,18 @@ model User {
 }
 
 model Notification {
-  id                  Int                @id @default(autoincrement())
-  notificationTokenId Int                @map("notification_token_id")
-  title               String
-  body                String
-  status              NotificationStatus @default(UNREAD)
-  createdBy           String             @map("created_by")
+  id     Int                @id @default(autoincrement())
+  userId Int                @map("user_id")
+  title  String
+  body   String             @db.Text
+  status NotificationStatus @default(UNREAD)
 
-  notificationToken NotificationToken @relation(fields: [notificationTokenId], references: [id])
+  user User @relation(name: "user_notifications", fields: [userId], references: [id])
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("notifications")
-}
-
-model NotificationToken {
-  id                Int                 @id @default(autoincrement())
-  userId            Int                 @map("user_id")
-  deviceType        String              @map("device_type")
-  notificationToken String              @map("notification_token")
-  status            FirebaseTokenStatus @default(INACTIVE)
-
-  notifications Notification[]
-  user          User           @relation(fields: [userId], references: [id])
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@unique([userId, status])
-  @@map("notification_tokens")
 }
 
 model Course {
@@ -87,13 +70,15 @@ model Course {
   createdById Int     @map("created_by_id")
   status      Boolean @default(true)
 
-  enrollments    Enrollment[]    @relation("course_students")
-  courseTeachers CourseTeacher[] @relation("course_teachers")
-  createdBy      User            @relation(fields: [createdById], references: [id])
+  enrollments       Enrollment[]       @relation("course_students")
+  courseTeachers    CourseTeacher[]    @relation("course_teachers")
+  createdBy         User               @relation(fields: [createdById], references: [id])
+  gradeCompositions GradeComposition[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@unique([code])
   @@map("courses")
 }
 
@@ -131,14 +116,46 @@ model CourseTeacher {
   @@map("course_teachers")
 }
 
+model GradeComposition {
+  id        Int     @id @default(autoincrement())
+  courseId  Int     @map("course_id")
+  scale     String
+  studentId Int     @map("student_id")
+  createdBy String  @map("created_by")
+  gradeId   Int     @map("grade_id")
+  position  Int
+  score     Float
+  status    Boolean @default(true)
+
+  course  Course @relation(fields: [courseId], references: [id])
+  student User   @relation(fields: [studentId], references: [id])
+  grade   Grade  @relation(fields: [gradeId], references: [id])
+
+  @@unique([studentId, courseId])
+  @@map("grade_compositions")
+}
+
+model Grade {
+  id        Int     @id @default(autoincrement())
+  courseId  Int     @map("course_id")
+  scale     String
+  studentId Int     @map("student_id")
+  createdBy String  @map("created_by")
+  position  Int
+  grade     Float
+  status    Boolean @default(true)
+
+  gradeCompositions GradeComposition[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("grades")
+}
+
 enum NotificationStatus {
   UNREAD
   READ
-}
-
-enum FirebaseTokenStatus {
-  ACTIVE
-  INACTIVE
 }
 
 enum UserRole {

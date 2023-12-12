@@ -2,12 +2,18 @@ import {
   ExpressAdapter,
   NestExpressApplication,
 } from '@nestjs/platform-express';
-import { HttpAdapterHost, NestFactory, Reflector } from '@nestjs/core';
+import {
+  HttpAdapterHost,
+  ModuleRef,
+  NestFactory,
+  Reflector,
+} from '@nestjs/core';
 import { HttpExceptionFilter, PrismaClientExceptionFilter } from './filters';
 import { UnprocessableEntityException, ValidationPipe } from '@nestjs/common';
 
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
+import { WebsocketAdapter } from './shared/gateway/gateway.adapter';
 import compression from 'compression';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -32,6 +38,10 @@ async function bootstrap(): Promise<NestExpressApplication> {
     }),
   );
 
+  const moduleRef = app.get(ModuleRef);
+  const adapter = new WebsocketAdapter(app, moduleRef);
+  app.useWebSocketAdapter(adapter);
+
   app.set('trust proxy', 1);
 
   app.use(helmet());
@@ -44,6 +54,7 @@ async function bootstrap(): Promise<NestExpressApplication> {
   app.use(compression());
   app.use(morgan('combined'));
   app.enableVersioning();
+  app.useLogger(['debug', 'error', 'log', 'verbose', 'warn']);
 
   const { httpAdapter } = app.get(HttpAdapterHost);
   const reflector = app.get(Reflector);

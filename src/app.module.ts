@@ -41,6 +41,7 @@ import redisConfig from './configs/redis.config';
     UserModule,
     CourseModule,
   ],
+  providers: [],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

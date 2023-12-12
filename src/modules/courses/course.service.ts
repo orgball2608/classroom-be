@@ -5,11 +5,13 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { COURSES_MESSAGES, USERS_MESSAGES } from '@src/constants/message';
+import { CourseTeacher, User } from '@prisma/client';
 
 import { ConfigService } from '@nestjs/config';
-import { CourseTeacher } from '@prisma/client';
 import { CreateCourseDto } from './dto/create-course.dto';
+import { EMIT_MESSAGES } from '@src/constants';
 import { EnrollmentRole } from './course.enum';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
@@ -23,6 +25,7 @@ export class CourseService {
   constructor(
     private readonly storageService: StorageService,
     private readonly mailerService: MailerService,
+    private readonly emitterEvent: EventEmitter2,
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
     private prisma: PrismaService,
@@ -290,7 +293,7 @@ export class CourseService {
     };
   }
 
-  async enrollToCourse(userId: number, courseId: number) {
+  async enrollToCourse(user: User, courseId: number) {
     const course = await this.prisma.course.findUnique({
       where: {
         id: courseId,
@@ -311,10 +314,21 @@ export class CourseService {
         },
         student: {
           connect: {
-            id: userId,
+            id: user.id,
           },
         },
       },
+    });
+
+    const notificationData = {
+      userId: user.id,
+      title: 'Enrolled to course',
+      body: `${user.firstName} ${user.lastName} enrolled to course ${course.name}`,
+    };
+
+    this.emitterEvent.emit(EMIT_MESSAGES.NOTIFICATION_CREATED, {
+      userId: course.createdById,
+      notificationData,
     });
 
     return {

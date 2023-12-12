@@ -5,14 +5,16 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 
+import { CreateNotificationDto } from './dto/create-notification.dto';
+import { OnEvent } from '@nestjs/event-emitter';
+import { PrismaService } from '../prisma/prisma.service';
+import { EMIT_MESSAGES, PROVIDERS, SOCKET_MESSAGES } from '@src/constants';
 import { Server } from 'socket.io';
-import { Socket } from 'dgram';
+import { Inject } from '@nestjs/common';
+import { IGatewaySessionManager } from './gateway.session';
+import { IAuthenticatedSocket } from '@src/interfaces';
 
 @WebSocketGateway({
-  // cors: {
-  //   origin: ['http://localhost:3000'],
-  //   credentials: true,
-  // },
   cors: {
     origin: '*',
   },
@@ -20,24 +22,47 @@ import { Socket } from 'dgram';
   pingTimeout: 15000,
 })
 export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  constructor() {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(PROVIDERS.GATEWAY_SESSION_MANAGER)
+    readonly sessions: IGatewaySessionManager,
+  ) {}
+
+  @WebSocketServer()
+  server: Server;
 
   onModuleInit() {
-    this.server.on('connection', (socket) => {
+    this.server.on('connection', (socket: IAuthenticatedSocket) => {
+      console.log('new coming connect');
       console.log(`Socket id: ${socket.id} - Has connected!`);
     });
   }
 
-  handleConnection(socket: Socket) {
-    console.log('new coming connect');
+  handleConnection(socket: IAuthenticatedSocket) {
+    this.sessions.setUserSocket(socket.user.id, socket);
     socket.emit('connected');
   }
 
-  handleDisconnect(socket: Socket) {
-    console.log('disconnect');
+  handleDisconnect(socket: IAuthenticatedSocket) {
+    this.sessions.removeUserSocket(socket.user.id);
     socket.emit('disconnected');
   }
 
-  @WebSocketServer()
-  server: Server;
+  getNotifications() {
+    return this.prisma.notification.findMany();
+  }
+
+  @OnEvent(EMIT_MESSAGES.NOTIFICATION_CREATED)
+  async sendPush(payload: {
+    userId: number;
+    notificationData: CreateNotificationDto;
+  }): Promise<void> {
+    console.log(payload.notificationData);
+    await this.prisma.notification.create({
+      data: payload.notificationData,
+    });
+    this.sessions
+      .getUserSocket(payload.userId)
+      .emit(SOCKET_MESSAGES.NOTIFICATION_CREATED);
+  }
 }
