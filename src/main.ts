@@ -22,7 +22,7 @@ async function bootstrap(): Promise<NestExpressApplication> {
   );
 
   const configService = app.get(ConfigService);
-  const PORT = configService.get<number>('app.port') || 3001;
+  const PORT = configService.getOrThrow<number>('app.port') || 3001;
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -55,9 +55,9 @@ async function bootstrap(): Promise<NestExpressApplication> {
   );
 
   const apiPrefix =
-    configService.get<string>('app.apiPrefix') +
+    configService.getOrThrow<string>('app.apiPrefix') +
     '/' +
-    configService.get<string>('app.apiVersion');
+    configService.getOrThrow<string>('app.apiVersion');
 
   app.setGlobalPrefix(apiPrefix);
 

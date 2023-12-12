@@ -8,7 +8,6 @@ import { CustomMailerModule } from './shared/mailer/mailer.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { GatewayModule } from './shared/gateway/gateway.module';
 import { JwtModule } from '@nestjs/jwt';
-import { NotificationModule } from './shared/notification/notification.module';
 import { PrismaModule } from './shared/prisma/prisma.module';
 import { RedisModule } from './shared/redis/redis.module';
 import { SharedModule } from './shared/shared.module';
@@ -37,7 +36,6 @@ import redisConfig from './configs/redis.config';
     PrismaModule,
     RedisModule,
     GatewayModule,
-    NotificationModule,
     SharedModule,
     AuthModule,
     UserModule,

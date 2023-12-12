@@ -39,4 +39,6 @@ export type AwsConfig = {
   awsPublicBucketsKey: string;
   awsCloudfrontURL: string;
   awsRegion: string;
+  awsRateTTL: number;
+  awsRateLimit: number;
 };
