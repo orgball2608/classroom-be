@@ -37,4 +37,6 @@ lerna-debug.log*
 
 # Environment
 .env
+.env.dev
 gitlog.txt
+

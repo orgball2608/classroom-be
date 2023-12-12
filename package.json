@@ -11,7 +11,7 @@
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
-    "start:dev": "nest start --watch",
+    "start:dev": "NODE_ENV=development nest start --watch",
     "start:proxy": " nest start --watch &&caddy reverse-proxy --from waang.localhost --to 127.0.0.1:3001",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
