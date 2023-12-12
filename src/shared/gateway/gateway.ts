@@ -13,6 +13,7 @@ import { Server } from 'socket.io';
 import { Inject } from '@nestjs/common';
 import { IGatewaySessionManager } from './gateway.session';
 import { IAuthenticatedSocket } from '@src/interfaces';
+import _ from 'lodash';
 
 @WebSocketGateway({
   cors: {
@@ -57,12 +58,11 @@ export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     userId: number;
     notificationData: CreateNotificationDto;
   }): Promise<void> {
-    console.log(payload.notificationData);
-    await this.prisma.notification.create({
+    const message = await this.prisma.notification.create({
       data: payload.notificationData,
     });
     this.sessions
       .getUserSocket(payload.userId)
-      .emit(SOCKET_MESSAGES.NOTIFICATION_CREATED);
+      .emit(SOCKET_MESSAGES.NOTIFICATION_CREATED, _.omit(message, 'updatedAt'));
   }
 }
