@@ -30,6 +30,8 @@ async function bootstrap(): Promise<NestExpressApplication> {
   const configService = app.get(ConfigService);
   const PORT = configService.getOrThrow<number>('app.port') || 3001;
 
+  app.enableShutdownHooks();
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true, // Remove all non-whitelisted properties

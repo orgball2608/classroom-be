@@ -3,7 +3,11 @@ import {
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PROVIDERS } from '@src/constants';
 
@@ -35,7 +39,7 @@ export class StorageService {
     return `${cloudfrontURL}${key}`;
   }
 
-  async deleteFile(key: string) {
+  async deleteFile(key: string): Promise<void> {
     const bucketName = this.configService.getOrThrow<string>(
       'aws.awsPublicBucketsKey',
     );
@@ -47,10 +51,9 @@ export class StorageService {
 
     try {
       await this.storageClient.send(new DeleteObjectCommand(deleteParams));
-      return { success: true };
+      console.log('File deleted successfully');
     } catch (error) {
-      console.error(error);
-      return { success: false };
+      throw new InternalServerErrorException(error.message);
     }
   }
 }
