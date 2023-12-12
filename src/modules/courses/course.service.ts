@@ -447,7 +447,7 @@ export class CourseService {
     }
 
     const enrollmentRole =
-      role === EnrollmentRole.STUDENT ? 'học sinh' : 'giáo viên';
+      role === EnrollmentRole.STUDENT ? 'student' : 'teacher';
 
     const verifyEmailToken = this.signJoinCourseToken(email, courseId, role);
     const inviteLink = `${process.env.FRONTEND_URL}/class/join?token=${verifyEmailToken}`;
@@ -455,7 +455,7 @@ export class CourseService {
     return this.mailerService.sendMail({
       to: email,
       from: 'elearningapp@gmail.com',
-      subject: 'Lời Mời Tham gia lớp học',
+      subject: 'Invitation to Join the Class',
       template: './invitation-email.hbs',
       context: {
         name: fullName,
