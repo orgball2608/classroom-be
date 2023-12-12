@@ -46,9 +46,9 @@ export class CourseMiddleware implements NestMiddleware {
             },
           },
           {
-            teachers: {
+            courseTeachers: {
               some: {
-                id: userId,
+                teacherId: userId,
               },
             },
           },

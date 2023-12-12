@@ -31,10 +31,10 @@ model User {
   status              Boolean      @default(true)
 
   createdCourses     Course[]
-  notificationTokens NotificationToken[]
-  teachers           Course[]            @relation("course_teachers")
+  createdEnrollments Enrollment[]
+  courseTeachers     CourseTeacher[]
   studentEnrollments Enrollment[]        @relation("student_enrollments")
-  enrollments        Enrollment[]
+  notificationTokens NotificationToken[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -87,9 +87,9 @@ model Course {
   createdById Int     @map("created_by_id")
   status      Boolean @default(true)
 
-  enrollments Enrollment[] @relation("course_students")
-  teachers    User[]       @relation("course_teachers")
-  createdBy   User         @relation(fields: [createdById], references: [id])
+  enrollments    Enrollment[]    @relation("course_students")
+  courseTeachers CourseTeacher[] @relation("course_teachers")
+  createdBy      User            @relation(fields: [createdById], references: [id])
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -113,6 +113,22 @@ model Enrollment {
 
   @@unique([studentId, courseId])
   @@map("enrollments")
+}
+
+model CourseTeacher {
+  id        Int     @id @default(autoincrement())
+  courseId  Int     @map("course_id")
+  teacherId Int     @map("teacher_id")
+  status    Boolean @default(true)
+
+  course  Course @relation(name: "course_teachers", fields: [courseId], references: [id])
+  teacher User   @relation(fields: [teacherId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([courseId, teacherId])
+  @@map("course_teachers")
 }
 
 enum NotificationStatus {

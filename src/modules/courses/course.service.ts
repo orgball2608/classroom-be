@@ -7,6 +7,7 @@ import {
 import { COURSES_MESSAGES, USERS_MESSAGES } from '@src/constants/message';
 
 import { ConfigService } from '@nestjs/config';
+import { CourseTeacher } from '@prisma/client';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { EnrollmentRole } from './course.enum';
 import { JwtService } from '@nestjs/jwt';
@@ -14,7 +15,6 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { StorageService } from '@src/shared/storage/services/storage.service';
 import { UpdateCourseDto } from './dto/update-course.dto';
-import { User } from '@prisma/client';
 import { generateCourseCode } from '@src/common/utils';
 import { v4 as uuid4 } from 'uuid';
 
@@ -35,9 +35,13 @@ export class CourseService {
         code: courseCode,
         year: new Date().getFullYear(),
         createdById: userId,
-        teachers: {
-          connect: {
-            id: userId,
+        courseTeachers: {
+          create: {
+            teacher: {
+              connect: {
+                id: userId,
+              },
+            },
           },
         },
       },
@@ -189,13 +193,17 @@ export class CourseService {
             },
           },
         },
-        teachers: {
+        courseTeachers: {
           select: {
-            id: true,
-            email: true,
-            avatar: true,
-            firstName: true,
-            lastName: true,
+            teacher: {
+              select: {
+                id: true,
+                email: true,
+                avatar: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
           },
         },
       },
@@ -207,22 +215,21 @@ export class CourseService {
     };
   }
 
-  async findAllCourseOfMe(id: number) {
-    //TODO: add order by created
+  async findAllCourseOfMe(userId: number) {
     const courses = await this.prisma.course.findMany({
       where: {
         OR: [
           {
             enrollments: {
               some: {
-                studentId: id,
+                studentId: userId,
               },
             },
           },
           {
-            teachers: {
+            courseTeachers: {
               some: {
-                id: id,
+                teacherId: userId,
               },
             },
           },
@@ -238,8 +245,44 @@ export class CourseService {
             lastName: true,
           },
         },
+        enrollments: {
+          select: {
+            studentId: true,
+            createdAt: true,
+          },
+        },
+        courseTeachers: {
+          select: {
+            teacherId: true,
+            createdAt: true,
+          },
+        },
       },
     });
+
+    courses
+      .map((course) => {
+        if (
+          course.courseTeachers.some((teacher) => teacher.teacherId === userId)
+        ) {
+          const joinedAt = course.courseTeachers.find(
+            (teacher) => teacher.teacherId === userId,
+          ).createdAt;
+          return {
+            ...course,
+            joinedAt: joinedAt,
+          };
+        } else {
+          const joinedAt = course.enrollments.find(
+            (enrollment) => enrollment.studentId === userId,
+          ).createdAt;
+          return {
+            ...course,
+            joinedAt: joinedAt,
+          };
+        }
+      })
+      .sort((a: any, b: any) => a.joinedAt - b.joinedAt);
 
     return {
       message: COURSES_MESSAGES.GET_COURSES_ENROLLED_SUCCESSFULLY,
@@ -309,16 +352,16 @@ export class CourseService {
             },
           },
           {
-            teachers: {
+            courseTeachers: {
               some: {
-                id: userId,
+                teacherId: userId,
               },
             },
           },
         ],
       },
       include: {
-        teachers: true,
+        courseTeachers: true,
       },
     });
 
@@ -329,19 +372,15 @@ export class CourseService {
     }
 
     if (
-      enrollment.teachers.some(
-        (teacher: User): boolean => teacher.id === userId,
+      enrollment.courseTeachers.some(
+        (teacher: CourseTeacher): boolean => teacher.teacherId === userId,
       )
     ) {
-      await this.prisma.course.update({
+      await this.prisma.courseTeacher.delete({
         where: {
-          id: courseId,
-        },
-        data: {
-          teachers: {
-            disconnect: {
-              id: userId,
-            },
+          courseId_teacherId: {
+            courseId: courseId,
+            teacherId: userId,
           },
         },
       });
@@ -391,9 +430,11 @@ export class CourseService {
             },
           },
           {
-            teachers: {
+            courseTeachers: {
               some: {
-                email: email,
+                teacher: {
+                  email: email,
+                },
               },
             },
           },
@@ -485,9 +526,11 @@ export class CourseService {
               },
             },
             {
-              teachers: {
+              courseTeachers: {
                 some: {
-                  email: email,
+                  teacher: {
+                    email: email,
+                  },
                 },
               },
             },
@@ -542,14 +585,28 @@ export class CourseService {
       }
 
       if (role === EnrollmentRole.TEACHER) {
-        const course = await this.prisma.course.update({
-          where: {
-            id: courseId,
-          },
+        const course = await this.prisma.courseTeacher.create({
           data: {
-            teachers: {
+            course: {
+              connect: {
+                id: courseId,
+              },
+            },
+            teacher: {
               connect: {
                 id: user.id,
+              },
+            },
+          },
+          select: {
+            course: {
+              select: {
+                id: true,
+                name: true,
+                code: true,
+                description: true,
+                avatar: true,
+                createdBy: true,
               },
             },
           },
