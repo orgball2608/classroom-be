@@ -7,6 +7,7 @@ import { CourseModule } from './modules/courses/course.module';
 import { CustomMailerModule } from './shared/mailer/mailer.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { GatewayModule } from './shared/gateway/gateway.module';
+import { HealthModule } from './modules/health/health.module';
 import { JwtModule } from '@nestjs/jwt';
 import { PrismaModule } from './shared/prisma/prisma.module';
 import { RedisModule } from './shared/redis/redis.module';
@@ -40,11 +41,16 @@ import redisConfig from './configs/redis.config';
     AuthModule,
     UserModule,
     CourseModule,
+    HealthModule,
   ],
   providers: [],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AuthenticateMiddleware).exclude('auth/(.*)').forRoutes('*');
+    consumer
+      .apply(AuthenticateMiddleware)
+      .exclude('auth/(.*)')
+      .exclude('health')
+      .forRoutes('*');
   }
 }
