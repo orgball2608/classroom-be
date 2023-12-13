@@ -30,12 +30,12 @@ model User {
   role                UserRole     @default(STUDENT)
   status              Boolean      @default(true)
 
-  notifications      Notification[]     @relation(name: "user_notifications")
+  notifications      Notification[]  @relation(name: "user_notifications")
   createdCourses     Course[]
   createdEnrollments Enrollment[]
   courseTeachers     CourseTeacher[]
-  studentEnrollments Enrollment[]       @relation("student_enrollments")
-  gradeCompositions  GradeComposition[]
+  studentEnrollments Enrollment[]    @relation("student_enrollments")
+  createdGrades      Grade[]         @relation("created_grades")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -70,10 +70,10 @@ model Course {
   createdById Int     @map("created_by_id")
   status      Boolean @default(true)
 
-  enrollments       Enrollment[]       @relation("course_students")
-  courseTeachers    CourseTeacher[]    @relation("course_teachers")
-  createdBy         User               @relation(fields: [createdById], references: [id])
-  gradeCompositions GradeComposition[]
+  enrollments    Enrollment[]    @relation("course_students")
+  courseTeachers CourseTeacher[] @relation("course_teachers")
+  createdBy      User            @relation(fields: [createdById], references: [id])
+  gradeStructs   GradeStruct[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -87,6 +87,7 @@ model Enrollment {
   courseId    Int     @map("course_id")
   studentId   Int     @map("student_id")
   createdById Int     @map("created_by_id")
+  courseOrder Int     @default(0) @map("course_order")
   status      Boolean @default(true)
 
   student   User   @relation(name: "student_enrollments", fields: [studentId], references: [id])
@@ -96,15 +97,17 @@ model Enrollment {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@unique([studentId, courseOrder])
   @@unique([studentId, courseId])
   @@map("enrollments")
 }
 
 model CourseTeacher {
-  id        Int     @id @default(autoincrement())
-  courseId  Int     @map("course_id")
-  teacherId Int     @map("teacher_id")
-  status    Boolean @default(true)
+  id          Int     @id @default(autoincrement())
+  courseId    Int     @map("course_id")
+  teacherId   Int     @map("teacher_id")
+  courseOrder Int     @default(0) @map("course_order")
+  status      Boolean @default(true)
 
   course  Course @relation(name: "course_teachers", fields: [courseId], references: [id])
   teacher User   @relation(fields: [teacherId], references: [id])
@@ -112,40 +115,37 @@ model CourseTeacher {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@unique([teacherId, courseOrder])
   @@unique([courseId, teacherId])
   @@map("course_teachers")
 }
 
-model GradeComposition {
-  id        Int     @id @default(autoincrement())
-  courseId  Int     @map("course_id")
-  scale     String
-  studentId Int     @map("student_id")
-  createdBy String  @map("created_by")
-  gradeId   Int     @map("grade_id")
-  position  Int
-  score     Float
-  status    Boolean @default(true)
+model GradeStruct {
+  id       Int     @id @default(autoincrement())
+  courseId Int     @map("course_id")
+  name     String
+  scale    String
+  status   Boolean @default(true)
 
-  course  Course @relation(fields: [courseId], references: [id])
-  student User   @relation(fields: [studentId], references: [id])
-  grade   Grade  @relation(fields: [gradeId], references: [id])
+  course Course  @relation(fields: [courseId], references: [id])
+  grades Grade[]
 
-  @@unique([studentId, courseId])
-  @@map("grade_compositions")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("grade_structs")
 }
 
 model Grade {
-  id        Int     @id @default(autoincrement())
-  courseId  Int     @map("course_id")
-  scale     String
-  studentId Int     @map("student_id")
-  createdBy String  @map("created_by")
-  position  Int
-  grade     Float
-  status    Boolean @default(true)
+  id            Int     @id @default(autoincrement())
+  studentId     Int     @map("student_id")
+  gradeStructId Int     @map("grade_struct_id")
+  grade         Float
+  createdById   Int     @map("created_by_id")
+  status        Boolean @default(true)
 
-  gradeCompositions GradeComposition[]
+  createdBy   User        @relation(name: "created_grades", fields: [createdById], references: [id])
+  gradeStruct GradeStruct @relation(fields: [gradeStructId], references: [id])
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
