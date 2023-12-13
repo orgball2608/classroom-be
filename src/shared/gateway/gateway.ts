@@ -61,8 +61,14 @@ export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const message = await this.prisma.notification.create({
       data: payload.notificationData,
     });
-    this.sessions
-      .getUserSocket(payload.userId)
-      .emit(SOCKET_MESSAGES.NOTIFICATION_CREATED, _.omit(message, 'updatedAt'));
+
+    const socket = this.sessions.getUserSocket(payload.userId);
+
+    if (socket) {
+      socket.emit(
+        SOCKET_MESSAGES.NOTIFICATION_CREATED,
+        _.omit(message, 'updatedAt'),
+      );
+    }
   }
 }

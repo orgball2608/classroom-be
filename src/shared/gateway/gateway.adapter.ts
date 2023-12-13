@@ -23,29 +23,39 @@ export class WebsocketAdapter extends IoAdapter {
   createIOServer(port: number, options?: any): any {
     const server = super.createIOServer(port, options);
     server.use(async (socket: IAuthenticatedSocket, next: NextFunction) => {
-      const token = socket.handshake.query.accessToken as string;
+      const token =
+        socket.handshake.auth['access-token'] ||
+        (socket.handshake.headers['access-token'] as string);
       if (!token) {
         socket.disconnect();
         return;
       }
 
-      const payload = this.jwtService.verify(token, {
-        secret: this.configService.getOrThrow<string>('auth.accessTokenSecret'),
-        ignoreExpiration: false,
-      });
+      try {
+        const payload = this.jwtService.verify(token, {
+          secret: this.configService.getOrThrow<string>(
+            'auth.accessTokenSecret',
+          ),
+          ignoreExpiration: false,
+        });
 
-      if (!payload) {
+        if (!payload) {
+          socket.disconnect();
+          return;
+        }
+
+        const user = await this.prismaService.user.findUnique({
+          where: {
+            id: payload.id,
+          },
+        });
+
+        socket.user = user;
+      } catch (err) {
+        console.log(err);
         socket.disconnect();
         return;
       }
-
-      const user = await this.prismaService.user.findUnique({
-        where: {
-          id: payload.id,
-        },
-      });
-
-      socket.user = user;
 
       next();
     });

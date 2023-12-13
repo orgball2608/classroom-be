@@ -322,7 +322,7 @@ export class CourseService {
 
     const notificationData = {
       userId: user.id,
-      title: 'Enrolled to course',
+      title: 'New enrollment to your course',
       body: `${user.firstName} ${user.lastName} enrolled to course ${course.name}`,
     };
 
@@ -469,7 +469,7 @@ export class CourseService {
     return this.mailerService.sendMail({
       to: email,
       from: 'elearningapp@gmail.com',
-      subject: 'Invitation to Join the Class',
+      subject: 'Invitation to join the class',
       template: './invitation-email.hbs',
       context: {
         name: fullName,
