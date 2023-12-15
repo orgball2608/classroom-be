@@ -1,13 +1,17 @@
-import { IsEnum, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import {
+  IsBoolean,
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+} from 'class-validator';
 
 import { AppConfig } from './config.type';
+import { Environment } from '@src/common/enum/node-env';
 import { registerAs } from '@nestjs/config';
 import { validateConfig } from '@src/common/utils';
-
-enum Environment {
-  Development = 'development',
-  Production = 'production',
-}
 
 class EnvironmentVariablesValidator {
   @IsEnum(Environment)
@@ -35,6 +39,10 @@ class EnvironmentVariablesValidator {
   @IsString()
   @IsOptional()
   FRONTEND_URL: string;
+
+  @IsBoolean()
+  @IsOptional()
+  DOCUMENT_ENABLED: boolean;
 }
 
 export default registerAs<AppConfig>('app', () => {
@@ -51,5 +59,6 @@ export default registerAs<AppConfig>('app', () => {
     apiVersion: process.env.API_VERSION || 'v1',
     appURL: process.env.APP_URL || 'http://localhost:3001',
     frontendURL: process.env.FRONTEND_URL || 'http://localhost:3000',
+    documentEnabled: process.env.DOCUMENT_ENABLED === 'true',
   };
 });

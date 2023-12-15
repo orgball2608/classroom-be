@@ -1,5 +1,7 @@
 import { NumberField, StringField } from '@src/decorators';
 
+import { EnrollmentRole } from '../course.enum';
+
 export class InviteEmailDto {
   @StringField({
     maxLength: 150,
@@ -14,7 +16,8 @@ export class InviteEmailDto {
   courseId: number;
 
   @StringField({
-    example: 'student',
+    example: EnrollmentRole.STUDENT,
+    enum: EnrollmentRole,
   })
-  role: string;
+  role: EnrollmentRole;
 }
