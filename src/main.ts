@@ -79,7 +79,7 @@ async function bootstrap(): Promise<NestExpressApplication> {
   );
 
   if (isDocumentEnabled) {
-    setupSwagger(app, PORT);
+    setupSwagger(app, configService);
   }
 
   //Enable shutdown hooks
