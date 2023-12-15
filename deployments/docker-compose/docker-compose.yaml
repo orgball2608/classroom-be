@@ -10,7 +10,6 @@ services:
       POSTGRES_DB: webnc
     volumes:
       - postgres:/var/lib/postgresql/data
-      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
     ports:
       - '5432:5432'
     networks:
@@ -28,7 +27,7 @@ services:
     networks:
       - elearning
 
-  api:
+  nestjs:
     build:
       context: ../../
       dockerfile: Dockerfile
@@ -45,6 +44,11 @@ services:
       - postgres
     networks:
       - elearning
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3001/api/v1/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   prometheus:
     image: prom/prometheus
