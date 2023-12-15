@@ -1,13 +1,21 @@
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  DeleteObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PROVIDERS } from '@src/constants';
-import { S3 } from 'aws-sdk';
 
 @Injectable()
 export class StorageService {
   constructor(
     @Inject(PROVIDERS.STORAGE)
-    private readonly storageClient: S3,
+    private readonly storageClient: S3Client,
     private readonly configService: ConfigService,
   ) {}
 
@@ -23,22 +31,29 @@ export class StorageService {
       Body: file.buffer,
       ContentType: file.mimetype,
     };
-    await this.storageClient.putObject(uploadParams).promise();
+
+    await this.storageClient.send(new PutObjectCommand(uploadParams));
     const cloudfrontURL = this.configService.getOrThrow<string>(
       'aws.awsCloudfrontURL',
     );
     return `${cloudfrontURL}${key}`;
   }
 
-  deleteFile(key: string) {
+  async deleteFile(key: string): Promise<void> {
     const bucketName = this.configService.getOrThrow<string>(
       'aws.awsPublicBucketsKey',
     );
-    return this.storageClient
-      .deleteObject({
-        Bucket: bucketName,
-        Key: key,
-      })
-      .promise();
+
+    const deleteParams = {
+      Bucket: bucketName,
+      Key: key,
+    };
+
+    try {
+      await this.storageClient.send(new DeleteObjectCommand(deleteParams));
+      console.log('File deleted successfully');
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
   }
 }

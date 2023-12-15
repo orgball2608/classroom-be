@@ -5,6 +5,7 @@ export type AppConfig = {
   apiVersion: string;
   appURL: string;
   frontendURL: string;
+  documentEnabled: boolean;
 };
 
 export type AuthConfig = {
@@ -39,4 +40,6 @@ export type AwsConfig = {
   awsPublicBucketsKey: string;
   awsCloudfrontURL: string;
   awsRegion: string;
+  awsRateTTL: number;
+  awsRateLimit: number;
 };

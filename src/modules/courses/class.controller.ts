@@ -148,7 +148,7 @@ export class CourseController {
         message: COURSES_MESSAGES.USER_ENROLLED_COURSE,
       };
     }
-    return this.courseService.enrollToCourse(req.user.id, id);
+    return this.courseService.enrollToCourse(req.user, id);
   }
 
   @Delete(':id/enrollments/me/leave')
@@ -162,7 +162,6 @@ export class CourseController {
 
   @Post('/invite/email')
   @ApiBody({ type: InviteEmailDto })
-  // @ApiResponseWithMessage(Course)
   inviteByEmail(@Req() req: IUserRequest, @Body() body: InviteEmailDto) {
     const fullName = req.user.firstName + ' ' + req.user.lastName;
     return this.courseService.inviteByEmail(

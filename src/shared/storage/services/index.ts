@@ -1,26 +1,20 @@
-import * as AWS from 'aws-sdk';
-
 import { ConfigService } from '@nestjs/config';
 import { PROVIDERS } from '@src/constants';
 import { Provider } from '@nestjs/common';
+import { S3Client } from '@aws-sdk/client-s3';
 
-export const StorageServiceProvider: Provider<AWS.S3> = {
+export const StorageServiceProvider: Provider<S3Client> = {
   useFactory: (configService: ConfigService) => {
-    return new AWS.S3({
-      accessKeyId: configService.get<string>('aws.awsAccessKeyID'),
-      secretAccessKey: configService.get<string>('aws.awsSecretAccessKey'),
-      region: configService.get<string>('aws.awsRegion'),
+    return new S3Client({
+      region: configService.getOrThrow<string>('aws.awsRegion'),
+      credentials: {
+        accessKeyId: configService.getOrThrow<string>('aws.awsAccessKeyID'),
+        secretAccessKey: configService.getOrThrow<string>(
+          'aws.awsSecretAccessKey',
+        ),
+      },
     });
   },
   provide: PROVIDERS.STORAGE,
   inject: [ConfigService],
 };
-
-export interface UploadedMulterFile {
-  fieldname: string;
-  originalname: string;
-  encoding: string;
-  mimetype: string;
-  buffer: Buffer;
-  size: number;
-}

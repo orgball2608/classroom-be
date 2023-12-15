@@ -8,9 +8,11 @@ import { PassportStrategy } from '@nestjs/passport';
 export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
   constructor(private readonly configService: ConfigService) {
     super({
-      clientID: configService.get<string>('auth.facebookClientID'),
-      clientSecret: configService.get<string>('auth.facebookClientSecret'),
-      callbackURL: configService.get<string>('auth.facebookCallbackURL'),
+      clientID: configService.getOrThrow<string>('auth.facebookClientID'),
+      clientSecret: configService.getOrThrow<string>(
+        'auth.facebookClientSecret',
+      ),
+      callbackURL: configService.getOrThrow<string>('auth.facebookCallbackURL'),
       scope: 'email',
       profileFields: ['id', , 'emails', 'name'],
     });

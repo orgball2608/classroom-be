@@ -6,13 +6,14 @@ import {
 
 import { AUTHORIZATION_MESSAGES } from '@src/constants';
 import { IUserRequest } from '@src/interfaces';
+import { NextFunction } from 'express';
 import { UserRole } from '@prisma/client';
 
 @Injectable()
 export class RoleCheckerMiddleware implements NestMiddleware {
   constructor(private readonly allowedRoles: UserRole[]) {}
 
-  use(req: IUserRequest, res: any, next: () => void) {
+  use(req: IUserRequest, res: Response, next: () => void) {
     const userRole = req.user.role;
 
     const hasRole = () => this.allowedRoles.includes(userRole);
@@ -30,6 +31,6 @@ export class RoleCheckerMiddleware implements NestMiddleware {
 export function RoleChecker(allowedRoles: UserRole[]) {
   const middleware = new RoleCheckerMiddleware(allowedRoles);
 
-  return (req: IUserRequest, res: any, next: any) =>
+  return (req: IUserRequest, res: Response, next: NextFunction) =>
     middleware.use(req, res, next);
 }

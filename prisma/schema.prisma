@@ -14,26 +14,28 @@ datasource db {
 model User {
   id                  Int          @id @default(autoincrement())
   email               String?      @unique
-  googleId            String?      @unique
-  facebookId          String?      @unique
-  password            String?
-  firstName           String
-  lastName            String
-  phoneNumber         String?
-  address             String?
-  avatar              String?
-  verifyEmailToken    String?
-  forgotPasswordToken String?
-  studentId           String?      @map("student_id")
+  googleId            String?      @unique @map("google_id")
+  facebookId          String?      @unique @map("facebook_id")
+  password            String?      @map("password")
+  firstName           String       @map("first_name")
+  lastName            String       @map("last_name")
+  phoneNumber         String?      @map("phone_number")
+  address             String?      @map("address")
+  avatar              String?      @map("avatar")
+  verifyEmailToken    String?      @map("verify_email_token")
+  forgotPasswordToken String?      @map("forgot_password_token")
+  studentId           String?      @unique @map("student_id")
   verify              VerifyStatus @default(UNVERIFY)
   sex                 Sex          @default(NONE)
-  role                UserRole     @default(USER)
+  role                UserRole     @default(STUDENT)
   status              Boolean      @default(true)
 
+  notifications      Notification[]  @relation(name: "user_notifications")
   createdCourses     Course[]
-  notificationTokens NotificationToken[]
-  teachers           Course[]            @relation("course_teachers")
-  studentEnrollments Enrollment[]        @relation("student_enrollments")
+  createdEnrollments Enrollment[]
+  courseTeachers     CourseTeacher[]
+  studentEnrollments Enrollment[]    @relation("student_enrollments")
+  createdGrades      Grade[]         @relation("created_grades")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -42,36 +44,18 @@ model User {
 }
 
 model Notification {
-  id                  Int                @id @default(autoincrement())
-  notificationTokenId Int                @map("notification_token_id")
-  title               String
-  body                String
-  status              NotificationStatus @default(UNREAD)
-  createdBy           String             @map("created_by")
+  id     Int                @id @default(autoincrement())
+  userId Int                @map("user_id")
+  title  String
+  body   String             @db.Text
+  status NotificationStatus @default(UNREAD)
 
-  notificationToken NotificationToken @relation(fields: [notificationTokenId], references: [id])
+  user User @relation(name: "user_notifications", fields: [userId], references: [id])
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("notifications")
-}
-
-model NotificationToken {
-  id                Int                 @id @default(autoincrement())
-  userId            Int
-  deviceType        String              @map("device_type")
-  notificationToken String              @map("notification_token")
-  status            FirebaseTokenStatus @default(INACTIVE)
-
-  notifications Notification[]
-  user          User           @relation(fields: [userId], references: [id])
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@unique([userId, status])
-  @@map("notification_tokens")
 }
 
 model Course {
@@ -86,31 +70,87 @@ model Course {
   createdById Int     @map("created_by_id")
   status      Boolean @default(true)
 
-  students  Enrollment[] @relation("course_students")
-  teachers  User[]       @relation("course_teachers")
-  createdBy User         @relation(fields: [createdById], references: [id])
+  enrollments    Enrollment[]    @relation("course_students")
+  courseTeachers CourseTeacher[] @relation("course_teachers")
+  createdBy      User            @relation(fields: [createdById], references: [id])
+  gradeStructs   GradeStruct[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@unique([code])
   @@map("courses")
 }
 
 model Enrollment {
-  id        Int     @id @default(autoincrement())
-  courseId  Int     @map("course_id")
-  studentId Int     @map("student_id")
-  createdBy String  @map("created_by")
-  status    Boolean @default(true)
+  id          Int     @id @default(autoincrement())
+  courseId    Int     @map("course_id")
+  studentId   Int     @map("student_id")
+  createdById Int     @map("created_by_id")
+  courseOrder Int     @default(0) @map("course_order")
+  status      Boolean @default(true)
 
-  student User   @relation(name: "student_enrollments", fields: [studentId], references: [id])
-  course  Course @relation(name: "course_students", fields: [courseId], references: [id])
+  student   User   @relation(name: "student_enrollments", fields: [studentId], references: [id])
+  course    Course @relation(name: "course_students", fields: [courseId], references: [id])
+  createdBy User   @relation(fields: [createdById], references: [id])
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@unique([studentId, courseOrder])
   @@unique([studentId, courseId])
   @@map("enrollments")
+}
+
+model CourseTeacher {
+  id          Int     @id @default(autoincrement())
+  courseId    Int     @map("course_id")
+  teacherId   Int     @map("teacher_id")
+  courseOrder Int     @default(0) @map("course_order")
+  status      Boolean @default(true)
+
+  course  Course @relation(name: "course_teachers", fields: [courseId], references: [id])
+  teacher User   @relation(fields: [teacherId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([teacherId, courseOrder])
+  @@unique([courseId, teacherId])
+  @@map("course_teachers")
+}
+
+model GradeStruct {
+  id       Int     @id @default(autoincrement())
+  courseId Int     @map("course_id")
+  name     String
+  scale    String
+  status   Boolean @default(true)
+
+  course Course  @relation(fields: [courseId], references: [id])
+  grades Grade[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("grade_structs")
+}
+
+model Grade {
+  id            Int     @id @default(autoincrement())
+  studentId     Int     @map("student_id")
+  gradeStructId Int     @map("grade_struct_id")
+  grade         Float
+  createdById   Int     @map("created_by_id")
+  status        Boolean @default(true)
+
+  createdBy   User        @relation(name: "created_grades", fields: [createdById], references: [id])
+  gradeStruct GradeStruct @relation(fields: [gradeStructId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("grades")
 }
 
 enum NotificationStatus {
@@ -118,14 +158,10 @@ enum NotificationStatus {
   READ
 }
 
-enum FirebaseTokenStatus {
-  ACTIVE
-  INACTIVE
-}
-
 enum UserRole {
   ADMIN
-  USER
+  STUDENT
+  TEACHER
 }
 
 enum VerifyStatus {
