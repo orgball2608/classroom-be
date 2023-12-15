@@ -2,12 +2,19 @@ import {
   ExpressAdapter,
   NestExpressApplication,
 } from '@nestjs/platform-express';
-import { HttpAdapterHost, NestFactory, Reflector } from '@nestjs/core';
+import {
+  HttpAdapterHost,
+  ModuleRef,
+  NestFactory,
+  Reflector,
+} from '@nestjs/core';
 import { HttpExceptionFilter, PrismaClientExceptionFilter } from './filters';
 import { UnprocessableEntityException, ValidationPipe } from '@nestjs/common';
 
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
+import { Environment } from './common/enum/node-env';
+import { WebsocketAdapter } from './shared/gateway/gateway.adapter';
 import compression from 'compression';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -22,7 +29,7 @@ async function bootstrap(): Promise<NestExpressApplication> {
   );
 
   const configService = app.get(ConfigService);
-  const PORT = configService.get<number>('app.port') || 3001;
+  const PORT = configService.getOrThrow<number>('app.port') || 3001;
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -31,6 +38,10 @@ async function bootstrap(): Promise<NestExpressApplication> {
       exceptionFactory: (errors) => new UnprocessableEntityException(errors),
     }),
   );
+
+  const moduleRef = app.get(ModuleRef);
+  const adapter = new WebsocketAdapter(app, moduleRef);
+  app.useWebSocketAdapter(adapter);
 
   app.set('trust proxy', 1);
 
@@ -44,6 +55,7 @@ async function bootstrap(): Promise<NestExpressApplication> {
   app.use(compression());
   app.use(morgan('combined'));
   app.enableVersioning();
+  app.useLogger(['debug', 'error', 'log', 'verbose', 'warn']);
 
   const { httpAdapter } = app.get(HttpAdapterHost);
   const reflector = app.get(Reflector);
@@ -55,14 +67,28 @@ async function bootstrap(): Promise<NestExpressApplication> {
   );
 
   const apiPrefix =
-    configService.get<string>('app.apiPrefix') +
+    configService.getOrThrow<string>('app.apiPrefix') +
     '/' +
-    configService.get<string>('app.apiVersion');
+    configService.getOrThrow<string>('app.apiVersion');
 
   app.setGlobalPrefix(apiPrefix);
 
   //Swagger
-  setupSwagger(app, PORT);
+  const isDocumentEnabled = configService.getOrThrow<boolean>(
+    'app.documentEnabled',
+  );
+
+  if (isDocumentEnabled) {
+    setupSwagger(app, PORT);
+  }
+
+  //Enable shutdown hooks
+  const isDevelopment =
+    configService.getOrThrow<string>('app.nodeEnv') === Environment.DEVELOPMENT;
+
+  if (!isDevelopment) {
+    app.enableShutdownHooks();
+  }
 
   await app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
 

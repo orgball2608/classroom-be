@@ -5,15 +5,18 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { COURSES_MESSAGES, USERS_MESSAGES } from '@src/constants/message';
+import { CourseTeacher, User } from '@prisma/client';
 
 import { ConfigService } from '@nestjs/config';
 import { CreateCourseDto } from './dto/create-course.dto';
+import { EMIT_MESSAGES } from '@src/constants';
+import { EnrollmentRole } from './course.enum';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { StorageService } from '@src/shared/storage/services/storage.service';
 import { UpdateCourseDto } from './dto/update-course.dto';
-import { User } from '@prisma/client';
 import { generateCourseCode } from '@src/common/utils';
 import { v4 as uuid4 } from 'uuid';
 
@@ -22,6 +25,7 @@ export class CourseService {
   constructor(
     private readonly storageService: StorageService,
     private readonly mailerService: MailerService,
+    private readonly emitterEvent: EventEmitter2,
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
     private prisma: PrismaService,
@@ -34,9 +38,13 @@ export class CourseService {
         code: courseCode,
         year: new Date().getFullYear(),
         createdById: userId,
-        teachers: {
-          connect: {
-            id: userId,
+        courseTeachers: {
+          create: {
+            teacher: {
+              connect: {
+                id: userId,
+              },
+            },
           },
         },
       },
@@ -72,7 +80,7 @@ export class CourseService {
   async findAllCourseByStudentId(studentId: number) {
     const courses = await this.prisma.course.findMany({
       where: {
-        students: {
+        enrollments: {
           some: {
             id: studentId,
           },
@@ -152,24 +160,30 @@ export class CourseService {
   }
 
   async remove(id: number) {
-    await this.prisma.course.delete({
-      where: {
-        id,
-      },
-    });
+    try {
+      await this.prisma.course.delete({
+        where: {
+          id,
+        },
+      });
 
-    return {
-      message: COURSES_MESSAGES.DELETE_COURSE_SUCCESSFULLY,
-    };
+      return {
+        message: COURSES_MESSAGES.DELETE_COURSE_SUCCESSFULLY,
+      };
+    } catch (error) {
+      throw new NotFoundException(
+        COURSES_MESSAGES.CANNOT_DELETE_COURSE_WITH_STUDENTS,
+      );
+    }
   }
 
-  async findAllUserInCourse(id: number) {
+  async findAllUserInCourse(userId: number) {
     const course = await this.prisma.course.findMany({
       where: {
-        id,
+        id: userId,
       },
       select: {
-        students: {
+        enrollments: {
           select: {
             student: {
               select: {
@@ -182,13 +196,17 @@ export class CourseService {
             },
           },
         },
-        teachers: {
+        courseTeachers: {
           select: {
-            id: true,
-            email: true,
-            avatar: true,
-            firstName: true,
-            lastName: true,
+            teacher: {
+              select: {
+                id: true,
+                email: true,
+                avatar: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
           },
         },
       },
@@ -200,22 +218,21 @@ export class CourseService {
     };
   }
 
-  async findAllCourseOfMe(id: number) {
-    //TODO: add order by created
+  async findAllCourseOfMe(userId: number) {
     const courses = await this.prisma.course.findMany({
       where: {
         OR: [
           {
-            students: {
+            enrollments: {
               some: {
-                studentId: id,
+                studentId: userId,
               },
             },
           },
           {
-            teachers: {
+            courseTeachers: {
               some: {
-                id: id,
+                teacherId: userId,
               },
             },
           },
@@ -231,8 +248,44 @@ export class CourseService {
             lastName: true,
           },
         },
+        enrollments: {
+          select: {
+            studentId: true,
+            createdAt: true,
+          },
+        },
+        courseTeachers: {
+          select: {
+            teacherId: true,
+            createdAt: true,
+          },
+        },
       },
     });
+
+    courses
+      .map((course) => {
+        if (
+          course.courseTeachers.some((teacher) => teacher.teacherId === userId)
+        ) {
+          const joinedAt = course.courseTeachers.find(
+            (teacher) => teacher.teacherId === userId,
+          ).createdAt;
+          return {
+            ...course,
+            joinedAt: joinedAt,
+          };
+        } else {
+          const joinedAt = course.enrollments.find(
+            (enrollment) => enrollment.studentId === userId,
+          ).createdAt;
+          return {
+            ...course,
+            joinedAt: joinedAt,
+          };
+        }
+      })
+      .sort((a: any, b: any) => a.joinedAt - b.joinedAt);
 
     return {
       message: COURSES_MESSAGES.GET_COURSES_ENROLLED_SUCCESSFULLY,
@@ -240,18 +293,10 @@ export class CourseService {
     };
   }
 
-  async enrollToCourse(userId: number, courseId: number) {
+  async enrollToCourse(user: User, courseId: number) {
     const course = await this.prisma.course.findUnique({
       where: {
         id: courseId,
-      },
-      include: {
-        createdBy: {
-          select: {
-            firstName: true,
-            lastName: true,
-          },
-        },
       },
     });
 
@@ -262,15 +307,28 @@ export class CourseService {
             id: courseId,
           },
         },
-        createdBy: String(
-          course.createdBy.firstName + ' ' + course.createdBy.lastName,
-        ),
+        createdBy: {
+          connect: {
+            id: course.createdById,
+          },
+        },
         student: {
           connect: {
-            id: userId,
+            id: user.id,
           },
         },
       },
+    });
+
+    const notificationData = {
+      userId: user.id,
+      title: 'New enrollment to your course',
+      body: `${user.firstName} ${user.lastName} enrolled to course ${course.name}`,
+    };
+
+    this.emitterEvent.emit(EMIT_MESSAGES.NOTIFICATION_CREATED, {
+      userId: course.createdById,
+      notificationData,
     });
 
     return {
@@ -301,23 +359,23 @@ export class CourseService {
         id: courseId,
         OR: [
           {
-            students: {
+            enrollments: {
               some: {
                 studentId: userId,
               },
             },
           },
           {
-            teachers: {
+            courseTeachers: {
               some: {
-                id: userId,
+                teacherId: userId,
               },
             },
           },
         ],
       },
       include: {
-        teachers: true,
+        courseTeachers: true,
       },
     });
 
@@ -327,21 +385,16 @@ export class CourseService {
       );
     }
 
-    //Remove teacher or student from course
     if (
-      enrollment.teachers.some(
-        (teacher: User): boolean => teacher.id === userId,
+      enrollment.courseTeachers.some(
+        (teacher: CourseTeacher): boolean => teacher.teacherId === userId,
       )
     ) {
-      await this.prisma.course.update({
+      await this.prisma.courseTeacher.delete({
         where: {
-          id: courseId,
-        },
-        data: {
-          teachers: {
-            disconnect: {
-              id: userId,
-            },
+          courseId_teacherId: {
+            courseId: courseId,
+            teacherId: userId,
           },
         },
       });
@@ -364,7 +417,7 @@ export class CourseService {
   async inviteByEmail(
     email: string,
     courseId: number,
-    role: string,
+    role: EnrollmentRole,
     fullName: string,
   ) {
     const course = await this.prisma.course.findUnique({
@@ -382,7 +435,7 @@ export class CourseService {
         id: courseId,
         OR: [
           {
-            students: {
+            enrollments: {
               some: {
                 student: {
                   email: email,
@@ -391,9 +444,11 @@ export class CourseService {
             },
           },
           {
-            teachers: {
+            courseTeachers: {
               some: {
-                email: email,
+                teacher: {
+                  email: email,
+                },
               },
             },
           },
@@ -405,8 +460,8 @@ export class CourseService {
       throw new BadRequestException(COURSES_MESSAGES.USER_ENROLLED_COURSE);
     }
 
-    //TODO: change to enum instead of string
-    const Role = role === 'student' ? 'học sinh' : 'giáo viên';
+    const enrollmentRole =
+      role === EnrollmentRole.STUDENT ? 'student' : 'teacher';
 
     const verifyEmailToken = this.signJoinCourseToken(email, courseId, role);
     const inviteLink = `${process.env.FRONTEND_URL}/class/join?token=${verifyEmailToken}`;
@@ -414,13 +469,13 @@ export class CourseService {
     return this.mailerService.sendMail({
       to: email,
       from: 'elearningapp@gmail.com',
-      subject: 'Lời Mời Tham gia lớp học',
+      subject: 'Invitation to join the class',
       template: './invitation-email.hbs',
       context: {
         name: fullName,
         inviteLink: inviteLink,
         className: course.name,
-        role: Role,
+        role: enrollmentRole,
       },
     });
   }
@@ -433,14 +488,13 @@ export class CourseService {
         role,
       },
       {
-        //TODO: get from config
-        secret: this.config.get('auth.jwtMailSecret'),
-        expiresIn: 315360000,
+        secret: this.config.get<string>('auth.jwtMailSecret'),
+        expiresIn: this.config.get<number>('auth.jwtMailExpires'),
       },
     );
   }
 
-  async verifyInvitationEmailToken(id: number, token: string) {
+  async verifyInvitationEmailToken(userId: number, token: string) {
     try {
       const { email, courseId, role } = this.jwtService.verify(token, {
         secret: this.config.get('auth.jwtMailSecret'),
@@ -452,34 +506,32 @@ export class CourseService {
         },
       });
 
+      if (!user) {
+        throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
+      }
+
+      if (user.id !== userId) {
+        throw new ForbiddenException(
+          COURSES_MESSAGES.ACCOUNT_ENROLL_NOT_CORRECT_WITH_LOGIN_ACCOUNT,
+        );
+      }
+
       const course = await this.prisma.course.findUnique({
         where: {
           id: courseId,
         },
-        include: {
-          createdBy: {
-            select: {
-              firstName: true,
-              lastName: true,
-            },
-          },
-        },
       });
-
-      if (!user) {
-        throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
-      }
 
       if (!course) {
         throw new NotFoundException(COURSES_MESSAGES.COURSE_NOT_FOUND);
       }
 
-      const user_course = await this.prisma.course.findUnique({
+      const userCourse = await this.prisma.course.findUnique({
         where: {
           id: courseId,
           OR: [
             {
-              students: {
+              enrollments: {
                 some: {
                   student: {
                     email: email,
@@ -488,9 +540,11 @@ export class CourseService {
               },
             },
             {
-              teachers: {
+              courseTeachers: {
                 some: {
-                  email: email,
+                  teacher: {
+                    email: email,
+                  },
                 },
               },
             },
@@ -498,16 +552,14 @@ export class CourseService {
         },
       });
 
-      if (user_course) {
+      if (userCourse) {
         return {
           message: COURSES_MESSAGES.ENROLLED_TO_COURSE_SUCCESSFULLY,
           data: course,
         };
       }
 
-      //TODO: refactor this
-
-      if (role === 'student') {
+      if (role === EnrollmentRole.STUDENT) {
         const enrollment = await this.prisma.enrollment.create({
           data: {
             course: {
@@ -515,9 +567,11 @@ export class CourseService {
                 id: courseId,
               },
             },
-            createdBy: String(
-              course.createdBy.firstName + ' ' + course.createdBy.lastName,
-            ),
+            createdBy: {
+              connect: {
+                id: course.createdById,
+              },
+            },
             student: {
               connect: {
                 id: user.id,
@@ -537,23 +591,36 @@ export class CourseService {
             },
           },
         });
-        const result = enrollment.course;
 
         return {
           message: COURSES_MESSAGES.ENROLLED_TO_COURSE_SUCCESSFULLY,
-          data: result,
+          data: enrollment.course,
         };
       }
 
-      if (role === 'teacher') {
-        const course = await this.prisma.course.update({
-          where: {
-            id: courseId,
-          },
+      if (role === EnrollmentRole.TEACHER) {
+        const course = await this.prisma.courseTeacher.create({
           data: {
-            teachers: {
+            course: {
+              connect: {
+                id: courseId,
+              },
+            },
+            teacher: {
               connect: {
                 id: user.id,
+              },
+            },
+          },
+          select: {
+            course: {
+              select: {
+                id: true,
+                name: true,
+                code: true,
+                description: true,
+                avatar: true,
+                createdBy: true,
               },
             },
           },
