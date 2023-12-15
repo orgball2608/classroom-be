@@ -9,3 +9,9 @@ scrape_configs:
   - job_name: 'cadvisor'
     static_configs:
       - targets: ['cadvisor:8080']
+
+  - job_name: "nestjs"
+    metrics_path: /api/v1/metrics
+    static_configs:
+      - targets: ["docker.for.mac.localhost:3001"] # for mac
+      #  - targets: ["host.docker.internal:3001"] for windows
