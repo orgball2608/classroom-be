@@ -1,7 +1,13 @@
 import { type INestApplication } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
-export function setupSwagger(app: INestApplication, port: number): void {
+export function setupSwagger(
+  app: INestApplication,
+  configService: ConfigService,
+): void {
+  const appURL = configService.getOrThrow('app.appURL');
+
   const documentBuilder = new DocumentBuilder()
     .setTitle('API')
     .setDescription(
@@ -60,5 +66,5 @@ export function setupSwagger(app: INestApplication, port: number): void {
     },
   });
 
-  console.info(`Documentation: http://localhost:${port}/docs`);
+  console.info(`Documentation: ${appURL}/docs`);
 }
