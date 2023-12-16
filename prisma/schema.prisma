@@ -70,10 +70,10 @@ model Course {
   createdById Int     @map("created_by_id")
   status      Boolean @default(true)
 
-  enrollments    Enrollment[]    @relation("course_students")
-  courseTeachers CourseTeacher[] @relation("course_teachers")
-  createdBy      User            @relation(fields: [createdById], references: [id])
-  gradeStructs   GradeStruct[]
+  enrollments       Enrollment[]       @relation("course_students")
+  courseTeachers    CourseTeacher[]    @relation("course_teachers")
+  createdBy         User               @relation(fields: [createdById], references: [id])
+  gradeCompositions GradeComposition[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -120,11 +120,11 @@ model CourseTeacher {
   @@map("course_teachers")
 }
 
-model GradeStruct {
+model GradeComposition {
   id       Int     @id @default(autoincrement())
   courseId Int     @map("course_id")
   name     String
-  scale    String
+  scale    Int
   status   Boolean @default(true)
 
   course Course  @relation(fields: [courseId], references: [id])
@@ -137,15 +137,15 @@ model GradeStruct {
 }
 
 model Grade {
-  id            Int     @id @default(autoincrement())
-  studentId     Int     @map("student_id")
-  gradeStructId Int     @map("grade_struct_id")
-  grade         Float
-  createdById   Int     @map("created_by_id")
-  status        Boolean @default(true)
+  id                 Int     @id @default(autoincrement())
+  studentId          Int     @map("student_id")
+  gradeCompositionId Int     @map("grade_struct_id")
+  grade              Float
+  createdById        Int     @map("created_by_id")
+  status             Boolean @default(true)
 
-  createdBy   User        @relation(name: "created_grades", fields: [createdById], references: [id])
-  gradeStruct GradeStruct @relation(fields: [gradeStructId], references: [id])
+  createdBy        User             @relation(name: "created_grades", fields: [createdById], references: [id])
+  gradeComposition GradeComposition @relation(fields: [gradeCompositionId], references: [id])
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
