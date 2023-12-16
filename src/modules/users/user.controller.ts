@@ -11,6 +11,8 @@ import {
   UseInterceptors,
   Req,
   UploadedFile,
+  Post,
+  Redirect,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -29,6 +31,8 @@ import { PageDto } from '@src/common/dto/page.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { IUserRequest } from '@src/interfaces';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -50,6 +54,26 @@ export class UserController {
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number): Promise<UserEntity> {
     return omit(await this.userService.findOne(id), ['password']);
+  }
+
+  @Post('forgot-password')
+  forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    return this.userService.forgotPassword(forgotPasswordDto);
+  }
+
+  @Get('verify-forgot-password')
+  @Redirect()
+  verifyForgotPassword(@Query('token') token: string) {
+    const url = this.userService.verifyForgotPassword(token);
+    return {
+      url: url,
+    };
+  }
+
+  @ApiBody({ type: ResetPasswordDto })
+  @Post('reset-password')
+  resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    return this.userService.resetPassword(resetPasswordDto);
   }
 
   @ApiBody({ type: ChangePasswordDto })

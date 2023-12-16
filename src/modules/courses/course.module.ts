@@ -5,7 +5,7 @@ import {
   RequestMethod,
 } from '@nestjs/common';
 
-import { CourseController } from './class.controller';
+import { CourseController } from './course.controller';
 import { CourseMiddleware } from '@src/middlewares/course.middleware';
 import { CourseService } from './course.service';
 import { JwtModule } from '@nestjs/jwt';

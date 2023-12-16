@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 
 import { AuthModule } from '../auth/auth.module';
+import { JwtModule } from '@nestjs/jwt';
 import { RoleChecker } from '@src/middlewares';
 import { StorageModule } from '@src/shared/storage/storage.module';
 import { UserController } from './user.controller';
@@ -13,7 +14,7 @@ import { UserRole } from '@prisma/client';
 import { UserService } from './user.service';
 
 @Module({
-  imports: [AuthModule, StorageModule],
+  imports: [AuthModule, StorageModule, JwtModule.register({})],
   controllers: [UserController],
   providers: [UserService],
 })

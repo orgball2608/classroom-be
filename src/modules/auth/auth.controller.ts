@@ -26,8 +26,6 @@ import { UserEntity } from './entities/user.entity';
 import { RegisterDto } from './dto/register.dto';
 import { IOAuthRequest, IUserRequest } from '@src/interfaces';
 import { ResendConfirmEmailDto } from './dto/resend-confirm-email.dto';
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { FacebookAuthGuard } from '@src/guards/facebook.guard';
 import { GoogleAuthGuard } from '@src/guards/google.guard';
@@ -159,12 +157,12 @@ export class AuthController {
       },
     },
   })
-  @Post('refresh')
+  @Post('refresh-token')
   refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
     return this.authService.refreshToken(refreshTokenDto);
   }
 
-  @Get('verify')
+  @Get('verify-email')
   findOne(@Query('token') token: string) {
     return this.authService.confirmEmail(token);
   }
@@ -173,26 +171,6 @@ export class AuthController {
   @ApiBody({ type: ResendConfirmEmailDto })
   resendConfirmEmail(@Body() resendConfirmEmailDto: ResendConfirmEmailDto) {
     return this.authService.resendConfirmEmail(resendConfirmEmailDto);
-  }
-
-  @Post('forgot-password')
-  forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
-    return this.authService.forgotPassword(forgotPasswordDto);
-  }
-
-  @Get('verify-forgot-password')
-  @Redirect()
-  verifyForgotPassword(@Query('token') token: string) {
-    const url = this.authService.verifyForgotPassword(token);
-    return {
-      url: url,
-    };
-  }
-
-  @ApiBody({ type: ResetPasswordDto })
-  @Post('reset-password')
-  resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
-    return this.authService.resetPassword(resetPasswordDto);
   }
 
   @ApiBearerAuth()
