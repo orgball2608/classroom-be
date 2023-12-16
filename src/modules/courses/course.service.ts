@@ -67,7 +67,11 @@ export class CourseService {
   async findAllCourseByTeacherId(teacherId: number) {
     const courses = await this.prisma.course.findMany({
       where: {
-        createdById: teacherId,
+        courseTeachers: {
+          some: {
+            teacherId: teacherId,
+          },
+        },
       },
     });
 
@@ -82,7 +86,7 @@ export class CourseService {
       where: {
         enrollments: {
           some: {
-            id: studentId,
+            studentId: studentId,
           },
         },
       },
@@ -161,9 +165,12 @@ export class CourseService {
 
   async remove(id: number) {
     try {
-      await this.prisma.course.delete({
+      await this.prisma.course.update({
         where: {
           id,
+        },
+        data: {
+          status: false,
         },
       });
 

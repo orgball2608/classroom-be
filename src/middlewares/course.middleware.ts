@@ -9,6 +9,7 @@ import { NextFunction, Response } from 'express';
 import { COURSES_MESSAGES } from '@src/constants/message';
 import { IUserRequest } from '@src/interfaces';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
+import { UserRole } from '@prisma/client';
 
 @Injectable()
 export class CourseMiddleware implements NestMiddleware {
@@ -29,6 +30,10 @@ export class CourseMiddleware implements NestMiddleware {
     });
 
     if (!course) {
+      throw new NotFoundException(COURSES_MESSAGES.COURSE_NOT_FOUND);
+    }
+
+    if (req.user.role !== UserRole.ADMIN && course.status === false) {
       throw new NotFoundException(COURSES_MESSAGES.COURSE_NOT_FOUND);
     }
 
