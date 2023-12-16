@@ -28,7 +28,7 @@ import { ApiResponseWithMessage } from '@src/decorators';
 import { COURSES_MESSAGES } from '@src/constants';
 import { InviteEmailDto } from './dto/invite-email.dto';
 
-@ApiTags('Course')
+@ApiTags('Courses')
 @ApiBearerAuth()
 @Controller('courses')
 export class CourseController {

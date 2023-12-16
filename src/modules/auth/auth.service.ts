@@ -10,14 +10,12 @@ import { User, VerifyStatus } from '@prisma/client';
 import { generateHash, validateHash } from '@src/common/utils';
 
 import { ConfigService } from '@nestjs/config';
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ResendConfirmEmailDto } from './dto/resend-confirm-email.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
 import { TokenInvalidException } from '@src/exceptions';
 import { omit } from 'lodash';
 
@@ -367,123 +365,6 @@ export class AuthService {
     return {
       message: USERS_MESSAGES.RESEND_CONFIRM_EMAIL_SUCCESSFULLY,
     };
-  }
-
-  private signForgotPasswordToken({ userId }: { userId: number }) {
-    return this.jwtService.sign(
-      { userId },
-      {
-        secret: this.config.get('auth.jwtForgotPasswordSecret'),
-        expiresIn: `${this.config.get('auth.jwtForgotPasswordExpires')}s`,
-      },
-    );
-  }
-
-  private sendForgotPasswordMail({
-    email,
-    token,
-    name,
-  }: {
-    email: string;
-    token: string;
-    name: string;
-  }) {
-    const apiPrefix =
-      this.config.get<string>('app.apiPrefix') +
-      '/' +
-      this.config.get<string>('app.apiVersion');
-
-    const resetLink = `${this.config.get(
-      'app.appURL',
-    )}/${apiPrefix}/auth/verify-forgot-password?token=${token}`;
-
-    return this.mailerService.sendMail({
-      to: email,
-      from: 'elearningapp@gmail.com',
-      subject: 'Email reset forgot password for leaning app',
-      template: './forgot-password',
-      context: {
-        name,
-        resetLink: resetLink,
-      },
-    });
-  }
-
-  async forgotPassword({ email }: ForgotPasswordDto) {
-    const user = await this.prisma.user.findUnique({
-      where: {
-        email,
-      },
-    });
-
-    if (!user) throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
-
-    const token = this.signForgotPasswordToken({
-      userId: user.id,
-    });
-
-    await this.prisma.user.update({
-      where: {
-        email,
-      },
-      data: {
-        forgotPasswordToken: token,
-      },
-    });
-
-    const name = user.firstName + user.lastName;
-
-    await this.sendForgotPasswordMail({ email, token, name });
-
-    return {
-      message: USERS_MESSAGES.CHECK_EMAIL_TO_RESET_PASSWORD,
-    };
-  }
-
-  verifyForgotPassword(token: string) {
-    const frontendURL = this.config.get('app.frontendURL');
-    return `${frontendURL}/reset-password?token=${token}`;
-  }
-
-  async resetPassword(resetPasswordDto: ResetPasswordDto) {
-    try {
-      const { token, password } = resetPasswordDto;
-      const payload: {
-        userId: number;
-      } = this.jwtService.verify(token, {
-        secret: this.config.get<string>('auth.jwtForgotPasswordSecret'),
-        ignoreExpiration: false,
-      });
-
-      const user = await this.prisma.user.findUnique({
-        where: {
-          id: payload.userId,
-        },
-      });
-
-      if (!user) throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
-
-      if (user.forgotPasswordToken != token)
-        throw new BadRequestException(
-          USERS_MESSAGES.FORGOT_PASSWORD_TOKEN_INVALID,
-        );
-
-      await this.prisma.user.update({
-        where: {
-          email: user.email,
-        },
-        data: {
-          password: generateHash(password),
-          forgotPasswordToken: null,
-        },
-      });
-
-      return {
-        message: USERS_MESSAGES.RESET_PASSWORD_SUCCESSFUL,
-      };
-    } catch (error) {
-      throw new TokenInvalidException(TOKEN_MESSAGES.TOKEN_IS_INVALID);
-    }
   }
 
   async getMe(id: number) {
