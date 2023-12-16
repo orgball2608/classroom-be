@@ -133,13 +133,13 @@ model GradeComposition {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@map("grade_structs")
+  @@map("grade_compositions")
 }
 
 model Grade {
   id                 Int     @id @default(autoincrement())
   studentId          Int     @map("student_id")
-  gradeCompositionId Int     @map("grade_struct_id")
+  gradeCompositionId Int     @map("grade_composition_id")
   grade              Float
   createdById        Int     @map("created_by_id")
   status             Boolean @default(true)
