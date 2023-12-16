@@ -74,3 +74,24 @@ export const NOTIFICATION_MESSAGES = {
   GET_NOTIFICATION_BY_ID_SUCCESSFULLY: 'Get notification by id successfully',
   MARK_AS_READ_SUCCESSFULLY: 'Mark as read successfully',
 };
+
+export const GRADE_COMPOSITIONS_MESSAGES = {
+  GRADE_COMPOSITION_NOT_FOUND: 'Grade composition not found',
+  GET_LIST_GRADE_COMPOSITION_SUCCESSFULLY:
+    'Get list grade composition successfully',
+  GET_GRADE_COMPOSITION_SUCCESSFULLY: 'Get grade composition successfully',
+  CREATE_GRADE_COMPOSITION_SUCCESSFULLY:
+    'Create grade composition successfully',
+  UPDATE_GRADE_COMPOSITION_SUCCESSFULLY:
+    'Update grade composition successfully',
+  DELETE_GRADE_COMPOSITION_SUCCESSFULLY:
+    'Delete grade composition successfully',
+};
+
+export const GRADE_MESSAGES = {
+  GRADE_NOT_FOUND: 'Grade not found',
+  GET_GRADE_SUCCESSFULLY: 'Get grade successfully',
+  CREATE_GRADE_SUCCESSFULLY: 'Create grade successfully',
+  UPDATE_GRADE_SUCCESSFULLY: 'Update grade successfully',
+  DELETE_GRADE_SUCCESSFULLY: 'Delete grade successfully',
+};

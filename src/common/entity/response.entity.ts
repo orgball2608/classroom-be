@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class ApiResponseEntity<T> {
   @ApiProperty({ type: String, example: 'Update successfully' })
@@ -6,4 +6,20 @@ export class ApiResponseEntity<T> {
 
   @ApiProperty()
   data: T;
+}
+
+export class ApiResponseArrayEntity<T> {
+  @ApiProperty({ type: String, example: 'Get all data successfully' })
+  message: string;
+
+  @ApiProperty()
+  data: T[];
+
+  @ApiPropertyOptional()
+  meta: any;
+}
+
+export class ApiResponseOmitDataEntity {
+  @ApiProperty({ type: String, example: 'Update successfully' })
+  message: string;
 }
