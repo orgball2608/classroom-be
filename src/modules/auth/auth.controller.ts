@@ -12,7 +12,11 @@ import {
   Redirect,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LocalAuthGuard } from '../../guards/local-auth.guard';
+import {
+  LocalAuthGuard,
+  GoogleAuthGuard,
+  FacebookAuthGuard,
+} from '@src/guards';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -27,8 +31,6 @@ import { RegisterDto } from './dto/register.dto';
 import { IOAuthRequest, IUserRequest } from '@src/interfaces';
 import { ResendConfirmEmailDto } from './dto/resend-confirm-email.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
-import { FacebookAuthGuard } from '@src/guards/facebook.guard';
-import { GoogleAuthGuard } from '@src/guards/google.guard';
 
 @ApiTags('Authentication')
 @Controller('auth')
