@@ -196,7 +196,7 @@ export class AuthService {
 
     const verifyEmailUrl = `${this.config.get(
       'app.appURL',
-    )}/${apiPrefix}/auth/verify?token=${token}`;
+    )}/${apiPrefix}/auth/verify-email?token=${token}`;
 
     return this.mailerService.sendMail({
       to: email,
