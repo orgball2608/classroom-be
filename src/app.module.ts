@@ -60,7 +60,7 @@ export class AppModule implements NestModule {
       .apply(AuthenticateMiddleware)
       .exclude(
         {
-          path: 'auth',
+          path: 'auth/(.*)',
           method: RequestMethod.ALL,
         },
         {
