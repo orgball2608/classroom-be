@@ -12,6 +12,8 @@ import { CourseModule } from './modules/courses/course.module';
 import { CustomMailerModule } from './shared/mailer/mailer.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { GatewayModule } from './shared/gateway/gateway.module';
+import { GradeCompositionModule } from './modules/grade-compositions/grade-composition.module';
+import { GradeModule } from './modules/grades/grade.module';
 import { HealthModule } from './modules/health/health.module';
 import { JwtModule } from '@nestjs/jwt';
 import { NotificationModule } from './modules/notifications/notification.module';
@@ -53,6 +55,8 @@ import redisConfig from './configs/redis.config';
     CourseModule,
     HealthModule,
     NotificationModule,
+    GradeModule,
+    GradeCompositionModule,
   ],
   providers: [],
 })
