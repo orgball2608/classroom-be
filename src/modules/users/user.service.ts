@@ -104,7 +104,7 @@ export class UserService {
 
     const resetLink = `${this.config.getOrThrow(
       'app.appURL',
-    )}/${apiPrefix}/auth/verify-forgot-password?token=${token}`;
+    )}/${apiPrefix}/users/verify-forgot-password?token=${token}`;
 
     return this.mailerService.sendMail({
       to: email,
