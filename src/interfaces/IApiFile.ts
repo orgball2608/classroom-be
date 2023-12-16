@@ -6,3 +6,8 @@ export interface IUploadedMulterFile {
   buffer: Buffer;
   size: number;
 }
+
+export interface IApiFile {
+  name: string;
+  isArray?: boolean;
+}
