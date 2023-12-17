@@ -328,7 +328,7 @@ export class CourseService {
     });
 
     const notificationData = {
-      userId: user.id,
+      userId: course.createdById,
       title: 'New enrollment to your course',
       body: `${user.firstName} ${user.lastName} enrolled to course ${course.name}`,
     };
