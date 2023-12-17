@@ -14,6 +14,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { GatewayModule } from './shared/gateway/gateway.module';
 import { HealthModule } from './modules/health/health.module';
 import { JwtModule } from '@nestjs/jwt';
+import { NotificationModule } from './modules/notifications/notification.module';
 import { PrismaModule } from './shared/prisma/prisma.module';
 import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 import { RedisModule } from './shared/redis/redis.module';
@@ -51,6 +52,7 @@ import redisConfig from './configs/redis.config';
     UserModule,
     CourseModule,
     HealthModule,
+    NotificationModule,
   ],
   providers: [],
 })
