@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  Req,
 } from '@nestjs/common';
 import { GradeCompositionService } from './grade-composition.service';
 import { CreateGradeCompositionDto } from './dto/create-grade-composition.dto';
@@ -20,10 +21,11 @@ import {
   ApiUpdate,
 } from '@src/decorators';
 import { GradeCompositionEntity } from './entities/grade-composition.entity';
+import { IUserRequest } from '@src/interfaces';
 
 @ApiTags('Grade Composition')
 @ApiBearerAuth()
-@Controller('grade-compositions')
+@Controller('courses/:courseId/grade-compositions')
 export class GradeCompositionController {
   constructor(
     private readonly gradeCompositionService: GradeCompositionService,
@@ -31,14 +33,22 @@ export class GradeCompositionController {
 
   @Post()
   @ApiCreate(CreateGradeCompositionDto, GradeCompositionEntity)
-  create(@Body() createGradeCompositionDto: CreateGradeCompositionDto) {
-    return this.gradeCompositionService.create(createGradeCompositionDto);
+  create(
+    @Param('courseId', ParseIntPipe) courseId: number,
+    @Req() req: IUserRequest,
+    @Body() createGradeCompositionDto: CreateGradeCompositionDto,
+  ) {
+    return this.gradeCompositionService.create(
+      req.user,
+      courseId,
+      createGradeCompositionDto,
+    );
   }
 
   @Get()
   @ApiFindAll(GradeCompositionEntity)
-  findAll() {
-    return this.gradeCompositionService.findAll();
+  findAllByCourseId(@Param('courseId', ParseIntPipe) courseId: number) {
+    return this.gradeCompositionService.findAllByCourseId(courseId);
   }
 
   @Get(':id')

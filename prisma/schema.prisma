@@ -30,12 +30,13 @@ model User {
   role                UserRole     @default(STUDENT)
   status              Boolean      @default(true)
 
-  notifications      Notification[]  @relation(name: "user_notifications")
-  createdCourses     Course[]
-  createdEnrollments Enrollment[]
-  courseTeachers     CourseTeacher[]
-  studentEnrollments Enrollment[]    @relation("student_enrollments")
-  createdGrades      Grade[]         @relation("created_grades")
+  notifications            Notification[]     @relation(name: "user_notifications")
+  createdCourses           Course[]
+  createdEnrollments       Enrollment[]
+  courseTeachers           CourseTeacher[]
+  studentEnrollments       Enrollment[]       @relation("student_enrollments")
+  createdGrades            Grade[]            @relation("created_grades")
+  createdGradeCompositions GradeComposition[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -121,14 +122,16 @@ model CourseTeacher {
 }
 
 model GradeComposition {
-  id       Int     @id @default(autoincrement())
-  courseId Int     @map("course_id")
-  name     String
-  scale    Int
-  status   Boolean @default(true)
+  id          Int     @id @default(autoincrement())
+  courseId    Int     @map("course_id")
+  createdById Int     @map("created_by_id")
+  name        String
+  scale       Int
+  status      Boolean @default(true)
 
-  course Course  @relation(fields: [courseId], references: [id])
-  grades Grade[]
+  course    Course  @relation(fields: [courseId], references: [id])
+  createdBy User    @relation(fields: [createdById], references: [id])
+  grades    Grade[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

@@ -2,30 +2,57 @@ import {
   ApiResponseEntity,
   ApiResponseOmitDataEntity,
 } from '@src/common/entity/response.entity';
+import { BadRequestException, Injectable } from '@nestjs/common';
 
 import { CreateGradeCompositionDto } from './dto/create-grade-composition.dto';
 import { GRADE_COMPOSITIONS_MESSAGES } from '@src/constants';
 import { GradeCompositionEntity } from './entities/grade-composition.entity';
-import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { UpdateGradeCompositionDto } from './dto/update-grade-composition.dto';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class GradeCompositionService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create({
-    courseId,
-    name,
-    scale,
-  }: CreateGradeCompositionDto): Promise<
-    ApiResponseEntity<GradeCompositionEntity>
-  > {
+  async create(
+    user: User,
+    courseId: number,
+    { name, scale }: CreateGradeCompositionDto,
+  ): Promise<ApiResponseEntity<GradeCompositionEntity>> {
+    const gradeCompositions = await this.prisma.gradeComposition.findMany({
+      where: {
+        courseId,
+      },
+    });
+
+    const totalScale = gradeCompositions.reduce(
+      (total, gradeComposition) => total + gradeComposition.scale,
+      0,
+    );
+
+    if (
+      totalScale + scale > 100 ||
+      gradeCompositions.find(
+        (gradeComposition) =>
+          gradeComposition.name.toLowerCase() === name.toLowerCase(),
+      )
+    ) {
+      throw new BadRequestException(
+        GRADE_COMPOSITIONS_MESSAGES.INVALID_GRADE_COMPOSITION,
+      );
+    }
+
     const gradeComposition = await this.prisma.gradeComposition.create({
       data: {
         course: {
           connect: {
             id: courseId,
+          },
+        },
+        createdBy: {
+          connect: {
+            id: user.id,
           },
         },
         name,
@@ -40,11 +67,15 @@ export class GradeCompositionService {
     };
   }
 
-  async findAll(): Promise<ApiResponseEntity<GradeCompositionEntity[]>> {
-    const gradeCompositions = await this.prisma.gradeComposition.findMany();
+  async findAllByCourseId(courseId: number) {
+    const gradeCompositions = await this.prisma.gradeComposition.findMany({
+      where: {
+        courseId: courseId,
+      },
+    });
     return {
       message:
-        GRADE_COMPOSITIONS_MESSAGES.GET_LIST_GRADE_COMPOSITION_SUCCESSFULLY,
+        GRADE_COMPOSITIONS_MESSAGES.GET_GRADE_COMPOSITION_BY_COURSE_ID_SUCCESSFULLY,
       data: gradeCompositions,
     };
   }
@@ -55,6 +86,9 @@ export class GradeCompositionService {
     const gradeComposition = await this.prisma.gradeComposition.findUnique({
       where: {
         id,
+      },
+      include: {
+        createdBy: true,
       },
     });
 
