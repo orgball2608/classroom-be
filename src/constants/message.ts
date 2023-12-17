@@ -86,6 +86,11 @@ export const GRADE_COMPOSITIONS_MESSAGES = {
     'Update grade composition successfully',
   DELETE_GRADE_COMPOSITION_SUCCESSFULLY:
     'Delete grade composition successfully',
+  GET_GRADE_COMPOSITION_BY_COURSE_ID_SUCCESSFULLY:
+    'Get grade composition by course id successfully',
+  INVALID_GRADE_COMPOSITION: 'Invalid grade composition',
+  YOU_ARE_NOT_PERMISSION_TO_CREATE_GRADE_COMPOSITION:
+    'You are not permission to create grade composition',
 };
 
 export const GRADE_MESSAGES = {
