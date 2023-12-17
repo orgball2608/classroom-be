@@ -67,3 +67,10 @@ export const AUTHORIZATION_MESSAGES = {
   DO_NOT_HAVE_PERMISSION_TO_ACCESS_THIS_RESOURCE:
     'You do not have permission to access this resource',
 };
+
+export const NOTIFICATION_MESSAGES = {
+  NOTIFICATION_NOT_FOUND: 'Notification not found',
+  GET_NOTIFICATIONS_SUCCESSFULLY: 'Get notifications successfully',
+  GET_NOTIFICATION_BY_ID_SUCCESSFULLY: 'Get notification by id successfully',
+  MARK_AS_READ_SUCCESSFULLY: 'Mark as read successfully',
+};
