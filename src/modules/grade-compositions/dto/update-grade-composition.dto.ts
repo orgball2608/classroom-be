@@ -1,10 +1,9 @@
-import { OmitType, PartialType } from '@nestjs/swagger';
-
 import { CreateGradeCompositionDto } from './create-grade-composition.dto';
 import { IsOptional } from 'class-validator';
+import { PartialType } from '@nestjs/swagger';
 
 export class UpdateGradeCompositionDto extends PartialType(
-  OmitType(CreateGradeCompositionDto, ['courseId'] as const),
+  CreateGradeCompositionDto,
 ) {
   @IsOptional()
   name: string;
