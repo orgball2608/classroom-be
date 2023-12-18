@@ -10,6 +10,6 @@ import { GradeCompositionService } from './grade-composition.service';
 })
 export class GradeCompositionModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(GradeCompositionMiddleware).forRoutes('*');
+    consumer.apply(GradeCompositionMiddleware).forRoutes('grade-compositions');
   }
 }
