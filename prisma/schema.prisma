@@ -24,7 +24,7 @@ model User {
   avatar              String?      @map("avatar")
   verifyEmailToken    String?      @map("verify_email_token")
   forgotPasswordToken String?      @map("forgot_password_token")
-  studentId           String?      @unique @map("student_id")
+  studentId           Int?         @unique @map("student_id")
   verify              VerifyStatus @default(UNVERIFY)
   sex                 Sex          @default(NONE)
   role                UserRole     @default(STUDENT)
@@ -88,7 +88,7 @@ model Enrollment {
   courseId    Int     @map("course_id")
   studentId   Int     @map("student_id")
   createdById Int     @map("created_by_id")
-  courseOrder Int     @default(0) @map("course_order")
+  courseOrder Int?    @map("course_order")
   status      Boolean @default(true)
 
   student   User   @relation(name: "student_enrollments", fields: [studentId], references: [id])
@@ -107,7 +107,7 @@ model CourseTeacher {
   id          Int     @id @default(autoincrement())
   courseId    Int     @map("course_id")
   teacherId   Int     @map("teacher_id")
-  courseOrder Int     @default(0) @map("course_order")
+  courseOrder Int?    @map("course_order")
   status      Boolean @default(true)
 
   course  Course @relation(name: "course_teachers", fields: [courseId], references: [id])

@@ -55,8 +55,8 @@ import redisConfig from './configs/redis.config';
     CourseModule,
     HealthModule,
     NotificationModule,
-    GradeModule,
     GradeCompositionModule,
+    GradeModule,
   ],
   providers: [],
 })
