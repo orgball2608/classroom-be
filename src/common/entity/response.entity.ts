@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class ApiResponseEntity<T> {
   @ApiProperty({ type: String, example: 'Update successfully' })
@@ -14,9 +14,6 @@ export class ApiResponseArrayEntity<T> {
 
   @ApiProperty()
   data: T[];
-
-  @ApiPropertyOptional()
-  meta: any;
 }
 
 export class ApiResponseOmitDataEntity {

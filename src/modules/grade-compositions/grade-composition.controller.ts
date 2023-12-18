@@ -15,10 +15,10 @@ import { UpdateGradeCompositionDto } from './dto/update-grade-composition.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import {
   ApiCreate,
-  ApiDelete,
-  ApiFindAll,
   ApiFindOne,
+  ApiFindAll,
   ApiUpdate,
+  ApiDelete,
 } from '@src/decorators';
 import { GradeCompositionEntity } from './entities/grade-composition.entity';
 import { IUserRequest } from '@src/interfaces';
