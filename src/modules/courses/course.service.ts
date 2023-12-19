@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { COURSES_MESSAGES, USERS_MESSAGES } from '@src/constants/message';
-import { CourseTeacher, User } from '@prisma/client';
+import { Course, CourseTeacher, User } from '@prisma/client';
 
 import { ConfigService } from '@nestjs/config';
 import { CreateCourseDto } from './dto/create-course.dto';
@@ -164,24 +164,15 @@ export class CourseService {
   }
 
   async remove(id: number) {
-    try {
-      await this.prisma.course.update({
-        where: {
-          id,
-        },
-        data: {
-          status: false,
-        },
-      });
+    await this.prisma.course.delete({
+      where: {
+        id,
+      },
+    });
 
-      return {
-        message: COURSES_MESSAGES.DELETE_COURSE_SUCCESSFULLY,
-      };
-    } catch (error) {
-      throw new NotFoundException(
-        COURSES_MESSAGES.CANNOT_DELETE_COURSE_WITH_STUDENTS,
-      );
-    }
+    return {
+      message: COURSES_MESSAGES.DELETE_COURSE_SUCCESSFULLY,
+    };
   }
 
   async findAllUserInCourse(userId: number) {
@@ -300,13 +291,7 @@ export class CourseService {
     };
   }
 
-  async enrollToCourse(user: User, courseId: number) {
-    const course = await this.prisma.course.findUnique({
-      where: {
-        id: courseId,
-      },
-    });
-
+  async enrollToCourse(user: User, course: Course, courseId: number) {
     const enrollment = await this.prisma.enrollment.create({
       data: {
         course: {
@@ -344,17 +329,7 @@ export class CourseService {
     };
   }
 
-  async leaveCourse(userId: number, courseId: number) {
-    const course = await this.prisma.course.findUnique({
-      where: {
-        id: courseId,
-      },
-    });
-
-    if (!course) {
-      throw new NotFoundException(COURSES_MESSAGES.COURSE_NOT_FOUND);
-    }
-
+  async leaveCourse(userId: number, course: Course, courseId: number) {
     if (course.createdById === userId) {
       throw new ForbiddenException(
         COURSES_MESSAGES.YOU_ARE_OWNER_OF_THIS_COURSE_CAN_NOT_LEAVE,
