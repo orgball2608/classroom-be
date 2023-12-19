@@ -121,12 +121,9 @@ export class GradeCompositionService {
   }
 
   async remove(id: number): Promise<ApiResponseOmitDataEntity> {
-    await this.prisma.gradeComposition.update({
+    await this.prisma.gradeComposition.delete({
       where: {
         id,
-      },
-      data: {
-        status: false,
       },
     });
 
