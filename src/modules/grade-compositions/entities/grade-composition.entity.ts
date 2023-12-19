@@ -24,5 +24,5 @@ export class GradeCompositionEntity extends AbstractEntity {
     type: Boolean,
     example: true,
   })
-  status: boolean;
+  deleted: boolean;
 }

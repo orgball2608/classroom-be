@@ -14,11 +14,7 @@ export class GradeService {
   ) {
     const gradeData = await this.prisma.grade.create({
       data: {
-        student: {
-          connect: {
-            id: studentId,
-          },
-        },
+        studentId,
         gradeComposition: {
           connect: {
             id: compositionId,
