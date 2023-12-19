@@ -4,7 +4,7 @@ import {
   Logger,
   OnModuleInit,
 } from '@nestjs/common';
-import { PrismaClient, User } from '@prisma/client';
+import { Prisma, PrismaClient, User } from '@prisma/client';
 
 import { Expose } from './prisma.interface';
 
@@ -13,6 +13,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
   private readonly logger = new Logger(PrismaService.name);
   async onModuleInit() {
     await this.$connect();
+    this.$use(this.softDeleteMiddleware);
   }
 
   async exitHandler(app: INestApplication) {
@@ -24,6 +25,28 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
       this.exitHandler(app);
     });
   }
+
+  softDeleteMiddleware: Prisma.Middleware = async (
+    params: Prisma.MiddlewareParams,
+    next,
+  ) => {
+    if (
+      params.model !==
+      (Prisma.ModelName.Notification ||
+        Prisma.ModelName.Enrollment ||
+        Prisma.ModelName.CourseTeacher)
+    ) {
+      if (params.action === 'delete') {
+        params.action = 'update';
+        params.args['data'] = { status: false, deletedAt: new Date() };
+      }
+      if (params.action === 'deleteMany') {
+        params.action = 'updateMany';
+        params.args['data'] = { status: false, deletedAt: new Date() };
+      }
+    }
+    return next(params);
+  };
 
   /** Delete sensitive keys from an object */
   expose<T>(item: T): Expose<T> {

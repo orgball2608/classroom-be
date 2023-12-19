@@ -38,7 +38,7 @@ export class GradeCompositionMiddleware implements NestMiddleware {
       throw new NotFoundException(COURSES_MESSAGES.COURSE_NOT_FOUND);
     }
 
-    if (req.user.role !== UserRole.ADMIN && course.status === false) {
+    if (req.user.role !== UserRole.ADMIN && course.deleted === false) {
       throw new NotFoundException(COURSES_MESSAGES.COURSE_NOT_FOUND);
     }
 
