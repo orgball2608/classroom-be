@@ -7,7 +7,7 @@ import {
 import { NextFunction, Response } from 'express';
 
 import { COURSES_MESSAGES } from '@src/constants/message';
-import { IUserRequest } from '@src/interfaces';
+import { ICourseRequest } from '@src/interfaces';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { UserRole } from '@prisma/client';
 
@@ -15,7 +15,7 @@ import { UserRole } from '@prisma/client';
 export class CourseMiddleware implements NestMiddleware {
   constructor(private readonly prisma: PrismaService) {}
 
-  async use(req: IUserRequest, res: Response, next: NextFunction) {
+  async use(req: ICourseRequest, res: Response, next: NextFunction) {
     const courseId = req.params.id;
     const courseIdNumber = Number(courseId);
 
@@ -33,7 +33,7 @@ export class CourseMiddleware implements NestMiddleware {
       throw new NotFoundException(COURSES_MESSAGES.COURSE_NOT_FOUND);
     }
 
-    if (req.user.role !== UserRole.ADMIN && course.status === false) {
+    if (req.user.role !== UserRole.ADMIN && course.deleted === true) {
       throw new NotFoundException(COURSES_MESSAGES.COURSE_NOT_FOUND);
     }
 
@@ -70,6 +70,7 @@ export class CourseMiddleware implements NestMiddleware {
     }
 
     req.isEnrolled = enrollment !== null;
+    req.course = course;
     next();
   }
 }
