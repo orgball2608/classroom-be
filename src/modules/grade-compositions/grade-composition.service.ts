@@ -5,9 +5,10 @@ import {
 import { BadRequestException, Injectable } from '@nestjs/common';
 
 import { CreateGradeCompositionDto } from './dto/create-grade-composition.dto';
-import { GRADE_COMPOSITIONS_MESSAGES } from '@src/constants';
+import { GRADE_COMPOSITION_MESSAGES } from '@src/constants';
 import { GradeCompositionEntity } from './entities/grade-composition.entity';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
+import { SimpleUserEntity } from '@src/common/entity/simple-user.entity';
 import { UpdateGradeCompositionDto } from './dto/update-grade-composition.dto';
 import { User } from '@prisma/client';
 
@@ -31,6 +32,8 @@ export class GradeCompositionService {
       0,
     );
 
+    const maxIndex = Math.max(...gradeCompositions.map((gc) => gc.index), 0);
+
     if (
       totalScale + scale > 100 ||
       gradeCompositions.find(
@@ -39,7 +42,7 @@ export class GradeCompositionService {
       )
     ) {
       throw new BadRequestException(
-        GRADE_COMPOSITIONS_MESSAGES.INVALID_GRADE_COMPOSITION,
+        GRADE_COMPOSITION_MESSAGES.INVALID_GRADE_COMPOSITION,
       );
     }
 
@@ -57,12 +60,12 @@ export class GradeCompositionService {
         },
         name,
         scale,
+        index: maxIndex + 1,
       },
     });
 
     return {
-      message:
-        GRADE_COMPOSITIONS_MESSAGES.CREATE_GRADE_COMPOSITION_SUCCESSFULLY,
+      message: GRADE_COMPOSITION_MESSAGES.CREATE_GRADE_COMPOSITION_SUCCESSFULLY,
       data: gradeComposition,
     };
   }
@@ -72,10 +75,13 @@ export class GradeCompositionService {
       where: {
         courseId: courseId,
       },
+      orderBy: {
+        index: 'desc',
+      },
     });
     return {
       message:
-        GRADE_COMPOSITIONS_MESSAGES.GET_GRADE_COMPOSITION_BY_COURSE_ID_SUCCESSFULLY,
+        GRADE_COMPOSITION_MESSAGES.GET_GRADE_COMPOSITION_BY_COURSE_ID_SUCCESSFULLY,
       data: gradeCompositions,
     };
   }
@@ -93,8 +99,11 @@ export class GradeCompositionService {
     });
 
     return {
-      message: GRADE_COMPOSITIONS_MESSAGES.GET_GRADE_COMPOSITION_SUCCESSFULLY,
-      data: gradeComposition,
+      message: GRADE_COMPOSITION_MESSAGES.GET_GRADE_COMPOSITION_SUCCESSFULLY,
+      data: {
+        ...gradeComposition,
+        createdBy: new SimpleUserEntity(gradeComposition.createdBy),
+      },
     };
   }
 
@@ -114,8 +123,7 @@ export class GradeCompositionService {
     });
 
     return {
-      message:
-        GRADE_COMPOSITIONS_MESSAGES.UPDATE_GRADE_COMPOSITION_SUCCESSFULLY,
+      message: GRADE_COMPOSITION_MESSAGES.UPDATE_GRADE_COMPOSITION_SUCCESSFULLY,
       data: gradeComposition,
     };
   }
@@ -128,8 +136,73 @@ export class GradeCompositionService {
     });
 
     return {
+      message: GRADE_COMPOSITION_MESSAGES.DELETE_GRADE_COMPOSITION_SUCCESSFULLY,
+    };
+  }
+
+  async switchGradeCompositionIndex(firstId: number, secondId: number) {
+    const firstIndex = await this.prisma.gradeComposition.findUnique({
+      where: {
+        id: firstId,
+      },
+      select: {
+        index: true,
+      },
+    });
+
+    if (!firstIndex) {
+      throw new BadRequestException(
+        GRADE_COMPOSITION_MESSAGES.INVALID_GRADE_COMPOSITION,
+      );
+    }
+
+    const secondIndex = await this.prisma.gradeComposition.findUnique({
+      where: {
+        id: secondId,
+      },
+      select: {
+        index: true,
+      },
+    });
+
+    if (!secondIndex) {
+      throw new BadRequestException(
+        GRADE_COMPOSITION_MESSAGES.INVALID_GRADE_COMPOSITION,
+      );
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.gradeComposition.update({
+        where: {
+          id: secondId,
+        },
+        data: {
+          index: null,
+        },
+      }),
+
+      this.prisma.gradeComposition.update({
+        where: {
+          id: firstId,
+        },
+        data: {
+          index: secondIndex.index,
+        },
+      }),
+
+      this.prisma.gradeComposition.update({
+        where: {
+          id: secondId,
+        },
+        data: {
+          index: firstIndex.index,
+        },
+      }),
+    ]);
+
+    return {
       message:
-        GRADE_COMPOSITIONS_MESSAGES.DELETE_GRADE_COMPOSITION_SUCCESSFULLY,
+        GRADE_COMPOSITION_MESSAGES.SWITCH_GRADE_COMPOSITION_INDEX_SUCCESSFULLY,
     };
   }
 }

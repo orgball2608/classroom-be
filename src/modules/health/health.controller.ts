@@ -3,9 +3,10 @@ import { HealthCheck, HealthCheckService } from '@nestjs/terminus';
 
 import { ApiTags } from '@nestjs/swagger';
 import { PrismaOrmHealthIndicator } from '@src/shared/prisma/prisma.health';
+import { ROUTES } from '@src/constants';
 
 @ApiTags('health')
-@Controller('health')
+@Controller(ROUTES.HEALTH)
 export class HealthController {
   constructor(
     private health: HealthCheckService,
