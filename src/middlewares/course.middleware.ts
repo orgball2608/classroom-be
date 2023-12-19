@@ -16,7 +16,7 @@ export class CourseMiddleware implements NestMiddleware {
   constructor(private readonly prisma: PrismaService) {}
 
   async use(req: ICourseRequest, res: Response, next: NextFunction) {
-    const courseId = req.params.id;
+    const courseId = req.params.id || req.params.courseId;
     const courseIdNumber = Number(courseId);
 
     if (isNaN(courseIdNumber)) {

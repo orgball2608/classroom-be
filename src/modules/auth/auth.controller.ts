@@ -31,9 +31,10 @@ import { RegisterDto } from './dto/register.dto';
 import { IOAuthRequest, IUserRequest } from '@src/interfaces';
 import { ResendConfirmEmailDto } from './dto/resend-confirm-email.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { ROUTES } from '@src/constants';
 
 @ApiTags('Authentication')
-@Controller('auth')
+@Controller(ROUTES.AUTH)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

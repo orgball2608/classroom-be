@@ -19,7 +19,6 @@ import { StorageService } from '@src/shared/storage/services/storage.service';
 import { TokenInvalidException } from '@src/exceptions';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from '@prisma/client';
-import { UserEntity } from './entities/user.entity';
 import { UsersPageOptionsDto } from './dto/user-page-options.dto';
 import _ from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
@@ -34,9 +33,7 @@ export class UserService {
     private readonly storageService: StorageService,
   ) {}
 
-  async findAll(
-    pageOptionsDto: UsersPageOptionsDto,
-  ): Promise<PageDto<UserEntity>> {
+  async findAll(pageOptionsDto: UsersPageOptionsDto) {
     const { skip, take, order } = pageOptionsDto;
 
     const itemCount = await this.prisma.user.count();

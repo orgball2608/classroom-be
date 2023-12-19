@@ -3,10 +3,11 @@ import { Controller, Get, Param, ParseIntPipe, Req } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { IUserRequest } from '@src/interfaces';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ROUTES } from '@src/constants';
 
 @ApiTags('Notifications')
 @ApiBearerAuth()
-@Controller('notifications')
+@Controller(ROUTES.NOTIFICATIONS)
 export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
 

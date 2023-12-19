@@ -19,6 +19,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { NotificationModule } from './modules/notifications/notification.module';
 import { PrismaModule } from './shared/prisma/prisma.module';
 import { PrometheusModule } from '@willsoto/nestjs-prometheus';
+import { ROUTES } from './constants';
 import { RedisModule } from './shared/redis/redis.module';
 import { SharedModule } from './shared/shared.module';
 import { UserModule } from './modules/users/user.module';
@@ -44,7 +45,7 @@ import redisConfig from './configs/redis.config';
     JwtModule.register({}),
     EventEmitterModule.forRoot(),
     PrometheusModule.register({
-      path: '/metrics',
+      path: ROUTES.METRICS,
     }),
     PrismaModule,
     RedisModule,

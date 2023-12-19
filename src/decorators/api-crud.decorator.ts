@@ -91,7 +91,6 @@ export const ApiFindOne = <DataDto extends Type<unknown>>(dataDto: DataDto) => {
 export const ApiFindAll = <DataDto extends Type<unknown>>(dataDto: DataDto) => {
   return applyDecorators(
     ApiExtraModels(ApiResponseArrayEntity, dataDto),
-    ApiParam({ name: 'id', example: 1 }),
     ApiOkResponse({
       description: `Find list data successfully`,
       schema: {

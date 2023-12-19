@@ -25,12 +25,12 @@ import { ICourseRequest, IUserRequest } from '@src/interfaces';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Course } from './entities/course.entity';
 import { ApiResponseWithMessage } from '@src/decorators';
-import { COURSES_MESSAGES } from '@src/constants';
+import { COURSES_MESSAGES, ROUTES } from '@src/constants';
 import { InviteEmailDto } from './dto/invite-email.dto';
 
 @ApiTags('Courses')
 @ApiBearerAuth()
-@Controller('courses')
+@Controller(ROUTES.COURSES)
 export class CourseController {
   constructor(private readonly courseService: CourseService) {}
 
