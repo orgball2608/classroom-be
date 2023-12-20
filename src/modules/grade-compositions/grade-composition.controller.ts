@@ -50,8 +50,11 @@ export class GradeCompositionController {
   @Get()
   @ApiParam({ name: 'courseId', type: 'number', example: 1 })
   @ApiFindAll(GradeCompositionEntity)
-  findAllByCourseId(@Param('courseId', ParseIntPipe) courseId: number) {
-    return this.gradeCompositionService.findAllByCourseId(courseId);
+  findAllByCourseId(
+    @Req() req: IUserRequest,
+    @Param('courseId', ParseIntPipe) courseId: number,
+  ) {
+    return this.gradeCompositionService.findAllByCourseId(req.user, courseId);
   }
 
   @Get(':id')

@@ -224,6 +224,7 @@ export class CourseService {
   async findAllCourseOfMe(userId: number) {
     const courses = await this.prisma.course.findMany({
       where: {
+        deleted: false,
         OR: [
           {
             enrollments: {
