@@ -31,10 +31,11 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
     next,
   ) => {
     if (
-      params.model !==
-      (Prisma.ModelName.Notification ||
-        Prisma.ModelName.Enrollment ||
-        Prisma.ModelName.CourseTeacher)
+      params.model ===
+      (Prisma.ModelName.User ||
+        Prisma.ModelName.Course ||
+        Prisma.ModelName.GradeComposition ||
+        Prisma.ModelName.Grade)
     ) {
       if (params.action === 'delete') {
         params.action = 'update';
