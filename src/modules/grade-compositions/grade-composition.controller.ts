@@ -12,26 +12,28 @@ import {
 import { GradeCompositionService } from './grade-composition.service';
 import { CreateGradeCompositionDto } from './dto/create-grade-composition.dto';
 import { UpdateGradeCompositionDto } from './dto/update-grade-composition.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import {
   ApiCreate,
-  ApiDelete,
-  ApiFindAll,
   ApiFindOne,
+  ApiFindAll,
   ApiUpdate,
+  ApiDelete,
 } from '@src/decorators';
 import { GradeCompositionEntity } from './entities/grade-composition.entity';
 import { IUserRequest } from '@src/interfaces';
+import { ROUTES } from '@src/constants';
 
 @ApiTags('Grade Composition')
 @ApiBearerAuth()
-@Controller('courses/:courseId/grade-compositions')
+@Controller(ROUTES.GRADE_COMPOSITIONS)
 export class GradeCompositionController {
   constructor(
     private readonly gradeCompositionService: GradeCompositionService,
   ) {}
 
   @Post()
+  @ApiParam({ name: 'courseId', type: 'number', example: 1 })
   @ApiCreate(CreateGradeCompositionDto, GradeCompositionEntity)
   create(
     @Param('courseId', ParseIntPipe) courseId: number,
@@ -46,18 +48,22 @@ export class GradeCompositionController {
   }
 
   @Get()
+  @ApiParam({ name: 'courseId', type: 'number', example: 1 })
   @ApiFindAll(GradeCompositionEntity)
   findAllByCourseId(@Param('courseId', ParseIntPipe) courseId: number) {
     return this.gradeCompositionService.findAllByCourseId(courseId);
   }
 
   @Get(':id')
+  @ApiParam({ name: 'courseId', type: 'number', example: 1 })
+  @ApiParam({ name: 'id', type: 'number', example: 1 })
   @ApiFindOne(GradeCompositionEntity)
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.gradeCompositionService.findOne(id);
   }
 
   @Patch(':id')
+  @ApiParam({ name: 'courseId', type: 'number', example: 1 })
   @ApiUpdate(UpdateGradeCompositionDto, GradeCompositionEntity)
   update(
     @Param('id', ParseIntPipe) id: number,
@@ -67,8 +73,23 @@ export class GradeCompositionController {
   }
 
   @Delete(':id')
+  @ApiParam({ name: 'courseId', type: 'number', example: 1 })
   @ApiDelete()
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.gradeCompositionService.remove(id);
+  }
+
+  @Post(':firstId/switch-index/:secondId')
+  @ApiParam({ name: 'courseId', type: 'number', example: 1 })
+  @ApiParam({ name: 'firstId', type: Number, example: 1 })
+  @ApiParam({ name: 'secondId', type: Number, example: 2 })
+  switchGradeCompositionIndex(
+    @Param('firstId', ParseIntPipe) firstId: number,
+    @Param('secondId', ParseIntPipe) secondId: number,
+  ) {
+    return this.gradeCompositionService.switchGradeCompositionIndex(
+      firstId,
+      secondId,
+    );
   }
 }

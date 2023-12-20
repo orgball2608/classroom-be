@@ -24,11 +24,11 @@ model User {
   avatar              String?      @map("avatar")
   verifyEmailToken    String?      @map("verify_email_token")
   forgotPasswordToken String?      @map("forgot_password_token")
-  studentId           String?      @unique @map("student_id")
+  studentId           Int?         @unique @map("student_id")
   verify              VerifyStatus @default(UNVERIFY)
   sex                 Sex          @default(NONE)
   role                UserRole     @default(STUDENT)
-  status              Boolean      @default(true)
+  deleted             Boolean      @default(false)
 
   notifications            Notification[]     @relation(name: "user_notifications")
   createdCourses           Course[]
@@ -38,23 +38,26 @@ model User {
   createdGrades            Grade[]            @relation("created_grades")
   createdGradeCompositions GradeComposition[]
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
 
   @@map("users")
 }
 
 model Notification {
-  id     Int                @id @default(autoincrement())
-  userId Int                @map("user_id")
-  title  String
-  body   String             @db.Text
-  status NotificationStatus @default(UNREAD)
+  id      Int                @id @default(autoincrement())
+  userId  Int                @map("user_id")
+  title   String
+  body    String             @db.Text
+  status  NotificationStatus @default(UNREAD)
+  deleted Boolean            @default(false)
 
   user User @relation(name: "user_notifications", fields: [userId], references: [id])
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
 
   @@map("notifications")
 }
@@ -69,15 +72,16 @@ model Course {
   code        String
   year        Int
   createdById Int     @map("created_by_id")
-  status      Boolean @default(true)
+  deleted     Boolean @default(false)
 
   enrollments       Enrollment[]       @relation("course_students")
   courseTeachers    CourseTeacher[]    @relation("course_teachers")
   createdBy         User               @relation(fields: [createdById], references: [id])
   gradeCompositions GradeComposition[]
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
 
   @@unique([code])
   @@map("courses")
@@ -88,35 +92,33 @@ model Enrollment {
   courseId    Int     @map("course_id")
   studentId   Int     @map("student_id")
   createdById Int     @map("created_by_id")
-  courseOrder Int     @default(0) @map("course_order")
-  status      Boolean @default(true)
+  deleted     Boolean @default(false)
 
   student   User   @relation(name: "student_enrollments", fields: [studentId], references: [id])
   course    Course @relation(name: "course_students", fields: [courseId], references: [id])
   createdBy User   @relation(fields: [createdById], references: [id])
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
 
-  @@unique([studentId, courseOrder])
   @@unique([studentId, courseId])
   @@map("enrollments")
 }
 
 model CourseTeacher {
-  id          Int     @id @default(autoincrement())
-  courseId    Int     @map("course_id")
-  teacherId   Int     @map("teacher_id")
-  courseOrder Int     @default(0) @map("course_order")
-  status      Boolean @default(true)
+  id        Int     @id @default(autoincrement())
+  courseId  Int     @map("course_id")
+  teacherId Int     @map("teacher_id")
+  deleted   Boolean @default(false)
 
   course  Course @relation(name: "course_teachers", fields: [courseId], references: [id])
   teacher User   @relation(fields: [teacherId], references: [id])
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
 
-  @@unique([teacherId, courseOrder])
   @@unique([courseId, teacherId])
   @@map("course_teachers")
 }
@@ -127,15 +129,18 @@ model GradeComposition {
   createdById Int     @map("created_by_id")
   name        String
   scale       Int
-  status      Boolean @default(true)
+  index       Int?
+  deleted     Boolean @default(false)
 
   course    Course  @relation(fields: [courseId], references: [id])
   createdBy User    @relation(fields: [createdById], references: [id])
   grades    Grade[]
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
 
+  @@unique([courseId, index, deleted])
   @@map("grade_compositions")
 }
 
@@ -145,13 +150,14 @@ model Grade {
   gradeCompositionId Int     @map("grade_composition_id")
   grade              Float
   createdById        Int     @map("created_by_id")
-  status             Boolean @default(true)
+  deleted            Boolean @default(false)
 
   createdBy        User             @relation(name: "created_grades", fields: [createdById], references: [id])
   gradeComposition GradeComposition @relation(fields: [gradeCompositionId], references: [id])
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
 
   @@map("grades")
 }

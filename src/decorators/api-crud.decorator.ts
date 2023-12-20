@@ -1,6 +1,7 @@
 import {
   ApiBody,
   ApiCreatedResponse,
+  ApiExtraModels,
   ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiParam,
@@ -12,12 +13,15 @@ import {
 } from '@src/common/entity/response.entity';
 import { HttpCode, HttpStatus, Type, applyDecorators } from '@nestjs/common';
 
-export const ApiCreate = <DataDto extends Type<unknown>>(
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  bodyDto: Function,
+export const ApiCreate = <
+  BodyDto extends Type<unknown>,
+  DataDto extends Type<unknown>,
+>(
+  bodyDto: BodyDto,
   dataDto: DataDto,
 ) => {
   return applyDecorators(
+    ApiExtraModels(ApiResponseEntity, dataDto),
     ApiBody({ type: bodyDto }),
     ApiCreatedResponse({
       description: `Create successfully`,
@@ -51,6 +55,7 @@ export const ApiCreate = <DataDto extends Type<unknown>>(
 
 export const ApiFindOne = <DataDto extends Type<unknown>>(dataDto: DataDto) => {
   return applyDecorators(
+    ApiExtraModels(ApiResponseEntity, dataDto),
     ApiParam({ name: 'id', example: 1 }),
     ApiOkResponse({
       description: `Get data successfully`,
@@ -85,7 +90,7 @@ export const ApiFindOne = <DataDto extends Type<unknown>>(dataDto: DataDto) => {
 
 export const ApiFindAll = <DataDto extends Type<unknown>>(dataDto: DataDto) => {
   return applyDecorators(
-    ApiParam({ name: 'id', example: 1 }),
+    ApiExtraModels(ApiResponseArrayEntity, dataDto),
     ApiOkResponse({
       description: `Find list data successfully`,
       schema: {
@@ -123,12 +128,15 @@ export const ApiFindAll = <DataDto extends Type<unknown>>(dataDto: DataDto) => {
   );
 };
 
-export const ApiUpdate = <DataDto extends Type<unknown>>(
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  bodyDto: Function,
+export const ApiUpdate = <
+  BodyDto extends Type<unknown>,
+  DataDto extends Type<unknown>,
+>(
+  bodyDto: BodyDto,
   dataDto: DataDto,
 ) => {
   return applyDecorators(
+    ApiExtraModels(ApiResponseEntity, dataDto),
     ApiParam({ name: 'id', example: 1 }),
     ApiBody({ type: bodyDto }),
     ApiOkResponse({

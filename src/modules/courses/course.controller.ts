@@ -21,16 +21,16 @@ import {
   ApiBody,
   ApiParam,
 } from '@nestjs/swagger';
-import { IUserRequest } from '@src/interfaces';
+import { ICourseRequest, IUserRequest } from '@src/interfaces';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Course } from './entities/course.entity';
 import { ApiResponseWithMessage } from '@src/decorators';
-import { COURSES_MESSAGES } from '@src/constants';
+import { COURSES_MESSAGES, ROUTES } from '@src/constants';
 import { InviteEmailDto } from './dto/invite-email.dto';
 
 @ApiTags('Courses')
 @ApiBearerAuth()
-@Controller('courses')
+@Controller(ROUTES.COURSES)
 export class CourseController {
   constructor(private readonly courseService: CourseService) {}
 
@@ -140,24 +140,24 @@ export class CourseController {
   @Patch(':id/enroll')
   @ApiParam({ name: 'id', type: 'number', example: 1 })
   enrollCourse(
-    @Req() req: IUserRequest,
-    @Param('id', ParseIntPipe) id: number,
+    @Req() req: ICourseRequest,
+    @Param('id', ParseIntPipe) courseId: number,
   ) {
     if (req.isEnrolled === true) {
       return {
         message: COURSES_MESSAGES.USER_ENROLLED_COURSE,
       };
     }
-    return this.courseService.enrollToCourse(req.user, id);
+    return this.courseService.enrollToCourse(req.user, req.course, courseId);
   }
 
   @Delete(':id/enrollments/me/leave')
   @ApiParam({ name: 'id', type: 'number', example: 1 })
   leaveCourse(
-    @Req() req: IUserRequest,
+    @Req() req: ICourseRequest,
     @Param('id', ParseIntPipe) courseId: number,
   ) {
-    return this.courseService.leaveCourse(req.user.id, courseId);
+    return this.courseService.leaveCourse(req.user.id, req.course, courseId);
   }
 
   @Post('/invite/email')
@@ -182,9 +182,10 @@ export class CourseController {
   @ApiParam({ name: 'courseId', type: 'number', example: 1 })
   @ApiParam({ name: 'userId', type: 'number', example: 1 })
   removeUserInCourse(
+    @Req() req: ICourseRequest,
     @Param('courseId', ParseIntPipe) courseId: number,
     @Param('userId', ParseIntPipe) userId: number,
   ) {
-    return this.courseService.removeUserInCourse(userId, courseId);
+    return this.courseService.removeUserInCourse(userId, req.course, courseId);
   }
 }

@@ -27,16 +27,16 @@ import {
 import { omit } from 'lodash';
 import { UserEntity } from './entities/user.entity';
 import { UsersPageOptionsDto } from './dto/user-page-options.dto';
-import { PageDto } from '@src/common/dto/page.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { IUserRequest } from '@src/interfaces';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ROUTES } from '@src/constants';
 
 @ApiTags('Users')
 @ApiBearerAuth()
-@Controller('users')
+@Controller(ROUTES.USERS)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -45,7 +45,7 @@ export class UserController {
   findAll(
     @Query(new ValidationPipe({ transform: true }))
     pageOptionsDto: UsersPageOptionsDto,
-  ): Promise<PageDto<UserEntity>> {
+  ) {
     return this.userService.findAll(pageOptionsDto);
   }
 

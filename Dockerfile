@@ -4,7 +4,6 @@ FROM node:18-alpine3.18 AS development
 WORKDIR /app
 
 COPY package*.json ./
-COPY .env.docker .env
 
 RUN yarn install --frozen-lockfile
 

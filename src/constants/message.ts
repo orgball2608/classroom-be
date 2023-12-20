@@ -76,7 +76,8 @@ export const NOTIFICATION_MESSAGES = {
   MARK_AS_READ_SUCCESSFULLY: 'Mark as read successfully',
 };
 
-export const GRADE_COMPOSITIONS_MESSAGES = {
+export const GRADE_COMPOSITION_MESSAGES = {
+  INVALID_GRADE_COMPOSITION_ID: 'Invalid grade composition id',
   GRADE_COMPOSITION_NOT_FOUND: 'Grade composition not found',
   GET_LIST_GRADE_COMPOSITION_SUCCESSFULLY:
     'Get list grade composition successfully',
@@ -92,6 +93,8 @@ export const GRADE_COMPOSITIONS_MESSAGES = {
   INVALID_GRADE_COMPOSITION: 'Invalid grade composition',
   YOU_ARE_NOT_PERMISSION_TO_CREATE_GRADE_COMPOSITION:
     'You are not permission to create grade composition',
+  SWITCH_GRADE_COMPOSITION_INDEX_SUCCESSFULLY:
+    'Switch grade composition index successfully',
 };
 
 export const GRADE_MESSAGES = {

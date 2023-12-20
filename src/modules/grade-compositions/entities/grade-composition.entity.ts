@@ -1,5 +1,7 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
 import { AbstractEntity } from '@src/common/entity/abstract.entity';
-import { ApiProperty } from '@nestjs/swagger';
+import { SimpleUserEntity } from '@src/common/entity/simple-user.entity';
 
 export class GradeCompositionEntity extends AbstractEntity {
   @ApiProperty({
@@ -20,9 +22,8 @@ export class GradeCompositionEntity extends AbstractEntity {
   })
   scale: number;
 
-  @ApiProperty({
-    type: Boolean,
-    example: true,
+  @ApiPropertyOptional({
+    type: SimpleUserEntity,
   })
-  status: boolean;
+  createdBy?: SimpleUserEntity;
 }
