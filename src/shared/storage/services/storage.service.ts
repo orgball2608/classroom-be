@@ -21,6 +21,10 @@ export class StorageService {
 
   async uploadFile(params: { key: string; file: Express.Multer.File }) {
     const { key, file } = params;
+    if (!file) {
+      return null;
+    }
+
     const bucketName = this.configService.getOrThrow<string>(
       'aws.awsPublicBucketsKey',
     );

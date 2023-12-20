@@ -49,7 +49,7 @@ export const COURSES_MESSAGES = {
   GET_USERS_IN_COURSE_SUCCESSFULLY: 'Get users in course successfully',
   INVALID_COURSE_ID: 'Invalid course id',
   USER_NOT_IN_COURSE: 'User not in course',
-  USER_ENROLLED_COURSE: 'User in course',
+  USER_ENROLLED_COURSE: 'User enrolled course',
   ENROLLED_TO_COURSE_SUCCESSFULLY: 'Enrolled to course successfully',
   LEAVE_COURSE_SUCCESSFULLY: 'Leave course successfully',
   YOU_NOT_ENROLLED_IN_THIS_COURSE: 'You not enrolled in this course',
@@ -59,6 +59,7 @@ export const COURSES_MESSAGES = {
   CANNOT_DELETE_COURSE_WITH_STUDENTS: 'Cannot delete course with students',
   ACCOUNT_ENROLL_NOT_CORRECT_WITH_LOGIN_ACCOUNT:
     'Account enroll not correct with login account',
+  REMOVE_USER_IN_COURSE_SUCCESSFULLY: 'Remove user in course successfully',
 };
 
 export const AUTHORIZATION_MESSAGES = {
