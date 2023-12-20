@@ -17,6 +17,7 @@ import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { StorageService } from '@src/shared/storage/services/storage.service';
 import { TokenInvalidException } from '@src/exceptions';
+import { UpdateFullFieldUserDto } from './dto/update-full-field-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from '@prisma/client';
 import { UsersPageOptionsDto } from './dto/user-page-options.dto';
@@ -237,23 +238,22 @@ export class UserService {
     updateUserDto: UpdateUserDto,
     avatar: Express.Multer.File,
   ) {
-    let user: User;
+    const key = uuidv4();
+    let avatarURL: string;
 
-    await this.prisma.$transaction(async (tx) => {
-      const key = uuidv4();
-
-      const avatarURL = await this.storageService.uploadFile({
+    if (avatar) {
+      avatarURL = await this.storageService.uploadFile({
         key,
         file: avatar,
       });
+    }
 
-      user = await tx.user.update({
-        where: { id },
-        data: {
-          ...updateUserDto,
-          avatar: avatarURL,
-        },
-      });
+    const user = await this.prisma.user.update({
+      where: { id },
+      data: {
+        ...updateUserDto,
+        avatar: avatarURL ? avatarURL : null,
+      },
     });
 
     if (!user) throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
@@ -262,7 +262,6 @@ export class UserService {
       message: USERS_MESSAGES.UPDATE_PROFILE_SUCCESSFULLY,
       data: _.omit(user, [
         'password',
-        'status',
         'verifyEmailToken',
         'forgotPasswordToken',
         'verify',
@@ -270,6 +269,44 @@ export class UserService {
         'facebookId',
         'role',
         'status',
+      ]),
+    };
+  }
+
+  async updateFullField(
+    id: number,
+    updateFullFieldUserDto: UpdateFullFieldUserDto,
+    avatar: Express.Multer.File,
+  ) {
+    const key = uuidv4();
+
+    let avatarURL: string;
+
+    if (avatar) {
+      avatarURL = await this.storageService.uploadFile({
+        key,
+        file: avatar,
+      });
+    }
+
+    const user = await this.prisma.user.update({
+      where: { id },
+      data: {
+        ...updateFullFieldUserDto,
+        avatar: avatarURL ? avatarURL : null,
+      },
+    });
+
+    if (!user) throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
+
+    return {
+      message: USERS_MESSAGES.UPDATE_PROFILE_SUCCESSFULLY,
+      data: _.omit(user, [
+        'password',
+        'verifyEmailToken',
+        'forgotPasswordToken',
+        'googleId',
+        'facebookId',
       ]),
     };
   }
