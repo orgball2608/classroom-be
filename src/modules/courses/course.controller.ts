@@ -177,4 +177,14 @@ export class CourseController {
     const t = token.token as string;
     return this.courseService.verifyInvitationEmailToken(req.user.id, t);
   }
+
+  @Delete(':courseId/users/:userId')
+  @ApiParam({ name: 'courseId', type: 'number', example: 1 })
+  @ApiParam({ name: 'userId', type: 'number', example: 1 })
+  removeUserInCourse(
+    @Param('courseId', ParseIntPipe) courseId: number,
+    @Param('userId', ParseIntPipe) userId: number,
+  ) {
+    return this.courseService.removeUserInCourse(userId, courseId);
+  }
 }

@@ -1,7 +1,7 @@
-import { MiddlewareConsumer, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 
 import { GradeCompositionController } from './grade-composition.controller';
-import { GradeCompositionMiddleware } from '@src/middlewares';
+// import { GradeCompositionMiddleware } from '@src/middlewares';
 import { GradeCompositionService } from './grade-composition.service';
 
 @Module({
@@ -9,7 +9,7 @@ import { GradeCompositionService } from './grade-composition.service';
   providers: [GradeCompositionService],
 })
 export class GradeCompositionModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(GradeCompositionMiddleware).forRoutes('*');
-  }
+  // configure(consumer: MiddlewareConsumer) {
+  //   consumer.apply(GradeCompositionMiddleware).forRoutes('*');
+  // }
 }

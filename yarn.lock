@@ -11084,6 +11084,11 @@ windows-release@^4.0.0:
   dependencies:
     execa "^4.0.2"
 
+with-node-env@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/with-node-env/-/with-node-env-1.0.0.tgz#1f16f0dc62112b52d837ed5283eddb475c50fca3"
+  integrity sha512-xS+I4TgHfHVloR38Q/16WUNU6mmytuEIHOcQBYEmyBooA4fc6dk/BAxfgBqIaipjBtfRLfeHFf6IAqUYtURxHA==
+
 with@^7.0.0:
   version "7.0.2"
   resolved "https://registry.yarnpkg.com/with/-/with-7.0.2.tgz#ccee3ad542d25538a7a7a80aad212b9828495bac"

@@ -59,6 +59,7 @@ export const COURSES_MESSAGES = {
   CANNOT_DELETE_COURSE_WITH_STUDENTS: 'Cannot delete course with students',
   ACCOUNT_ENROLL_NOT_CORRECT_WITH_LOGIN_ACCOUNT:
     'Account enroll not correct with login account',
+  REMOVE_USER_IN_COURSE_SUCCESSFULLY: 'Remove user in course successfully',
 };
 
 export const AUTHORIZATION_MESSAGES = {

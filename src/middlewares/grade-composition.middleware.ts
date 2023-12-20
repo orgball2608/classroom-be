@@ -25,6 +25,8 @@ export class GradeCompositionMiddleware implements NestMiddleware {
     const courseIdNumber = Number(courseId);
 
     if (isNaN(courseIdNumber)) {
+      console.log('courseIdNumber', courseIdNumber);
+
       throw new BadRequestException(COURSES_MESSAGES.INVALID_COURSE_ID);
     }
 
