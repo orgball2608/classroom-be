@@ -261,7 +261,10 @@ export class AuthService {
       },
     });
 
-    if (!user) throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
+    if (!user)
+      throw new NotFoundException(
+        USERS_MESSAGES.PASSWORD_OR_USERNAME_INCORRECT,
+      );
 
     const valid = await validateHash(password, user.password);
 
