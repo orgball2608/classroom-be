@@ -55,7 +55,7 @@ export class AuthenticateMiddleware implements NestMiddleware {
       throw new BadRequestException(USERS_MESSAGES.USER_NOT_FOUND);
     }
 
-    if (user.status === false) {
+    if (user.deleted === true) {
       throw new BadRequestException(USERS_MESSAGES.USER_IS_BANNED);
     }
 

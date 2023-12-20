@@ -32,6 +32,7 @@ import { IUserRequest } from '@src/interfaces';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { UpdateFullFieldUserDto } from './dto/update-full-field-user.dto';
 import { ROUTES } from '@src/constants';
 
 @ApiTags('Users')
@@ -106,6 +107,15 @@ export class UserController {
           type: 'string',
           nullable: true,
         },
+        sex: {
+          type: 'string',
+          enum: ['MALE', 'FEMALE', 'NONE'],
+          nullable: true,
+        },
+        studentId: {
+          type: 'number',
+          nullable: true,
+        },
         avatar: {
           type: 'string',
           format: 'binary',
@@ -130,5 +140,67 @@ export class UserController {
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.userService.remove(id);
+  }
+
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        firstName: {
+          type: 'string',
+          nullable: true,
+        },
+        lastName: {
+          type: 'string',
+          nullable: true,
+        },
+        password: {
+          type: 'string',
+          nullable: true,
+        },
+        phoneNumber: {
+          type: 'string',
+          nullable: true,
+        },
+        address: {
+          type: 'string',
+          nullable: true,
+        },
+        sex: {
+          type: 'string',
+          enum: ['MALE', 'FEMALE', 'NONE'],
+          nullable: true,
+        },
+        role: {
+          type: 'string',
+          enum: ['ADMIN', 'STUDENT', 'TEACHER'],
+          nullable: true,
+        },
+        verify: {
+          type: 'string',
+          enum: ['VERIFY', 'UNVERIFY'],
+          nullable: true,
+        },
+        studentId: {
+          type: 'number',
+          nullable: true,
+        },
+        avatar: {
+          type: 'string',
+          format: 'binary',
+          nullable: true,
+        },
+      },
+    },
+  })
+  @ApiConsumes('multipart/form-data')
+  @Patch(':id')
+  @UseInterceptors(FileInterceptor('avatar'))
+  updateFullField(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateFullFieldUserDto: UpdateFullFieldUserDto,
+    @UploadedFile() avatar: Express.Multer.File,
+  ) {
+    return this.userService.updateFullField(id, updateFullFieldUserDto, avatar);
   }
 }

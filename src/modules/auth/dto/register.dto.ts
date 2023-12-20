@@ -14,12 +14,12 @@ export class RegisterDto {
   @EmailField({
     example: 'quanghuynh@gmail.com',
   })
-  email!: string;
+  email: string;
 
   @PasswordField({
     example: 'password',
   })
-  password!: string;
+  password: string;
 
   @StringField({
     example: '0796694097',
@@ -29,5 +29,5 @@ export class RegisterDto {
   @StringField({
     example: 'Đà Nẵng',
   })
-  address!: string;
+  address: string;
 }
