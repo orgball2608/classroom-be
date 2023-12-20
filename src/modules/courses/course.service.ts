@@ -180,7 +180,7 @@ export class CourseService {
       where: {
         id: userId,
       },
-      select: {
+      include: {
         enrollments: {
           select: {
             student: {
@@ -190,6 +190,9 @@ export class CourseService {
                 avatar: true,
                 firstName: true,
                 lastName: true,
+                address: true,
+                phoneNumber: true,
+                studentId: true,
               },
             },
           },
@@ -203,6 +206,8 @@ export class CourseService {
                 avatar: true,
                 firstName: true,
                 lastName: true,
+                address: true,
+                phoneNumber: true,
               },
             },
           },
@@ -329,6 +334,14 @@ export class CourseService {
     };
   }
 
+  async checkCourse(courseId: number) {
+    const course = await this.findOne(courseId);
+    if (!course) {
+      throw new NotFoundException(COURSES_MESSAGES.COURSE_NOT_FOUND);
+    }
+    return course.data;
+  }
+
   async leaveCourse(userId: number, course: Course, courseId: number) {
     if (course.createdById === userId) {
       throw new ForbiddenException(
@@ -402,16 +415,7 @@ export class CourseService {
     role: EnrollmentRole,
     fullName: string,
   ) {
-    const course = await this.prisma.course.findUnique({
-      where: {
-        id: courseId,
-      },
-    });
-
-    if (!course) {
-      throw new NotFoundException(COURSES_MESSAGES.COURSE_NOT_FOUND);
-    }
-
+    const course = await this.checkCourse(courseId);
     const user = await this.prisma.course.findUnique({
       where: {
         id: courseId,
@@ -498,15 +502,7 @@ export class CourseService {
         );
       }
 
-      const course = await this.prisma.course.findUnique({
-        where: {
-          id: courseId,
-        },
-      });
-
-      if (!course) {
-        throw new NotFoundException(COURSES_MESSAGES.COURSE_NOT_FOUND);
-      }
+      const course = await this.checkCourse(courseId);
 
       const userCourse = await this.prisma.course.findUnique({
         where: {
@@ -542,46 +538,44 @@ export class CourseService {
       }
 
       if (role === EnrollmentRole.STUDENT) {
-        const enrollment = await this.prisma.enrollment.create({
-          data: {
-            course: {
-              connect: {
-                id: courseId,
-              },
-            },
-            createdBy: {
-              connect: {
-                id: course.createdById,
-              },
-            },
-            student: {
-              connect: {
-                id: user.id,
-              },
-            },
-          },
-          select: {
-            course: {
-              select: {
-                id: true,
-                name: true,
-                code: true,
-                description: true,
-                avatar: true,
-                createdBy: true,
-              },
-            },
-          },
-        });
+        const result = await this.enrollToCourse(user, course, courseId);
 
-        return {
-          message: COURSES_MESSAGES.ENROLLED_TO_COURSE_SUCCESSFULLY,
-          data: enrollment.course,
-        };
+        // const enrollment = await this.prisma.enrollment.create({
+        //   data: {
+        //     course: {
+        //       connect: {
+        //         id: courseId,
+        //       },
+        //     },
+        //     createdBy: {
+        //       connect: {
+        //         id: course.createdById,
+        //       },
+        //     },
+        //     student: {
+        //       connect: {
+        //         id: user.id,
+        //       },
+        //     },
+        //   },
+        //   select: {
+        //     course: {
+        //       select: {
+        //         id: true,
+        //         name: true,
+        //         code: true,
+        //         description: true,
+        //         avatar: true,
+        //         createdBy: true,
+        //       },
+        //     },
+        //   },
+        // });
+        return result;
       }
 
       if (role === EnrollmentRole.TEACHER) {
-        const course = await this.prisma.courseTeacher.create({
+        const result = await this.prisma.courseTeacher.create({
           data: {
             course: {
               connect: {
@@ -594,7 +588,7 @@ export class CourseService {
               },
             },
           },
-          select: {
+          include: {
             course: {
               select: {
                 id: true,
@@ -608,9 +602,20 @@ export class CourseService {
           },
         });
 
+        const notificationData = {
+          userId: course.createdBy,
+          title: 'New enrollment to your course',
+          body: `${user.firstName} ${user.lastName} enrolled to course ${course.name}`,
+        };
+
+        this.emitterEvent.emit(EMIT_MESSAGES.NOTIFICATION_CREATED, {
+          userId: course.createdById,
+          notificationData,
+        });
+
         return {
           message: COURSES_MESSAGES.ENROLLED_TO_COURSE_SUCCESSFULLY,
-          data: course,
+          data: result,
         };
       }
 
@@ -620,5 +625,11 @@ export class CourseService {
     } catch (error) {
       throw new BadRequestException(COURSES_MESSAGES.INVALID_TOKEN);
     }
+  }
+
+  async removeUserInCourse(userId: number, course: Course, courseId: number) {
+    const result = await this.leaveCourse(userId, course, courseId);
+    result.message = COURSES_MESSAGES.REMOVE_USER_IN_COURSE_SUCCESSFULLY;
+    return result;
   }
 }
