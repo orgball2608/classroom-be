@@ -373,7 +373,6 @@ export class CourseService {
         courseTeachers: true,
       },
     });
-    console.log(courseId, userId);
 
     if (!enrollment) {
       throw new NotFoundException(
@@ -540,7 +539,6 @@ export class CourseService {
 
       if (role === EnrollmentRole.STUDENT) {
         const result = await this.enrollToCourse(user, course, courseId);
-        console.log(result);
 
         // const enrollment = await this.prisma.enrollment.create({
         //   data: {

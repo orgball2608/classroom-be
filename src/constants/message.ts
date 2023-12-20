@@ -49,7 +49,7 @@ export const COURSES_MESSAGES = {
   GET_USERS_IN_COURSE_SUCCESSFULLY: 'Get users in course successfully',
   INVALID_COURSE_ID: 'Invalid course id',
   USER_NOT_IN_COURSE: 'User not in course',
-  USER_ENROLLED_COURSE: 'User in course',
+  USER_ENROLLED_COURSE: 'User enrolled course',
   ENROLLED_TO_COURSE_SUCCESSFULLY: 'Enrolled to course successfully',
   LEAVE_COURSE_SUCCESSFULLY: 'Leave course successfully',
   YOU_NOT_ENROLLED_IN_THIS_COURSE: 'You not enrolled in this course',
