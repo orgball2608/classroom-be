@@ -24,7 +24,7 @@ model User {
   avatar              String?      @map("avatar")
   verifyEmailToken    String?      @map("verify_email_token")
   forgotPasswordToken String?      @map("forgot_password_token")
-  studentId           Int?         @unique @map("student_id")
+  studentId           String?      @unique @map("student_id")
   verify              VerifyStatus @default(UNVERIFY)
   sex                 Sex          @default(NONE)
   role                UserRole     @default(STUDENT)
@@ -140,7 +140,7 @@ model GradeComposition {
 
 model Grade {
   id                 Int     @id @default(autoincrement())
-  studentId          Int     @map("student_id")
+  studentId          String  @map("student_id")
   gradeCompositionId Int     @map("grade_composition_id")
   grade              Float
   createdById        Int     @map("created_by_id")
