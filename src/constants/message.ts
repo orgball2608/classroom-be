@@ -25,6 +25,10 @@ export const USERS_MESSAGES = {
   RESET_PASSWORD_SUCCESSFUL: 'Reset password successful',
   ACCOUNT_IS_VERIFIED: 'Account is verified, cant verify again',
   USER_IS_BANNED: 'User is banned',
+  MAP_STUDENT_ID_WITH_USER_ID_SUCCESSFULLY:
+    'Map student id with user id successfully',
+  UN_MAP_STUDENT_ID_WITH_USER_ID_SUCCESSFULLY:
+    'Un map student id with user id successfully',
 } as const;
 
 export const TOKEN_MESSAGES = {

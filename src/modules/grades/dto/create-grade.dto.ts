@@ -1,10 +1,10 @@
-import { NumberField } from '@src/decorators';
+import { NumberField, StringField } from '@src/decorators';
 
 export class CreateGradeDto {
-  @NumberField({
-    example: 2012055,
+  @StringField({
+    example: '2012055',
   })
-  studentId: number;
+  studentId: string;
 
   @NumberField({
     example: 10,

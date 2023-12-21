@@ -1,9 +1,9 @@
-import { NumberFieldOptional, StringFieldOptional } from '@src/decorators';
 import { OmitType, PartialType } from '@nestjs/swagger';
 
 import { IsOptional } from 'class-validator';
 import { RegisterDto } from '@src/modules/auth/dto/register.dto';
 import { Sex } from '@prisma/client';
+import { StringFieldOptional } from '@src/decorators';
 
 export class UpdateUserDto extends PartialType(
   OmitType(RegisterDto, ['email', 'password']),
@@ -25,11 +25,6 @@ export class UpdateUserDto extends PartialType(
 
   @IsOptional()
   address: string;
-
-  @NumberFieldOptional({
-    example: 2012055,
-  })
-  studentId: number;
 
   @StringFieldOptional({
     enum: Sex,
