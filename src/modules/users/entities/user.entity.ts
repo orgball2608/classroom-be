@@ -34,7 +34,7 @@ export class UserEntity extends AbstractEntity {
   @ApiProperty({
     type: String,
     enum: UserRole,
-    example: UserRole.USER,
+    example: UserRole.STUDENT,
   })
   role: UserRole;
 }
