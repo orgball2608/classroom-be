@@ -34,6 +34,8 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { UpdateFullFieldUserDto } from './dto/update-full-field-user.dto';
 import { ROUTES } from '@src/constants';
+import { MapStudentIdWithUserIdDto } from './dto/map-student-id.dto';
+import { ApiDelete, ApiUpdate } from '@src/decorators';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -87,6 +89,18 @@ export class UserController {
     return this.userService.changePassword(id, changePasswordDto);
   }
 
+  @Patch('student-id')
+  @ApiBody({ type: MapStudentIdWithUserIdDto })
+  updateStudentId(
+    @Req() req: IUserRequest,
+    @Body() mapStudentIdWithUserIdDto: MapStudentIdWithUserIdDto,
+  ) {
+    return this.userService.mapStudentIdWithUserId(
+      req.user.id,
+      mapStudentIdWithUserIdDto,
+    );
+  }
+
   @ApiBody({
     schema: {
       type: 'object',
@@ -110,10 +124,6 @@ export class UserController {
         sex: {
           type: 'string',
           enum: ['MALE', 'FEMALE', 'NONE'],
-          nullable: true,
-        },
-        studentId: {
-          type: 'number',
           nullable: true,
         },
         avatar: {
@@ -181,10 +191,6 @@ export class UserController {
           enum: ['VERIFY', 'UNVERIFY'],
           nullable: true,
         },
-        studentId: {
-          type: 'number',
-          nullable: true,
-        },
         avatar: {
           type: 'string',
           format: 'binary',
@@ -202,5 +208,23 @@ export class UserController {
     @UploadedFile() avatar: Express.Multer.File,
   ) {
     return this.userService.updateFullField(id, updateFullFieldUserDto, avatar);
+  }
+
+  @Patch(':id/student-id')
+  @ApiUpdate(MapStudentIdWithUserIdDto, UserEntity)
+  updateStudentIdWithUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() mapStudentIdWithUserIdDto: MapStudentIdWithUserIdDto,
+  ) {
+    return this.userService.mapStudentIdWithUserId(
+      id,
+      mapStudentIdWithUserIdDto,
+    );
+  }
+
+  @Delete(':id/student-id')
+  @ApiDelete()
+  deleteStudentId(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.unMapStudentId(id);
   }
 }
