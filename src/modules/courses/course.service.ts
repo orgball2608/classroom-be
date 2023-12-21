@@ -5,9 +5,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { COURSES_MESSAGES, USERS_MESSAGES } from '@src/constants/message';
-import { Course, CourseTeacher, User } from '@prisma/client';
+import { CourseTeacher, User } from '@prisma/client';
 
 import { ConfigService } from '@nestjs/config';
+import { Course } from './entities/course.entity';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { EMIT_MESSAGES } from '@src/constants';
 import { EnrollmentRole } from './course.enum';
@@ -319,7 +320,8 @@ export class CourseService {
     });
 
     const notificationData = {
-      userId: course.createdById,
+      user: course.createdBy,
+      creatorId: user.id,
       title: 'New enrollment to your course',
       body: `${user.firstName} ${user.lastName} enrolled to course ${course.name}`,
     };
