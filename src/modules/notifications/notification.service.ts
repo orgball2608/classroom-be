@@ -3,6 +3,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { NOTIFICATION_MESSAGES } from '@src/constants';
 import { NotificationStatus } from '@prisma/client';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
+import { SimpleUserEntity } from './../../common/entity/simple-user.entity';
 
 @Injectable()
 export class NotificationService {
@@ -12,14 +13,26 @@ export class NotificationService {
       where: {
         userId,
       },
+      include: {
+        creator: true,
+      },
       orderBy: {
         createdAt: 'desc',
       },
     });
 
+    const response = notifications.map((notification) => {
+      const { creator: creatorData, ...rest } = notification;
+      const creator = new SimpleUserEntity(creatorData);
+      return {
+        ...rest,
+        creator,
+      };
+    });
+
     return {
       message: NOTIFICATION_MESSAGES.GET_NOTIFICATIONS_SUCCESSFULLY,
-      data: notifications,
+      data: response,
     };
   }
 
@@ -29,6 +42,9 @@ export class NotificationService {
         id: notificationId,
         userId: userId,
       },
+      include: {
+        creator: true,
+      },
     });
 
     if (!notification) {
@@ -37,9 +53,16 @@ export class NotificationService {
       };
     }
 
+    const { creator: creatorData, ...rest } = notification;
+
+    const creator = new SimpleUserEntity(creatorData);
+
     return {
       message: NOTIFICATION_MESSAGES.GET_NOTIFICATION_BY_ID_SUCCESSFULLY,
-      data: notification,
+      data: {
+        ...rest,
+        creator,
+      },
     };
   }
 

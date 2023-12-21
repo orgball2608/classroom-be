@@ -1,7 +1,9 @@
 import { ApiExtraModels, ApiOkResponse, getSchemaPath } from '@nestjs/swagger';
+import {
+  ApiResponseArrayEntity,
+  ApiResponseEntity,
+} from '@src/common/entity/response.entity';
 import { Type, applyDecorators } from '@nestjs/common';
-
-import { ApiResponseEntity } from '@src/common/entity/response.entity';
 
 export const ApiResponseWithMessage = <DataDto extends Type<unknown>>(
   dataDto: DataDto,
@@ -16,6 +18,30 @@ export const ApiResponseWithMessage = <DataDto extends Type<unknown>>(
             properties: {
               data: {
                 $ref: getSchemaPath(dataDto),
+              },
+            },
+          },
+        ],
+      },
+    }),
+  );
+
+export const ApiResponseArrayDataWithMessage = <DataDto extends Type<unknown>>(
+  dataDto: DataDto,
+) =>
+  applyDecorators(
+    ApiExtraModels(ApiResponseArrayEntity, dataDto),
+    ApiOkResponse({
+      schema: {
+        allOf: [
+          { $ref: getSchemaPath(ApiResponseArrayEntity) },
+          {
+            properties: {
+              data: {
+                type: 'array',
+                items: {
+                  $ref: getSchemaPath(dataDto),
+                },
               },
             },
           },
