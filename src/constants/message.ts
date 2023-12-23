@@ -29,6 +29,7 @@ export const USERS_MESSAGES = {
     'Map student id with user id successfully',
   UN_MAP_STUDENT_ID_WITH_USER_ID_SUCCESSFULLY:
     'Un map student id with user id successfully',
+  GET_USERS_LIST_SUCCESSFULLY: 'Get users successfully',
 } as const;
 
 export const TOKEN_MESSAGES = {
