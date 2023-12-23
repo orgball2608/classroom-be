@@ -59,6 +59,8 @@ export default registerAs<AppConfig>('app', () => {
     apiVersion: process.env.API_VERSION || 'v1',
     appURL: process.env.APP_URL || 'http://localhost:3001',
     frontendURL: process.env.FRONTEND_URL || 'http://localhost:3000',
+    adminFrontendURL:
+      process.env.ADMIN_FRONTEND_URL || 'http://localhost:3030/admin',
     documentEnabled: process.env.DOCUMENT_ENABLED === 'true',
   };
 });
