@@ -15,7 +15,6 @@ export class RoleCheckerMiddleware implements NestMiddleware {
 
   use(req: IUserRequest, res: Response, next: () => void) {
     const userRole = req.user.role;
-
     const hasRole = () => this.allowedRoles.includes(userRole);
 
     if (hasRole()) {

@@ -36,17 +36,49 @@ export class UserService {
   ) {}
 
   async findAll(pageOptionsDto: UsersPageOptionsDto) {
-    const { skip, take, order } = pageOptionsDto;
+    const { skip, take, order, search } = pageOptionsDto;
+    //search by name or email if search is not null
+    let whereClause = {};
 
-    const itemCount = await this.prisma.user.count();
+    if (search !== ' ' && search.length > 0) {
+      //search by name or email
+      const searchQuery = search.trim();
+      whereClause = {
+        OR: [
+          {
+            firstName: {
+              contains: searchQuery,
+              mode: 'insensitive',
+            },
+          },
+          {
+            lastName: {
+              contains: searchQuery,
+              mode: 'insensitive',
+            },
+          },
+          {
+            email: {
+              contains: searchQuery,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      };
+    }
+    // eslint-disable-next-line prettier/prettier
+    const itemCount = await this.prisma.user.count({
+      where: whereClause,
+    });
+
     const users = await this.prisma.user.findMany({
       skip,
       take,
+      where: whereClause,
       orderBy: {
         createdAt: order,
       },
     });
-
     const pageMetaDto = new PageMetaDto({
       itemCount,
       pageOptionsDto,

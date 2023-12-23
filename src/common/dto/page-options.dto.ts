@@ -32,4 +32,9 @@ export class PageOptionsDto {
 
   @StringFieldOptional()
   readonly q?: string;
+
+  @StringFieldOptional({
+    minLength: 0,
+  })
+  readonly search?: string;
 }
