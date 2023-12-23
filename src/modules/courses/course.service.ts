@@ -540,38 +540,6 @@ export class CourseService {
 
       if (role === EnrollmentRole.STUDENT) {
         const result = await this.enrollToCourse(user, course, courseId);
-
-        // const enrollment = await this.prisma.enrollment.create({
-        //   data: {
-        //     course: {
-        //       connect: {
-        //         id: courseId,
-        //       },
-        //     },
-        //     createdBy: {
-        //       connect: {
-        //         id: course.createdById,
-        //       },
-        //     },
-        //     student: {
-        //       connect: {
-        //         id: user.id,
-        //       },
-        //     },
-        //   },
-        //   select: {
-        //     course: {
-        //       select: {
-        //         id: true,
-        //         name: true,
-        //         code: true,
-        //         description: true,
-        //         avatar: true,
-        //         createdBy: true,
-        //       },
-        //     },
-        //   },
-        // });
         return result;
       }
 

@@ -78,6 +78,18 @@ export class AppModule implements NestModule {
           path: 'metrics',
           method: RequestMethod.GET,
         },
+        {
+          path: 'users/forgot-password',
+          method: RequestMethod.POST,
+        },
+        {
+          path: 'users/verify/forgot-password',
+          method: RequestMethod.GET,
+        },
+        {
+          path: 'users/reset-password',
+          method: RequestMethod.POST,
+        },
       )
       .forRoutes('*');
   }

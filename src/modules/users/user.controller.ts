@@ -52,25 +52,29 @@ export class UserController {
     return this.userService.findAll(pageOptionsDto);
   }
 
-  @ApiParam({ name: 'id', type: Number, example: 1 })
-  @ApiOkResponse({ type: UserEntity })
-  @Get(':id')
-  async findOne(@Param('id', ParseIntPipe) id: number): Promise<UserEntity> {
-    return omit(await this.userService.findOne(id), ['password']);
-  }
-
   @Post('forgot-password')
   forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
     return this.userService.forgotPassword(forgotPasswordDto);
   }
 
-  @Get('verify-forgot-password')
+  @Get('verify/forgot-password')
   @Redirect()
-  verifyForgotPassword(@Query('token') token: string) {
-    const url = this.userService.verifyForgotPassword(token);
+  verifyForgotPassword(
+    @Req() req: IUserRequest,
+    @Query('token') token: string,
+  ) {
+    const role = req.user?.role;
+    const url = this.userService.verifyForgotPassword(token, role);
     return {
       url: url,
     };
+  }
+
+  @ApiParam({ name: 'id', type: Number, example: 1 })
+  @ApiOkResponse({ type: UserEntity })
+  @Get(':id')
+  async findOne(@Param('id', ParseIntPipe) id: number): Promise<UserEntity> {
+    return omit(await this.userService.findOne(id), ['password']);
   }
 
   @ApiBody({ type: ResetPasswordDto })
@@ -135,7 +139,7 @@ export class UserController {
     },
   })
   @ApiConsumes('multipart/form-data')
-  @Patch('me')
+  @Patch('me/update')
   @UseInterceptors(FileInterceptor('avatar'))
   update(
     @Req() req: IUserRequest,

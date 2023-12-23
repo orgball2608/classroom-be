@@ -53,16 +53,15 @@ export class UserService {
     });
 
     const filteredUsers = users.map((user) =>
-      _.omit(user, [
-        'password',
-        'status',
-        'forgotPasswordToken',
-        'verifyEmailToken',
-        'verify',
-      ]),
+      _.omit(user, ['password', 'forgotPasswordToken', 'verifyEmailToken']),
     );
 
-    return new PageDto(filteredUsers, pageMetaDto);
+    const result = new PageDto(filteredUsers, pageMetaDto);
+
+    return {
+      message: USERS_MESSAGES.GET_USERS_LIST_SUCCESSFULLY,
+      data: result,
+    };
   }
 
   async findOne(id: number): Promise<User> {
@@ -100,10 +99,9 @@ export class UserService {
       this.config.getOrThrow<string>('app.apiPrefix') +
       '/' +
       this.config.getOrThrow<string>('app.apiVersion');
-
     const resetLink = `${this.config.getOrThrow(
       'app.appURL',
-    )}/${apiPrefix}/users/verify-forgot-password?token=${token}`;
+    )}/${apiPrefix}/users/verify/forgot-password?token=${token}`;
 
     return this.mailerService.sendMail({
       to: email,
@@ -148,8 +146,11 @@ export class UserService {
     };
   }
 
-  verifyForgotPassword(token: string) {
-    const frontendURL = this.config.get('app.frontendURL');
+  verifyForgotPassword(token: string, role: string) {
+    const frontendURL =
+      role !== 'ADMIN'
+        ? this.config.get('app.frontendURL')
+        : this.config.get('app.adminFrontendURL');
     return `${frontendURL}/reset-password?token=${token}`;
   }
 
