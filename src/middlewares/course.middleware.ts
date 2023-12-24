@@ -27,6 +27,17 @@ export class CourseMiddleware implements NestMiddleware {
       where: {
         id: courseIdNumber,
       },
+      include: {
+        createdBy: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            avatar: true,
+          },
+        },
+      },
     });
 
     if (!course) {
@@ -46,7 +57,7 @@ export class CourseMiddleware implements NestMiddleware {
           {
             enrollments: {
               some: {
-                studentId: userId,
+                userId: userId,
               },
             },
           },

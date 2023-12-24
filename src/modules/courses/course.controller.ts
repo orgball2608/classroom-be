@@ -24,9 +24,10 @@ import {
 import { ICourseRequest, IUserRequest } from '@src/interfaces';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Course } from './entities/course.entity';
-import { ApiResponseWithMessage } from '@src/decorators';
+import { ApiDelete, ApiResponseWithMessage } from '@src/decorators';
 import { COURSES_MESSAGES, ROUTES } from '@src/constants';
 import { InviteEmailDto } from './dto/invite-email.dto';
+import { MapStudentIdWithUserIdDto } from './dto/map-student-id.dto';
 
 @ApiTags('Courses')
 @ApiBearerAuth()
@@ -187,5 +188,34 @@ export class CourseController {
     @Param('userId', ParseIntPipe) userId: number,
   ) {
     return this.courseService.removeUserInCourse(userId, req.course, courseId);
+  }
+
+  @Patch('student-id')
+  @ApiBody({ type: MapStudentIdWithUserIdDto })
+  updateStudentId(
+    @Req() req: IUserRequest,
+    @Body() mapStudentIdWithUserIdDto: MapStudentIdWithUserIdDto,
+  ) {
+    return this.courseService.mapStudentIdWithUserId(
+      req.user.id,
+      mapStudentIdWithUserIdDto,
+    );
+  }
+
+  @Patch(':id/student-id')
+  updateStudentIdWithUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() mapStudentIdWithUserIdDto: MapStudentIdWithUserIdDto,
+  ) {
+    return this.courseService.mapStudentIdWithUserId(
+      id,
+      mapStudentIdWithUserIdDto,
+    );
+  }
+
+  @Delete(':id/student-id')
+  @ApiDelete()
+  deleteStudentId(@Param('id', ParseIntPipe) id: number) {
+    return this.courseService.unMapStudentId(id);
   }
 }

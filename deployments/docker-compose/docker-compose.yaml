@@ -2,6 +2,7 @@ version: '3.7'
 
 services:
   postgres:
+    container_name: postgres
     image: postgres:16-alpine
     restart: always
     environment:
@@ -11,23 +12,24 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
     ports:
-      - '5432:5432'
+      - 5432:5432
     networks:
       - elearning
 
   redis:
+    container_name: redis
     image: redis/redis-stack:latest
     pull_policy: if_not_present
     restart: on-failure
-    container_name: redis
     ports:
-      - '6379:6379'
+      - 6379:6379
     volumes:
       - redis:/data
     networks:
       - elearning
 
   nestjs:
+    container_name: nestjs
     build:
       context: ../../
       dockerfile: Dockerfile
@@ -36,7 +38,7 @@ services:
     env_file:
       - ../../.env.docker
     ports:
-      - '3001:3001'
+      - 3001:3001
     volumes:
       - .:/usr/src/app
     depends_on:

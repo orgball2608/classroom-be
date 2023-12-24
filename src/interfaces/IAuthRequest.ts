@@ -4,6 +4,7 @@ import type { Request as ExpressRequest } from 'express';
 import { Profile as FaceBookProfile } from 'passport-facebook';
 import { Profile as GoogleProfile } from 'passport-google-oauth20';
 import type { Request as NestRequest } from '@nestjs/common';
+import { SimpleUserEntity } from '@src/common/entity/simple-user.entity';
 
 export interface IOAuthRequestUser {
   profile: GoogleProfile | FaceBookProfile;
@@ -16,7 +17,7 @@ export interface IUserRequest extends CombinedRequest {
 }
 
 export interface ICourseRequest extends IUserRequest {
-  course: Course;
+  course: Course & { createdBy: SimpleUserEntity };
 }
 
 export interface IGradeCompositionRequest extends ICourseRequest {
