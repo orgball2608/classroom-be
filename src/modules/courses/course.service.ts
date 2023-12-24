@@ -607,11 +607,15 @@ export class CourseService {
 
   async mapStudentIdWithUserId(
     userId: number,
+    courseId: number,
     mapStudentIdWithUserIdDto: MapStudentIdWithUserIdDto,
   ) {
     await this.prisma.enrollment.update({
       where: {
-        id: userId,
+        userId_courseId: {
+          courseId: courseId,
+          userId: userId,
+        },
       },
       data: {
         studentId: mapStudentIdWithUserIdDto.studentId,
@@ -623,10 +627,13 @@ export class CourseService {
     };
   }
 
-  async unMapStudentId(id: number) {
+  async unMapStudentId(userId: number, courseId: number) {
     await this.prisma.enrollment.update({
       where: {
-        id,
+        userId_courseId: {
+          courseId: courseId,
+          userId: userId,
+        },
       },
       data: {
         studentId: null,
