@@ -12,6 +12,17 @@ export class NotificationService {
       where: {
         userId,
       },
+      include: {
+        creator: {
+          select: {
+            id: true,
+            email: true,
+            avatar: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
       orderBy: {
         createdAt: 'desc',
       },
@@ -28,6 +39,17 @@ export class NotificationService {
       where: {
         id: notificationId,
         userId: userId,
+      },
+      include: {
+        creator: {
+          select: {
+            id: true,
+            email: true,
+            avatar: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
       },
     });
 

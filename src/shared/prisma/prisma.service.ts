@@ -32,8 +32,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
   ) => {
     if (
       params.model ===
-      (Prisma.ModelName.User ||
-        Prisma.ModelName.Course ||
+      (Prisma.ModelName.Course ||
         Prisma.ModelName.GradeComposition ||
         Prisma.ModelName.Grade)
     ) {
