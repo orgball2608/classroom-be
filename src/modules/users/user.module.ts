@@ -30,10 +30,7 @@ export class UserModule implements NestModule {
 
     consumer
       .apply(RoleChecker([UserRole.ADMIN]))
-      .exclude({
-        path: 'users/student-id',
-        method: RequestMethod.PATCH,
-      })
+
       .forRoutes(
         { path: 'users', method: RequestMethod.GET },
         {
@@ -45,11 +42,7 @@ export class UserModule implements NestModule {
           method: RequestMethod.PATCH,
         },
         {
-          path: 'users/:id/student-id',
-          method: RequestMethod.PATCH,
-        },
-        {
-          path: 'users/student-id',
+          path: 'users/:id/ban',
           method: RequestMethod.DELETE,
         },
       );

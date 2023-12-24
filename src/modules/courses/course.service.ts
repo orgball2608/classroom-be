@@ -15,6 +15,7 @@ import { EnrollmentRole } from './course.enum';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
+import { MapStudentIdWithUserIdDto } from './dto/map-student-id.dto';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { StorageService } from '@src/shared/storage/services/storage.service';
 import { UpdateCourseDto } from './dto/update-course.dto';
@@ -87,7 +88,7 @@ export class CourseService {
       where: {
         enrollments: {
           some: {
-            studentId: studentId,
+            userId: studentId,
           },
         },
       },
@@ -193,7 +194,6 @@ export class CourseService {
                 lastName: true,
                 address: true,
                 phoneNumber: true,
-                studentId: true,
               },
             },
           },
@@ -230,7 +230,7 @@ export class CourseService {
           {
             enrollments: {
               some: {
-                studentId: userId,
+                userId: userId,
               },
             },
           },
@@ -255,7 +255,7 @@ export class CourseService {
         },
         enrollments: {
           select: {
-            studentId: true,
+            userId: true,
             createdAt: true,
           },
         },
@@ -282,7 +282,7 @@ export class CourseService {
           };
         } else {
           const joinedAt = course.enrollments.find(
-            (enrollment) => enrollment.studentId === userId,
+            (enrollment) => enrollment.userId === userId,
           ).createdAt;
           return {
             ...course,
@@ -320,7 +320,7 @@ export class CourseService {
     });
 
     const notificationData = {
-      user: course.createdBy,
+      userId: course.createdBy.id,
       creatorId: user.id,
       title: 'New enrollment to your course',
       body: `${user.firstName} ${user.lastName} enrolled to course ${course.name}`,
@@ -359,7 +359,7 @@ export class CourseService {
           {
             enrollments: {
               some: {
-                studentId: userId,
+                userId: userId,
               },
             },
           },
@@ -399,9 +399,9 @@ export class CourseService {
     } else {
       await this.prisma.enrollment.delete({
         where: {
-          studentId_courseId: {
+          userId_courseId: {
             courseId: courseId,
-            studentId: userId,
+            userId: userId,
           },
         },
       });
@@ -600,7 +600,40 @@ export class CourseService {
 
   async removeUserInCourse(userId: number, course: Course, courseId: number) {
     const result = await this.leaveCourse(userId, course, courseId);
-    result.message = COURSES_MESSAGES.REMOVE_USER_IN_COURSE_SUCCESSFULLY;
+
     return result;
+  }
+
+  async mapStudentIdWithUserId(
+    userId: number,
+    mapStudentIdWithUserIdDto: MapStudentIdWithUserIdDto,
+  ) {
+    await this.prisma.enrollment.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        studentId: mapStudentIdWithUserIdDto.studentId,
+      },
+    });
+
+    return {
+      message: USERS_MESSAGES.MAP_STUDENT_ID_WITH_USER_ID_SUCCESSFULLY,
+    };
+  }
+
+  async unMapStudentId(id: number) {
+    await this.prisma.enrollment.update({
+      where: {
+        id,
+      },
+      data: {
+        studentId: null,
+      },
+    });
+
+    return {
+      message: USERS_MESSAGES.UN_MAP_STUDENT_ID_WITH_USER_ID_SUCCESSFULLY,
+    };
   }
 }

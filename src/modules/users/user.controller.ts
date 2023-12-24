@@ -34,8 +34,6 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { UpdateFullFieldUserDto } from './dto/update-full-field-user.dto';
 import { ROUTES } from '@src/constants';
-import { MapStudentIdWithUserIdDto } from './dto/map-student-id.dto';
-import { ApiDelete, ApiUpdate } from '@src/decorators';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -93,18 +91,6 @@ export class UserController {
     return this.userService.changePassword(id, changePasswordDto);
   }
 
-  @Patch('student-id')
-  @ApiBody({ type: MapStudentIdWithUserIdDto })
-  updateStudentId(
-    @Req() req: IUserRequest,
-    @Body() mapStudentIdWithUserIdDto: MapStudentIdWithUserIdDto,
-  ) {
-    return this.userService.mapStudentIdWithUserId(
-      req.user.id,
-      mapStudentIdWithUserIdDto,
-    );
-  }
-
   @ApiBody({
     schema: {
       type: 'object',
@@ -148,12 +134,6 @@ export class UserController {
   ) {
     const id = req.user.id;
     return this.userService.update(id, updateUserDto, avatar);
-  }
-
-  @ApiParam({ name: 'id', type: Number, example: 1 })
-  @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.userService.remove(id);
   }
 
   @ApiBody({
@@ -214,21 +194,15 @@ export class UserController {
     return this.userService.updateFullField(id, updateFullFieldUserDto, avatar);
   }
 
-  @Patch(':id/student-id')
-  @ApiUpdate(MapStudentIdWithUserIdDto, UserEntity)
-  updateStudentIdWithUser(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() mapStudentIdWithUserIdDto: MapStudentIdWithUserIdDto,
-  ) {
-    return this.userService.mapStudentIdWithUserId(
-      id,
-      mapStudentIdWithUserIdDto,
-    );
+  @ApiParam({ name: 'id', type: Number, example: 1 })
+  @Patch(':id/ban')
+  banUser(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.banUser(id);
   }
 
-  @Delete(':id/student-id')
-  @ApiDelete()
-  deleteStudentId(@Param('id', ParseIntPipe) id: number) {
-    return this.userService.unMapStudentId(id);
+  @ApiParam({ name: 'id', type: Number, example: 1 })
+  @Delete(':id')
+  deleteUser(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.deleteUser(id);
   }
 }
