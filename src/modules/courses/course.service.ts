@@ -13,6 +13,7 @@ import { CreateCourseDto } from './dto/create-course.dto';
 import { EMIT_MESSAGES } from '@src/constants';
 import { EnrollmentRole } from './course.enum';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { INotification } from '@src/interfaces';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { MapStudentIdWithUserIdDto } from './dto/map-student-id.dto';
@@ -319,7 +320,7 @@ export class CourseService {
       },
     });
 
-    const notificationData = {
+    const notificationData: INotification = {
       userId: course.createdBy.id,
       creatorId: user.id,
       title: 'New enrollment to your course',
