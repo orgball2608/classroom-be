@@ -5,14 +5,13 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 
-import { CreateNotificationDto } from './dto/create-notification.dto';
 import { OnEvent } from '@nestjs/event-emitter';
 import { PrismaService } from '../prisma/prisma.service';
 import { EMIT_MESSAGES, PROVIDERS, SOCKET_MESSAGES } from '@src/constants';
 import { Server } from 'socket.io';
 import { Inject } from '@nestjs/common';
 import { IGatewaySessionManager } from './gateway.session';
-import { IAuthenticatedSocket } from '@src/interfaces';
+import { IAuthenticatedSocket, INotification } from '@src/interfaces';
 import _ from 'lodash';
 
 @WebSocketGateway({
@@ -56,7 +55,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @OnEvent(EMIT_MESSAGES.NOTIFICATION_CREATED)
   async sendPush(payload: {
     userId: number;
-    notificationData: CreateNotificationDto;
+    notificationData: INotification;
   }): Promise<void> {
     const message = await this.prisma.notification.create({
       data: payload.notificationData,
