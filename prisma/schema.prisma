@@ -24,7 +24,6 @@ model User {
   avatar              String?      @map("avatar")
   verifyEmailToken    String?      @map("verify_email_token")
   forgotPasswordToken String?      @map("forgot_password_token")
-  studentId           String?      @unique @map("student_id")
   verify              VerifyStatus @default(UNVERIFY)
   sex                 Sex          @default(NONE)
   role                UserRole     @default(STUDENT)
