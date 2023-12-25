@@ -23,10 +23,10 @@ export const createUser = async () => {
   });
 
   await prisma.user.upsert({
-    where: { email: 'admin@gmail' },
+    where: { email: 'admin@gmail.com' },
     update: {},
     create: {
-      email: 'admin@gmail',
+      email: 'admin@gmail.com',
       password: generateHash('password'),
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName(),
@@ -39,10 +39,10 @@ export const createUser = async () => {
   });
 
   await prisma.user.upsert({
-    where: { email: 'student@gmail' },
+    where: { email: 'student@gmail.com' },
     update: {},
     create: {
-      email: 'student@gmail',
+      email: 'student@gmail.com',
       password: generateHash('password'),
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName(),
