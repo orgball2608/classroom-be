@@ -50,6 +50,7 @@
     "class-validator": "0.14.0",
     "compression": "1.7.4",
     "dayjs": "^1.11.10",
+    "exceljs": "^4.4.0",
     "express-rate-limit": "7.1.5",
     "gts": "5.2.0",
     "handlebars": "4.7.8",
@@ -69,6 +70,7 @@
     "reflect-metadata": "0.2.1",
     "rxjs": "7.8.1",
     "swagger-ui-express": "5.0.0",
+    "tmp": "^0.2.1",
     "uuid": "9.0.1"
   },
   "devDependencies": {
@@ -95,6 +97,7 @@
     "@types/passport-jwt": "3.0.13",
     "@types/passport-local": "1.0.38",
     "@types/supertest": "2.0.16",
+    "@types/tmp": "^0.2.6",
     "@types/uuid": "9.0.7",
     "@typescript-eslint/eslint-plugin": "6.15.0",
     "@typescript-eslint/parser": "6.15.0",
