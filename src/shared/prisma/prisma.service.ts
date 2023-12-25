@@ -30,12 +30,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
     params: Prisma.MiddlewareParams,
     next,
   ) => {
-    if (
-      params.model ===
-      (Prisma.ModelName.Course ||
-        Prisma.ModelName.GradeComposition ||
-        Prisma.ModelName.Grade)
-    ) {
+    if (params.model === Prisma.ModelName.Course) {
       if (params.action === 'delete') {
         params.action = 'update';
         params.args['data'] = { deleted: true, deletedAt: new Date() };
