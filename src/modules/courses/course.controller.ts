@@ -24,9 +24,10 @@ import {
 import { ICourseRequest, IUserRequest } from '@src/interfaces';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Course } from './entities/course.entity';
-import { ApiResponseWithMessage } from '@src/decorators';
+import { ApiDelete, ApiResponseWithMessage } from '@src/decorators';
 import { COURSES_MESSAGES, ROUTES } from '@src/constants';
 import { InviteEmailDto } from './dto/invite-email.dto';
+import { MapStudentIdWithUserIdDto } from './dto/map-student-id.dto';
 
 @ApiTags('Courses')
 @ApiBearerAuth()
@@ -137,6 +138,35 @@ export class CourseController {
     return result;
   }
 
+  @Patch(':id/enrollments/student-id')
+  @ApiParam({ name: 'id', type: 'number', example: 1 })
+  @ApiBody({ type: MapStudentIdWithUserIdDto })
+  updateStudentId(
+    @Req() req: ICourseRequest,
+    @Body() mapStudentIdWithUserIdDto: MapStudentIdWithUserIdDto,
+  ) {
+    return this.courseService.mapStudentIdWithUserId(
+      req.user.id,
+      req.course.id,
+      mapStudentIdWithUserIdDto,
+    );
+  }
+
+  @Patch(':id/enrollments/:userId/student-id')
+  @ApiParam({ name: 'id', type: 'number', example: 1 })
+  @ApiParam({ name: 'userId', type: 'number', example: 1 })
+  updateStudentIdWithUser(
+    @Req() req: ICourseRequest,
+    @Param('userId', ParseIntPipe) userId: number,
+    @Body() mapStudentIdWithUserIdDto: MapStudentIdWithUserIdDto,
+  ) {
+    return this.courseService.mapStudentIdWithUserId(
+      userId,
+      req.course.id,
+      mapStudentIdWithUserIdDto,
+    );
+  }
+
   @Patch(':id/enroll')
   @ApiParam({ name: 'id', type: 'number', example: 1 })
   enrollCourse(
@@ -158,6 +188,15 @@ export class CourseController {
     @Param('id', ParseIntPipe) courseId: number,
   ) {
     return this.courseService.leaveCourse(req.user.id, req.course, courseId);
+  }
+
+  @Delete(':id/enrollments/:userId/student-id')
+  @ApiDelete()
+  deleteStudentId(
+    @Req() req: ICourseRequest,
+    @Param('userId', ParseIntPipe) userId: number,
+  ) {
+    return this.courseService.unMapStudentId(userId, req.course.id);
   }
 
   @Post('/invite/email')

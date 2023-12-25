@@ -11,7 +11,6 @@ import { ConfigService } from '@nestjs/config';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
-import { MapStudentIdWithUserIdDto } from './dto/map-student-id.dto';
 import { PageDto } from '@src/common/dto/page.dto';
 import { PageMetaDto } from '@src/common/dto/page-meta.dto';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
@@ -345,7 +344,7 @@ export class UserService {
     };
   }
 
-  async remove(id: number) {
+  async deleteUser(id: number) {
     const user = await this.prisma.user.delete({ where: { id } });
 
     if (!user) {
@@ -357,43 +356,21 @@ export class UserService {
     };
   }
 
-  async mapStudentIdWithUserId(
-    userId: number,
-    mapStudentIdWithUserIdDto: MapStudentIdWithUserIdDto,
-  ) {
-    const user: User = await this.prisma.user.update({
-      where: {
-        id: userId,
-      },
+  async banUser(id: number) {
+    const user = await this.prisma.user.update({
+      where: { id },
       data: {
-        studentId: mapStudentIdWithUserIdDto.studentId,
+        deleted: true,
+        deletedAt: new Date(),
       },
     });
 
-    return {
-      message: USERS_MESSAGES.MAP_STUDENT_ID_WITH_USER_ID_SUCCESSFULLY,
-      data: _.omit(user, [
-        'password',
-        'verifyEmailToken',
-        'forgotPasswordToken',
-        'googleId',
-        'facebookId',
-      ]),
-    };
-  }
-
-  async unMapStudentId(id: number) {
-    await this.prisma.user.update({
-      where: {
-        id,
-      },
-      data: {
-        studentId: null,
-      },
-    });
+    if (!user) {
+      throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
+    }
 
     return {
-      message: USERS_MESSAGES.UN_MAP_STUDENT_ID_WITH_USER_ID_SUCCESSFULLY,
+      message: USERS_MESSAGES.BAN_USER_SUCCESSFULLY,
     };
   }
 }

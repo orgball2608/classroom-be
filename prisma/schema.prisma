@@ -88,12 +88,13 @@ model Course {
 }
 
 model Enrollment {
-  id          Int @id @default(autoincrement())
-  courseId    Int @map("course_id")
-  studentId   Int @map("student_id")
-  createdById Int @map("created_by_id")
+  id          Int     @id @default(autoincrement())
+  courseId    Int     @map("course_id")
+  userId      Int     @map("user_id")
+  studentId   String? @map("student_id")
+  createdById Int     @map("created_by_id")
 
-  student   User   @relation(name: "student_enrollments", fields: [studentId], references: [id])
+  student   User   @relation(name: "student_enrollments", fields: [userId], references: [id])
   course    Course @relation(name: "course_students", fields: [courseId], references: [id])
   createdBy User   @relation(fields: [createdById], references: [id])
 
@@ -101,6 +102,7 @@ model Enrollment {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@unique([studentId, courseId])
+  @@unique([userId, courseId])
   @@map("enrollments")
 }
 
