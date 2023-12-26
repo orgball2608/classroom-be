@@ -41,6 +41,7 @@ export class ExcelService {
       },
       select: {
         studentId: true,
+        fullName: true,
         student: {
           select: {
             firstName: true,
@@ -53,7 +54,7 @@ export class ExcelService {
     const students = enrollments.map((enrollment): IStudentEnrollment => {
       return {
         studentId: Number(enrollment.studentId) || 0,
-        fullName: `${enrollment.student.firstName} ${enrollment.student.lastName}`,
+        fullName: enrollment.fullName,
       };
     });
 
