@@ -34,6 +34,8 @@ export class GradeCompositionService {
 
     const maxIndex = Math.max(...gradeCompositions.map((gc) => gc.index), 0);
 
+    console.log(totalScale, scale, maxIndex);
+
     if (
       totalScale + scale > 100 ||
       gradeCompositions.find(
