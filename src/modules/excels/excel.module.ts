@@ -10,9 +10,15 @@ import { ExcelService } from './excel.service';
 })
 export class ExcelModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(CourseMiddleware).forRoutes({
-      path: 'courses/:courseId/excels/enrollments/download',
-      method: RequestMethod.GET,
-    });
+    consumer.apply(CourseMiddleware).forRoutes(
+      {
+        path: 'courses/:courseId/excels/enrollments/download',
+        method: RequestMethod.GET,
+      },
+      {
+        path: 'courses/:courseId/excels/enrollments/upload',
+        method: RequestMethod.POST,
+      },
+    );
   }
 }

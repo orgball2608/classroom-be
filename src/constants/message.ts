@@ -112,3 +112,7 @@ export const GRADE_MESSAGES = {
   UPDATE_GRADE_SUCCESSFULLY: 'Update grade successfully',
   DELETE_GRADE_SUCCESSFULLY: 'Delete grade successfully',
 };
+
+export const EXCEL_MESSAGES = {
+  UPLOAD_STUDENT_LIST_SUCCESSFULLY: 'Upload student list successfully',
+};

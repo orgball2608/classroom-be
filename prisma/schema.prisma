@@ -92,6 +92,7 @@ model Enrollment {
   courseId    Int     @map("course_id")
   userId      Int?    @map("user_id")
   studentId   String? @map("student_id")
+  fullName    String? @map("full_name")
   createdById Int     @map("created_by_id")
 
   student   User?  @relation(name: "student_enrollments", fields: [userId], references: [id])
