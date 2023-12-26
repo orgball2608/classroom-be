@@ -11,6 +11,7 @@ import { ConfigModule } from '@nestjs/config';
 import { CourseModule } from './modules/courses/course.module';
 import { CustomMailerModule } from './shared/mailer/mailer.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ExcelModule } from './modules/excels/excel.module';
 import { GatewayModule } from './shared/gateway/gateway.module';
 import { GradeCompositionModule } from './modules/grade-compositions/grade-composition.module';
 import { GradeModule } from './modules/grades/grade.module';
@@ -58,6 +59,7 @@ import redisConfig from './configs/redis.config';
     NotificationModule,
     GradeCompositionModule,
     GradeModule,
+    ExcelModule,
   ],
   providers: [],
 })

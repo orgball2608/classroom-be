@@ -31,10 +31,12 @@ import { COURSES_MESSAGES, ROUTES } from '@src/constants';
 import { InviteEmailDto } from './dto/invite-email.dto';
 import { MapStudentIdWithUserIdDto } from './dto/map-student-id.dto';
 import { CoursesPageOptionsDto } from './dto/course-page-options-dto';
+import { ExcludeFieldsInterceptor } from '@src/interceptors';
 
 @ApiTags('Courses')
 @ApiBearerAuth()
 @Controller(ROUTES.COURSES)
+@UseInterceptors(ExcludeFieldsInterceptor)
 export class CourseController {
   constructor(private readonly courseService: CourseService) {}
 

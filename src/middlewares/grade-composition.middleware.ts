@@ -4,18 +4,19 @@ import {
   NestMiddleware,
   NotFoundException,
 } from '@nestjs/common';
+import { COURSES_MESSAGES, GRADE_COMPOSITION_MESSAGES } from '@src/constants';
 import { NextFunction, Response } from 'express';
 
-import { GRADE_COMPOSITION_MESSAGES } from '@src/constants';
 import { IGradeCompositionRequest } from '@src/interfaces';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
-import { UserRole } from '@prisma/client';
 
 @Injectable()
 export class GradeCompositionMiddleware implements NestMiddleware {
   constructor(private readonly prisma: PrismaService) {}
 
   async use(req: IGradeCompositionRequest, res: Response, next: NextFunction) {
+    console.log('GradeCompositionMiddleware');
+
     const gradeCompositionId = req.params.id;
     const gradeCompositionIdNumber = Number(gradeCompositionId);
 
@@ -37,10 +38,8 @@ export class GradeCompositionMiddleware implements NestMiddleware {
       );
     }
 
-    if (req.user.role !== UserRole.ADMIN && gradeComposition.deleted === true) {
-      throw new NotFoundException(
-        GRADE_COMPOSITION_MESSAGES.GRADE_COMPOSITION_NOT_FOUND,
-      );
+    if (req.user.id !== req.course.createdBy.id) {
+      throw new NotFoundException(COURSES_MESSAGES.YOU_ARE_NOT_COURSE_OWNER);
     }
 
     req.gradeComposition = gradeComposition;

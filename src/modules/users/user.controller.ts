@@ -34,10 +34,12 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { UpdateFullFieldUserDto } from './dto/update-full-field-user.dto';
 import { ROUTES } from '@src/constants';
+import { ExcludeFieldsInterceptor } from '@src/interceptors';
 
 @ApiTags('Users')
 @ApiBearerAuth()
 @Controller(ROUTES.USERS)
+@UseInterceptors(ExcludeFieldsInterceptor)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 

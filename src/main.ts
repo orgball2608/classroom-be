@@ -14,7 +14,6 @@ import { UnprocessableEntityException, ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { Environment } from './common/enum/node-env';
-import { ExcludeFieldsInterceptor } from './interceptors';
 import { WebsocketAdapter } from './shared/gateway/gateway.adapter';
 import compression from 'compression';
 import helmet from 'helmet';
@@ -66,8 +65,6 @@ async function bootstrap(): Promise<NestExpressApplication> {
 
     new PrismaClientExceptionFilter(httpAdapter),
   );
-
-  app.useGlobalInterceptors(new ExcludeFieldsInterceptor());
 
   const apiPrefix =
     configService.getOrThrow<string>('app.apiPrefix') +

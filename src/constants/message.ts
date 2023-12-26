@@ -67,6 +67,7 @@ export const COURSES_MESSAGES = {
   ACCOUNT_ENROLL_NOT_CORRECT_WITH_LOGIN_ACCOUNT:
     'Account enroll not correct with login account',
   REMOVE_USER_IN_COURSE_SUCCESSFULLY: 'Remove user in course successfully',
+  YOU_ARE_NOT_COURSE_OWNER: 'You are not course owner',
 };
 
 export const AUTHORIZATION_MESSAGES = {
@@ -106,6 +107,7 @@ export const GRADE_COMPOSITION_MESSAGES = {
 
 export const GRADE_MESSAGES = {
   GRADE_NOT_FOUND: 'Grade not found',
+  GET_GRADES_SUCCESSFULLY: 'Get grades successfully',
   GET_GRADE_SUCCESSFULLY: 'Get grade successfully',
   CREATE_GRADE_SUCCESSFULLY: 'Create grade successfully',
   UPDATE_GRADE_SUCCESSFULLY: 'Update grade successfully',
