@@ -1,15 +1,16 @@
 import * as tmp from 'tmp';
 
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Workbook, Worksheet } from 'exceljs';
 
+import { Course } from '@prisma/client';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
-import { Workbook } from 'exceljs';
 
 @Injectable()
 export class ExcelService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private styleSheet(sheet) {
+  private styleSheet(sheet: Worksheet) {
     sheet.getRow(1).height = 30.5;
     sheet.getRow(1).font = {
       size: 11.5,
@@ -31,10 +32,10 @@ export class ExcelService {
     };
   }
 
-  async downloadExcel() {
+  async downloadExcel(course: Course) {
     const enrollments = await this.prisma.enrollment.findMany({
       where: {
-        courseId: 1,
+        courseId: course.id,
       },
       select: {
         studentId: true,
@@ -59,8 +60,8 @@ export class ExcelService {
     const sheet = workbook.addWorksheet('sheet1');
 
     sheet.columns = [
-      { header: 'StudentId', key: 'studentId', width: 20 },
-      { header: 'FullName', key: 'fullName', width: 20 },
+      { header: 'StudentId', key: 'StudentId', width: 20 },
+      { header: 'Full name', key: 'Full name', width: 20 },
     ];
 
     data.forEach((item) => {
@@ -69,11 +70,27 @@ export class ExcelService {
 
     this.styleSheet(sheet);
 
-    const tmpFile = tmp.fileSync();
+    const tmpFile = tmp.fileSync({
+      discardDescriptor: true,
+      prefix: `${course.name}_`,
+      postfix: '.xlsx',
+      mode: parseInt('0600', 8),
+    });
     await workbook.xlsx.writeFile(tmpFile.name);
 
-    const File = tmpFile.name;
+    return tmpFile.name;
+  }
 
-    return File;
+  async readFileExcel(file: Express.Multer.File) {
+    const workbook = new Workbook();
+    await workbook.xlsx.load(file.buffer);
+    const worksheet = workbook.getWorksheet('sheet1');
+    worksheet.eachRow({ includeEmpty: true }, function (row, rowNumber) {
+      console.log('Row ' + rowNumber + ' = ' + JSON.stringify(row.values));
+    });
+
+    return {
+      message: 'Read excel successfully',
+    };
   }
 }

@@ -4,9 +4,9 @@ import {
   NestMiddleware,
   NotFoundException,
 } from '@nestjs/common';
+import { COURSES_MESSAGES, GRADE_COMPOSITION_MESSAGES } from '@src/constants';
 import { NextFunction, Response } from 'express';
 
-import { GRADE_COMPOSITION_MESSAGES } from '@src/constants';
 import { IGradeCompositionRequest } from '@src/interfaces';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { UserRole } from '@prisma/client';
@@ -41,6 +41,10 @@ export class GradeCompositionMiddleware implements NestMiddleware {
       throw new NotFoundException(
         GRADE_COMPOSITION_MESSAGES.GRADE_COMPOSITION_NOT_FOUND,
       );
+    }
+
+    if (req.user.id !== req.course.createdBy.id) {
+      throw new NotFoundException(COURSES_MESSAGES.YOU_ARE_NOT_COURSE_OWNER);
     }
 
     req.gradeComposition = gradeComposition;

@@ -7,4 +7,5 @@ export const ROUTES = {
   COURSES: 'courses',
   GRADE_COMPOSITIONS: 'courses/:courseId/grade-compositions',
   GRADES: 'courses/:courseId/grade-compositions/:compositionId/grades',
+  EXCELS: 'courses/:courseId/excels',
 };

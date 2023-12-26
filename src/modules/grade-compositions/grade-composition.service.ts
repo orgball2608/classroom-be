@@ -3,7 +3,6 @@ import {
   ApiResponseOmitDataEntity,
 } from '@src/common/entity/response.entity';
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { User, UserRole } from '@prisma/client';
 
 import { CreateGradeCompositionDto } from './dto/create-grade-composition.dto';
 import { GRADE_COMPOSITION_MESSAGES } from '@src/constants';
@@ -11,6 +10,7 @@ import { GradeCompositionEntity } from './entities/grade-composition.entity';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { SimpleUserEntity } from '@src/common/entity/simple-user.entity';
 import { UpdateGradeCompositionDto } from './dto/update-grade-composition.dto';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class GradeCompositionService {
@@ -70,11 +70,10 @@ export class GradeCompositionService {
     };
   }
 
-  async findAllByCourseId(user: User, courseId: number) {
+  async findAllByCourseId(courseId: number) {
     const gradeCompositions = await this.prisma.gradeComposition.findMany({
       where: {
         courseId: courseId,
-        deleted: user.role === UserRole.ADMIN ? undefined : false,
       },
       orderBy: {
         index: 'desc',
@@ -145,7 +144,6 @@ export class GradeCompositionService {
     const firstIndex = await this.prisma.gradeComposition.findUnique({
       where: {
         id: firstId,
-        deleted: false,
       },
       select: {
         index: true,
@@ -161,7 +159,6 @@ export class GradeCompositionService {
     const secondIndex = await this.prisma.gradeComposition.findUnique({
       where: {
         id: secondId,
-        deleted: false,
       },
       select: {
         index: true,
