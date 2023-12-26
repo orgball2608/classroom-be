@@ -291,10 +291,17 @@ export class CourseService {
     };
   }
 
-  async findAllUserInCourse(userId: number) {
+  async findAllUserInCourse(courseId: number) {
     const course = await this.prisma.course.findMany({
       where: {
-        id: userId,
+        id: courseId,
+        enrollments: {
+          some: {
+            userId: {
+              not: null,
+            },
+          },
+        },
       },
       include: {
         enrollments: {

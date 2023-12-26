@@ -50,7 +50,7 @@ export class ExcelService {
 
     const data = enrollments.map((item) => {
       return {
-        studentId: Number(item.studentId),
+        studentId: Number(item.studentId) || 0,
         fullName: `${item.student.firstName} ${item.student.lastName}`,
       };
     });
@@ -60,8 +60,8 @@ export class ExcelService {
     const sheet = workbook.addWorksheet('sheet1');
 
     sheet.columns = [
-      { header: 'StudentId', key: 'StudentId', width: 20 },
-      { header: 'Full name', key: 'Full name', width: 20 },
+      { header: 'StudentId', key: 'studentId', width: 20 },
+      { header: 'Full name', key: 'fullName', width: 20 },
     ];
 
     data.forEach((item) => {
@@ -76,6 +76,7 @@ export class ExcelService {
       postfix: '.xlsx',
       mode: parseInt('0600', 8),
     });
+
     await workbook.xlsx.writeFile(tmpFile.name);
 
     return tmpFile.name;
