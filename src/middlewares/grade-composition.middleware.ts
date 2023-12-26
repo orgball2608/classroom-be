@@ -9,13 +9,14 @@ import { NextFunction, Response } from 'express';
 
 import { IGradeCompositionRequest } from '@src/interfaces';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
-import { UserRole } from '@prisma/client';
 
 @Injectable()
 export class GradeCompositionMiddleware implements NestMiddleware {
   constructor(private readonly prisma: PrismaService) {}
 
   async use(req: IGradeCompositionRequest, res: Response, next: NextFunction) {
+    console.log('GradeCompositionMiddleware');
+
     const gradeCompositionId = req.params.id;
     const gradeCompositionIdNumber = Number(gradeCompositionId);
 
@@ -33,12 +34,6 @@ export class GradeCompositionMiddleware implements NestMiddleware {
 
     if (!gradeComposition) {
       throw new BadRequestException(
-        GRADE_COMPOSITION_MESSAGES.GRADE_COMPOSITION_NOT_FOUND,
-      );
-    }
-
-    if (req.user.role !== UserRole.ADMIN && gradeComposition.deleted === true) {
-      throw new NotFoundException(
         GRADE_COMPOSITION_MESSAGES.GRADE_COMPOSITION_NOT_FOUND,
       );
     }
