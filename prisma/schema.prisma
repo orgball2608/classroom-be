@@ -122,40 +122,37 @@ model CourseTeacher {
 }
 
 model GradeComposition {
-  id          Int     @id @default(autoincrement())
-  courseId    Int     @map("course_id")
-  createdById Int     @map("created_by_id")
+  id          Int    @id @default(autoincrement())
+  courseId    Int    @map("course_id")
+  createdById Int    @map("created_by_id")
   name        String
   scale       Int
   index       Int?
-  deleted     Boolean @default(false)
 
   course    Course  @relation(fields: [courseId], references: [id])
   createdBy User    @relation(fields: [createdById], references: [id])
   grades    Grade[]
 
-  deletedAt DateTime? @map("deleted_at")
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@unique([courseId, index, deleted])
+  @@unique([courseId, index])
   @@map("grade_compositions")
 }
 
 model Grade {
-  id                 Int     @id @default(autoincrement())
-  studentId          String  @map("student_id")
-  gradeCompositionId Int     @map("grade_composition_id")
-  grade              Float
-  createdById        Int     @map("created_by_id")
-  deleted            Boolean @default(false)
+  id                 Int    @id @default(autoincrement())
+  studentId          String @map("student_id")
+  fullName           String @map("full_name")
+  gradeCompositionId Int    @map("grade_composition_id")
+  grade              Float?
+  createdById        Int    @map("created_by_id")
 
   createdBy        User             @relation(name: "created_grades", fields: [createdById], references: [id])
   gradeComposition GradeComposition @relation(fields: [gradeCompositionId], references: [id])
 
-  deletedAt DateTime? @map("deleted_at")
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("grades")
 }

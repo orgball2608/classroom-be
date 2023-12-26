@@ -24,7 +24,7 @@ import { GradeCompositionEntity } from './entities/grade-composition.entity';
 import { IUserRequest } from '@src/interfaces';
 import { ROUTES } from '@src/constants';
 
-@ApiTags('Grade Composition')
+@ApiTags('Grade compositions')
 @ApiBearerAuth()
 @Controller(ROUTES.GRADE_COMPOSITIONS)
 export class GradeCompositionController {
@@ -50,11 +50,8 @@ export class GradeCompositionController {
   @Get()
   @ApiParam({ name: 'courseId', type: 'number', example: 1 })
   @ApiFindAll(GradeCompositionEntity)
-  findAllByCourseId(
-    @Req() req: IUserRequest,
-    @Param('courseId', ParseIntPipe) courseId: number,
-  ) {
-    return this.gradeCompositionService.findAllByCourseId(req.user, courseId);
+  findAllByCourseId(@Param('courseId', ParseIntPipe) courseId: number) {
+    return this.gradeCompositionService.findAllByCourseId(courseId);
   }
 
   @Get(':id')
