@@ -27,14 +27,17 @@ export class ExcelController {
     'Content-type',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   )
-  async downloadReport(@Req() req: ICourseRequest, @Res() res: Response) {
-    const result = await this.excelService.downloadExcel(req.course);
+  async downloadStudentList(@Req() req: ICourseRequest, @Res() res: Response) {
+    const result = await this.excelService.downloadStudentList(req.course);
     res.download(`${result}`);
   }
 
-  @Post('upload')
+  @Post('/enrollments/upload')
   @UseInterceptors(FileInterceptor('file'))
-  uploadFile(@UploadedFile() file: Express.Multer.File) {
-    return this.excelService.readFileExcel(file);
+  uploadStudentList(
+    @Req() req: ICourseRequest,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.excelService.readStudentList(req.course, file);
   }
 }
