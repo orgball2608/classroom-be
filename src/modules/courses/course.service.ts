@@ -22,6 +22,9 @@ import { StorageService } from '@src/shared/storage/services/storage.service';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { generateCourseCode } from '@src/common/utils';
 import { v4 as uuid4 } from 'uuid';
+import { CoursesPageOptionsDto } from './dto/course-page-options-dto';
+import { PageMetaDto } from '@src/common/dto/page-meta.dto';
+import { PageDto } from '@src/common/dto/page.dto';
 
 @Injectable()
 export class CourseService {
@@ -59,11 +62,69 @@ export class CourseService {
     };
   }
 
-  async findAll() {
-    const course = await this.prisma.course.findMany();
+  async findAll(pageOptionsDto: CoursesPageOptionsDto) {
+    const { skip, take, order, search } = pageOptionsDto;
+    console.log(pageOptionsDto);
+    //search by name or email if search is not null
+    let whereClause = {};
+
+    if (search !== ' ' && search.length > 0) {
+      //search by name or email
+      const searchQuery = search.trim();
+      whereClause = {
+        OR: [
+          {
+            name: {
+              contains: searchQuery,
+              mode: 'insensitive',
+            },
+          },
+          {
+            room: {
+              contains: searchQuery,
+              mode: 'insensitive',
+            },
+          },
+          {
+            topic: {
+              contains: searchQuery,
+              mode: 'insensitive',
+            },
+          },
+          {
+            code: {
+              contains: searchQuery,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      };
+    }
+    // eslint-disable-next-line prettier/prettier
+    const itemCount = await this.prisma.course.count({
+      where: whereClause,
+    });
+
+    const courses = await this.prisma.course.findMany({
+      skip,
+      take,
+      where: whereClause,
+      orderBy: {
+        createdAt: order,
+      },
+    });
+    const pageMetaDto = new PageMetaDto({
+      itemCount,
+      pageOptionsDto,
+    });
+
+    const filteredCourses = courses;
+
+    const result = new PageDto(filteredCourses, pageMetaDto);
+
     return {
       message: COURSES_MESSAGES.GET_COURSES_SUCCESSFULLY,
-      data: course,
+      data: result,
     };
   }
 

@@ -10,6 +10,8 @@ import {
   UseInterceptors,
   Req,
   UploadedFile,
+  ValidationPipe,
+  Query,
 } from '@nestjs/common';
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
@@ -28,6 +30,7 @@ import { ApiDelete, ApiResponseWithMessage } from '@src/decorators';
 import { COURSES_MESSAGES, ROUTES } from '@src/constants';
 import { InviteEmailDto } from './dto/invite-email.dto';
 import { MapStudentIdWithUserIdDto } from './dto/map-student-id.dto';
+import { CoursesPageOptionsDto } from './dto/course-page-options-dto';
 
 @ApiTags('Courses')
 @ApiBearerAuth()
@@ -43,8 +46,11 @@ export class CourseController {
   }
 
   @Get()
-  findAll() {
-    return this.courseService.findAll();
+  findAll(
+    @Query(new ValidationPipe({ transform: true }))
+    pageOptionsDto: CoursesPageOptionsDto,
+  ) {
+    return this.courseService.findAll(pageOptionsDto);
   }
 
   @Get(':id')

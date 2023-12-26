@@ -356,7 +356,26 @@ export class UserService {
     };
   }
 
-  async banUser(id: number) {
+  async deleteUserList(idArray: number[]) {
+    idArray.forEach(async (id) => {
+      console.log(id);
+      const user = await this.prisma.user.delete({ where: { id } });
+      if (!user) {
+        throw new NotFoundException({
+          message: USERS_MESSAGES.USER_NOT_FOUND,
+          data: {
+            idNotFound: id,
+          },
+        });
+      }
+    });
+
+    return {
+      message: USERS_MESSAGES.DELETE_USER_SUCCESSFULLY,
+    };
+  }
+
+  async lockUser(id: number) {
     const user = await this.prisma.user.update({
       where: { id },
       data: {
@@ -370,7 +389,25 @@ export class UserService {
     }
 
     return {
-      message: USERS_MESSAGES.BAN_USER_SUCCESSFULLY,
+      message: USERS_MESSAGES.LOCK_USER_SUCCESSFULLY,
+    };
+  }
+
+  async unlockUser(id: number) {
+    const user = await this.prisma.user.update({
+      where: { id },
+      data: {
+        deleted: false,
+        deletedAt: new Date(),
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
+    }
+
+    return {
+      message: USERS_MESSAGES.UNLOCK_USER_SUCCESSFULLY,
     };
   }
 }
