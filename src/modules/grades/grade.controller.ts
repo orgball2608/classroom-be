@@ -12,10 +12,10 @@ import {
 import { GradeService } from './grade.service';
 import { CreateGradeDto } from './dto/create-grade.dto';
 import { UpdateGradeDto } from './dto/update-grade.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { ApiCreate, ApiFindAll } from '@src/decorators';
 import { Grade } from './entities/grade.entity';
-import { IUserRequest } from '@src/interfaces';
+import { IGradeCompositionRequest } from '@src/interfaces';
 import { ROUTES } from '@src/constants';
 
 @ApiTags('Grades')
@@ -26,18 +26,25 @@ export class GradeController {
 
   @Post()
   @ApiCreate(CreateGradeDto, Grade)
+  @ApiParam({ name: 'courseId', type: Number, example: 1 })
+  @ApiParam({ name: 'compositionId', type: Number, example: 1 })
   create(
-    @Param('compositionId', ParseIntPipe) compositionId: number,
-    @Req() req: IUserRequest,
+    @Req() req: IGradeCompositionRequest,
     @Body() createGradeDto: CreateGradeDto,
   ) {
-    return this.gradeService.create(req.user.id, compositionId, createGradeDto);
+    return this.gradeService.create(
+      req.user.id,
+      req.gradeComposition.id,
+      createGradeDto,
+    );
   }
 
   @Get()
   @ApiFindAll(Grade)
-  findAll() {
-    return this.gradeService.findAll();
+  @ApiParam({ name: 'courseId', type: Number, example: 1 })
+  @ApiParam({ name: 'compositionId', type: Number, example: 1 })
+  findAll(@Req() req: IGradeCompositionRequest) {
+    return this.gradeService.findAll(req.gradeComposition.id);
   }
 
   @Get(':id')

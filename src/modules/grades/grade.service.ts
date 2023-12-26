@@ -10,11 +10,12 @@ export class GradeService {
   async create(
     userId: number,
     compositionId: number,
-    { studentId, grade }: CreateGradeDto,
+    { studentId, fullName, grade }: CreateGradeDto,
   ) {
     const gradeData = await this.prisma.grade.create({
       data: {
         studentId,
+        fullName: fullName,
         gradeComposition: {
           connect: {
             id: compositionId,
@@ -35,8 +36,17 @@ export class GradeService {
     };
   }
 
-  findAll() {
-    return `This action returns all grade`;
+  async findAll(compositionId: number) {
+    const grades = await this.prisma.grade.findMany({
+      where: {
+        gradeCompositionId: compositionId,
+      },
+    });
+
+    return {
+      message: GRADE_MESSAGES.GET_GRADES_SUCCESSFULLY,
+      data: grades,
+    };
   }
 
   findOne(id: number) {
