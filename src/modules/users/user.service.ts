@@ -322,12 +322,16 @@ export class UserService {
       });
     }
 
+    const dataUpdate = !avatarURL
+      ? { ...updateFullFieldUserDto }
+      : {
+          ...updateFullFieldUserDto,
+          avatar: avatarURL ? avatarURL : null,
+        };
+
     const user = await this.prisma.user.update({
       where: { id },
-      data: {
-        ...updateFullFieldUserDto,
-        avatar: avatarURL ? avatarURL : null,
-      },
+      data: dataUpdate,
     });
 
     if (!user) throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);

@@ -109,10 +109,12 @@ export class CourseController {
     return this.courseService.update(id, updateCourseDto);
   }
 
-  @Delete(':id')
-  @ApiParam({ name: 'id', type: 'number', example: 1 })
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.courseService.remove(id);
+  @Delete(':ids')
+  @ApiParam({ name: 'ids', type: 'number', example: 1 })
+  remove(@Param('ids') ids: string) {
+    const idsToDelete = ids.split(',').map((id) => parseInt(id, 10));
+    console.log(idsToDelete);
+    return this.courseService.remove(idsToDelete);
   }
 
   // get list of student and teacher in class

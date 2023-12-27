@@ -64,7 +64,6 @@ export class CourseService {
 
   async findAll(pageOptionsDto: CoursesPageOptionsDto) {
     const { skip, take, order, search } = pageOptionsDto;
-    console.log(pageOptionsDto);
     //search by name or email if search is not null
     let whereClause = {};
 
@@ -100,6 +99,10 @@ export class CourseService {
         ],
       };
     }
+    whereClause = {
+      ...whereClause,
+      deleted: false,
+    };
     // eslint-disable-next-line prettier/prettier
     const itemCount = await this.prisma.course.count({
       where: whereClause,
@@ -111,6 +114,49 @@ export class CourseService {
       where: whereClause,
       orderBy: {
         createdAt: order,
+      },
+      include: {
+        createdBy: {
+          select: {
+            id: true,
+            email: true,
+            avatar: true,
+            firstName: true,
+            lastName: true,
+            address: true,
+            phoneNumber: true,
+          },
+        },
+        enrollments: {
+          select: {
+            student: {
+              select: {
+                id: true,
+                email: true,
+                avatar: true,
+                firstName: true,
+                lastName: true,
+                address: true,
+                phoneNumber: true,
+              },
+            },
+          },
+        },
+        courseTeachers: {
+          select: {
+            teacher: {
+              select: {
+                id: true,
+                email: true,
+                avatar: true,
+                firstName: true,
+                lastName: true,
+                address: true,
+                phoneNumber: true,
+              },
+            },
+          },
+        },
       },
     });
     const pageMetaDto = new PageMetaDto({
@@ -227,11 +273,18 @@ export class CourseService {
     };
   }
 
-  async remove(id: number) {
-    await this.prisma.course.delete({
-      where: {
-        id,
-      },
+  async remove(idArray: number[]) {
+    idArray.forEach(async (id) => {
+      console.log(id);
+      const course = await this.prisma.course.delete({ where: { id } });
+      if (!course) {
+        throw new NotFoundException({
+          message: COURSES_MESSAGES.COURSE_NOT_FOUND,
+          data: {
+            idNotFound: id,
+          },
+        });
+      }
     });
 
     return {
