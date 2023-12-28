@@ -23,7 +23,7 @@ export class CourseModule implements NestModule {
     consumer.apply(RoleChecker([UserRole.ADMIN])).forRoutes(
       { path: 'courses', method: RequestMethod.GET },
       {
-        path: 'course',
+        path: 'course/:ids',
         method: RequestMethod.DELETE,
       },
     );
@@ -45,7 +45,10 @@ export class CourseModule implements NestModule {
         path: 'courses/:id/enroll',
         method: RequestMethod.PATCH,
       },
-
+      {
+        path: 'courses/:id',
+        method: RequestMethod.PATCH,
+      },
       {
         path: 'courses/:id/users/:userId',
         method: RequestMethod.DELETE,

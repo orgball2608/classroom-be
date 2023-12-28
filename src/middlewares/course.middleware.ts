@@ -40,7 +40,6 @@ export class CourseMiddleware implements NestMiddleware {
         },
       },
     });
-
     if (!course) {
       throw new NotFoundException(COURSES_MESSAGES.COURSE_NOT_FOUND);
     }
@@ -74,6 +73,7 @@ export class CourseMiddleware implements NestMiddleware {
     });
 
     if (
+      req.user.role !== UserRole.ADMIN &&
       !enrollment &&
       !req.url.includes('checkEnrolled') &&
       !req.url.includes('enroll')

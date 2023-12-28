@@ -217,7 +217,6 @@ export class UserController {
   @Delete('/list/:ids')
   deleteUserList(@Param('ids') ids: string) {
     const userIdsToDelete = ids.split(',').map((id) => parseInt(id, 10));
-    console.log(userIdsToDelete);
     return this.userService.deleteUserList(userIdsToDelete);
   }
 }

@@ -113,7 +113,6 @@ export class CourseController {
   @ApiParam({ name: 'ids', type: 'number', example: 1 })
   remove(@Param('ids') ids: string) {
     const idsToDelete = ids.split(',').map((id) => parseInt(id, 10));
-    console.log(idsToDelete);
     return this.courseService.remove(idsToDelete);
   }
 

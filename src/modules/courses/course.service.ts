@@ -275,7 +275,6 @@ export class CourseService {
 
   async remove(idArray: number[]) {
     idArray.forEach(async (id) => {
-      console.log(id);
       const course = await this.prisma.course.delete({ where: { id } });
       if (!course) {
         throw new NotFoundException({
@@ -309,8 +308,13 @@ export class CourseService {
                 lastName: true,
                 address: true,
                 phoneNumber: true,
+                createdAt: true,
               },
             },
+            studentId: true,
+          },
+          orderBy: {
+            createdAt: 'asc',
           },
         },
         courseTeachers: {
@@ -324,6 +328,7 @@ export class CourseService {
                 lastName: true,
                 address: true,
                 phoneNumber: true,
+                createdAt: true,
               },
             },
           },
@@ -724,7 +729,7 @@ export class CourseService {
     courseId: number,
     mapStudentIdWithUserIdDto: MapStudentIdWithUserIdDto,
   ) {
-    await this.prisma.enrollment.update({
+    const data = await this.prisma.enrollment.update({
       where: {
         userId_courseId: {
           courseId: courseId,
@@ -738,6 +743,7 @@ export class CourseService {
 
     return {
       message: USERS_MESSAGES.MAP_STUDENT_ID_WITH_USER_ID_SUCCESSFULLY,
+      data,
     };
   }
 
