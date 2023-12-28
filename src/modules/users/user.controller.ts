@@ -197,14 +197,26 @@ export class UserController {
   }
 
   @ApiParam({ name: 'id', type: Number, example: 1 })
-  @Patch(':id/ban')
-  banUser(@Param('id', ParseIntPipe) id: number) {
-    return this.userService.banUser(id);
+  @Patch(':id/lock')
+  lockUser(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.lockUser(id);
+  }
+
+  @ApiParam({ name: 'id', type: Number, example: 1 })
+  @Patch(':id/unlock')
+  unlockUser(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.unlockUser(id);
   }
 
   @ApiParam({ name: 'id', type: Number, example: 1 })
   @Delete(':id')
   deleteUser(@Param('id', ParseIntPipe) id: number) {
     return this.userService.deleteUser(id);
+  }
+
+  @Delete('/list/:ids')
+  deleteUserList(@Param('ids') ids: string) {
+    const userIdsToDelete = ids.split(',').map((id) => parseInt(id, 10));
+    return this.userService.deleteUserList(userIdsToDelete);
   }
 }
