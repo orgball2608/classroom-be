@@ -38,12 +38,20 @@ export class UserModule implements NestModule {
           method: RequestMethod.DELETE,
         },
         {
+          path: 'users/list/:ids',
+          method: RequestMethod.DELETE,
+        },
+        {
           path: 'users/:id',
           method: RequestMethod.PATCH,
         },
         {
-          path: 'users/:id/ban',
-          method: RequestMethod.DELETE,
+          path: 'users/:id/lock',
+          method: RequestMethod.PATCH,
+        },
+        {
+          path: 'users/:id/unlock',
+          method: RequestMethod.PATCH,
         },
       );
   }

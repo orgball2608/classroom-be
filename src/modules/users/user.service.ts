@@ -35,17 +35,49 @@ export class UserService {
   ) {}
 
   async findAll(pageOptionsDto: UsersPageOptionsDto) {
-    const { skip, take, order } = pageOptionsDto;
+    const { skip, take, order, search } = pageOptionsDto;
+    //search by name or email if search is not null
+    let whereClause = {};
 
-    const itemCount = await this.prisma.user.count();
+    if (search !== ' ' && search.length > 0) {
+      //search by name or email
+      const searchQuery = search.trim();
+      whereClause = {
+        OR: [
+          {
+            firstName: {
+              contains: searchQuery,
+              mode: 'insensitive',
+            },
+          },
+          {
+            lastName: {
+              contains: searchQuery,
+              mode: 'insensitive',
+            },
+          },
+          {
+            email: {
+              contains: searchQuery,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      };
+    }
+    // eslint-disable-next-line prettier/prettier
+    const itemCount = await this.prisma.user.count({
+      where: whereClause,
+    });
+
     const users = await this.prisma.user.findMany({
       skip,
       take,
+      where: whereClause,
       orderBy: {
         createdAt: order,
       },
     });
-
     const pageMetaDto = new PageMetaDto({
       itemCount,
       pageOptionsDto,
@@ -290,12 +322,16 @@ export class UserService {
       });
     }
 
+    const dataUpdate = !avatarURL
+      ? { ...updateFullFieldUserDto }
+      : {
+          ...updateFullFieldUserDto,
+          avatar: avatarURL ? avatarURL : null,
+        };
+
     const user = await this.prisma.user.update({
       where: { id },
-      data: {
-        ...updateFullFieldUserDto,
-        avatar: avatarURL ? avatarURL : null,
-      },
+      data: dataUpdate,
     });
 
     if (!user) throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
@@ -324,7 +360,25 @@ export class UserService {
     };
   }
 
-  async banUser(id: number) {
+  async deleteUserList(idArray: number[]) {
+    idArray.forEach(async (id) => {
+      const user = await this.prisma.user.delete({ where: { id } });
+      if (!user) {
+        throw new NotFoundException({
+          message: USERS_MESSAGES.USER_NOT_FOUND,
+          data: {
+            idNotFound: id,
+          },
+        });
+      }
+    });
+
+    return {
+      message: USERS_MESSAGES.DELETE_USER_SUCCESSFULLY,
+    };
+  }
+
+  async lockUser(id: number) {
     const user = await this.prisma.user.update({
       where: { id },
       data: {
@@ -338,7 +392,25 @@ export class UserService {
     }
 
     return {
-      message: USERS_MESSAGES.BAN_USER_SUCCESSFULLY,
+      message: USERS_MESSAGES.LOCK_USER_SUCCESSFULLY,
+    };
+  }
+
+  async unlockUser(id: number) {
+    const user = await this.prisma.user.update({
+      where: { id },
+      data: {
+        deleted: false,
+        deletedAt: new Date(),
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
+    }
+
+    return {
+      message: USERS_MESSAGES.UNLOCK_USER_SUCCESSFULLY,
     };
   }
 }

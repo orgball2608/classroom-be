@@ -20,9 +20,13 @@ import { UserRole } from '@prisma/client';
 })
 export class CourseModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(RoleChecker([UserRole.ADMIN]))
-      .forRoutes({ path: 'courses', method: RequestMethod.GET });
+    consumer.apply(RoleChecker([UserRole.ADMIN])).forRoutes(
+      { path: 'courses', method: RequestMethod.GET },
+      {
+        path: 'course/:ids',
+        method: RequestMethod.DELETE,
+      },
+    );
 
     consumer.apply(CourseMiddleware).forRoutes(
       {
@@ -41,7 +45,10 @@ export class CourseModule implements NestModule {
         path: 'courses/:id/enroll',
         method: RequestMethod.PATCH,
       },
-
+      {
+        path: 'courses/:id',
+        method: RequestMethod.PATCH,
+      },
       {
         path: 'courses/:id/users/:userId',
         method: RequestMethod.DELETE,
