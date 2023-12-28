@@ -385,6 +385,8 @@ export class AuthService {
       'facebookId',
       'googleId',
       'role',
+      'deletedAt',
+      'deleted',
     ]);
   }
 
