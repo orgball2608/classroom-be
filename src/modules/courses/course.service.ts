@@ -700,8 +700,9 @@ export class CourseService {
           },
         });
 
-        const notificationData = {
-          userId: course.createdBy,
+        const notificationData: INotification = {
+          userId: course.createdBy.id,
+          creatorId: user.id,
           title: 'New enrollment to your course',
           body: `${user.firstName} ${user.lastName} enrolled to course ${course.name}`,
         };
