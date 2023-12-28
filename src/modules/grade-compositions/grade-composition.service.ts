@@ -78,7 +78,7 @@ export class GradeCompositionService {
         courseId: courseId,
       },
       orderBy: {
-        index: 'desc',
+        index: 'asc',
       },
     });
     return {
@@ -131,10 +131,33 @@ export class GradeCompositionService {
   }
 
   async remove(id: number): Promise<ApiResponseOmitDataEntity> {
-    await this.prisma.gradeComposition.delete({
-      where: {
-        id,
-      },
+    await this.prisma.$transaction(async (tx) => {
+      const deletedGradeComposition = await tx.gradeComposition.delete({
+        where: {
+          id,
+        },
+      });
+
+      const gradeCompositions = await tx.gradeComposition.findMany({
+        where: {
+          index: {
+            gt: deletedGradeComposition.index,
+          },
+        },
+      });
+
+      for (const gradeComposition of gradeCompositions) {
+        await tx.gradeComposition.update({
+          where: {
+            id: gradeComposition.id,
+          },
+          data: {
+            index: {
+              decrement: 1,
+            },
+          },
+        });
+      }
     });
 
     return {
@@ -142,69 +165,134 @@ export class GradeCompositionService {
     };
   }
 
-  async switchGradeCompositionIndex(firstId: number, secondId: number) {
-    const firstIndex = await this.prisma.gradeComposition.findUnique({
+  async switchGradeCompositionIndex(switchedId: number, switchToId: number) {
+    if (switchedId === switchToId) {
+      throw new BadRequestException(
+        GRADE_COMPOSITION_MESSAGES.INVALID_SWITCH_TO_INDEX,
+      );
+    }
+
+    const switchedIndex = await this.prisma.gradeComposition.findUnique({
       where: {
-        id: firstId,
+        id: switchedId,
+      },
+      select: {
+        index: true,
+        courseId: true,
+      },
+    });
+
+    if (!switchedIndex) {
+      throw new BadRequestException(
+        GRADE_COMPOSITION_MESSAGES.INVALID_GRADE_COMPOSITION,
+      );
+    }
+
+    const switchToIndex = await this.prisma.gradeComposition.findUnique({
+      where: {
+        id: switchToId,
       },
       select: {
         index: true,
       },
     });
 
-    if (!firstIndex) {
+    if (!switchToIndex) {
       throw new BadRequestException(
         GRADE_COMPOSITION_MESSAGES.INVALID_GRADE_COMPOSITION,
       );
     }
 
-    const secondIndex = await this.prisma.gradeComposition.findUnique({
-      where: {
-        id: secondId,
-      },
-      select: {
-        index: true,
-      },
-    });
-
-    if (!secondIndex) {
-      throw new BadRequestException(
-        GRADE_COMPOSITION_MESSAGES.INVALID_GRADE_COMPOSITION,
-      );
-    }
-
-    await this.prisma.$transaction([
-      this.prisma.gradeComposition.update({
+    await this.prisma.$transaction(async (tx) => {
+      await tx.gradeComposition.update({
         where: {
-          id: secondId,
+          id: switchedId,
         },
         data: {
           index: null,
         },
-      }),
+      });
 
-      this.prisma.gradeComposition.update({
+      if (switchedIndex.index > switchToIndex.index) {
+        const updateIndexes = await tx.gradeComposition.findMany({
+          where: {
+            courseId: switchedIndex.courseId,
+            index: {
+              gte: switchToIndex.index,
+              lt: switchedIndex.index,
+            },
+          },
+          orderBy: {
+            index: 'desc',
+          },
+        });
+
+        await Promise.all(
+          updateIndexes.map(async (item) => {
+            await tx.gradeComposition.update({
+              where: {
+                id: item.id,
+              },
+              data: {
+                index: item.index + 1,
+              },
+            });
+          }),
+        );
+      } else {
+        const updateIndexes = await tx.gradeComposition.findMany({
+          where: {
+            courseId: switchedIndex.courseId,
+            index: {
+              gt: switchedIndex.index,
+              lte: switchToIndex.index,
+            },
+          },
+          orderBy: {
+            index: 'asc',
+          },
+        });
+
+        await Promise.all(
+          updateIndexes.map(async (item) => {
+            await tx.gradeComposition.update({
+              where: {
+                id: item.id,
+              },
+              data: {
+                index: item.index - 1,
+              },
+            });
+          }),
+        );
+      }
+
+      await tx.gradeComposition.update({
         where: {
-          id: firstId,
+          id: switchedId,
         },
         data: {
-          index: secondIndex.index,
+          index: switchToIndex.index,
         },
-      }),
+      });
+    });
 
-      this.prisma.gradeComposition.update({
-        where: {
-          id: secondId,
+    const gradeCompositions = await this.prisma.gradeComposition.findMany({
+      where: {
+        courseId: switchedIndex.courseId,
+        index: {
+          not: null,
         },
-        data: {
-          index: firstIndex.index,
-        },
-      }),
-    ]);
+      },
+      orderBy: {
+        index: 'asc',
+      },
+    });
 
     return {
       message:
         GRADE_COMPOSITION_MESSAGES.SWITCH_GRADE_COMPOSITION_INDEX_SUCCESSFULLY,
+      data: gradeCompositions,
     };
   }
 }

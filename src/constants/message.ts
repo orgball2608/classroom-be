@@ -102,6 +102,7 @@ export const GRADE_COMPOSITION_MESSAGES = {
     'You are not permission to create grade composition',
   SWITCH_GRADE_COMPOSITION_INDEX_SUCCESSFULLY:
     'Switch grade composition index successfully',
+  INVALID_SWITCH_TO_INDEX: 'Invalid switch to index',
 };
 
 export const GRADE_MESSAGES = {
