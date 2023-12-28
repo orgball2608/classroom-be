@@ -1,5 +1,10 @@
 import { UserRole } from '@prisma/client';
-import { EmailField, PasswordField, StringField } from '@src/decorators';
+import {
+  EmailField,
+  PasswordField,
+  StringField,
+  StringFieldOptional,
+} from '@src/decorators';
 
 export class RegisterDto {
   @StringField({
@@ -32,9 +37,8 @@ export class RegisterDto {
   })
   address: string;
 
-  @StringField({
+  @StringFieldOptional({
     example: UserRole.ADMIN,
-    required: false,
   })
   role?: UserRole;
 }

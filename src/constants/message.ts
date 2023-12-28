@@ -30,7 +30,8 @@ export const USERS_MESSAGES = {
   UN_MAP_STUDENT_ID_WITH_USER_ID_SUCCESSFULLY:
     'Un map student id with user id successfully',
   GET_USERS_LIST_SUCCESSFULLY: 'Get users successfully',
-  BAN_USER_SUCCESSFULLY: 'Ban user successfully',
+  LOCK_USER_SUCCESSFULLY: 'Lock user successfully',
+  UNLOCK_USER_SUCCESSFULLY: 'Unlock user successfully',
 } as const;
 
 export const TOKEN_MESSAGES = {
