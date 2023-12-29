@@ -103,6 +103,7 @@ export const GRADE_COMPOSITION_MESSAGES = {
     'You are not permission to create grade composition',
   SWITCH_GRADE_COMPOSITION_INDEX_SUCCESSFULLY:
     'Switch grade composition index successfully',
+  INVALID_SWITCH_TO_INDEX: 'Invalid switch to index',
 };
 
 export const GRADE_MESSAGES = {
@@ -112,4 +113,8 @@ export const GRADE_MESSAGES = {
   CREATE_GRADE_SUCCESSFULLY: 'Create grade successfully',
   UPDATE_GRADE_SUCCESSFULLY: 'Update grade successfully',
   DELETE_GRADE_SUCCESSFULLY: 'Delete grade successfully',
+};
+
+export const EXCEL_MESSAGES = {
+  UPLOAD_STUDENT_LIST_SUCCESSFULLY: 'Upload student list successfully',
 };

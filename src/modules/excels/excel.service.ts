@@ -3,6 +3,8 @@ import * as tmp from 'tmp';
 import { Workbook, Worksheet } from 'exceljs';
 
 import { Course } from '@prisma/client';
+import { EXCEL_MESSAGES } from '@src/constants';
+import { IStudentEnrollment } from './excel.interface';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 
@@ -32,26 +34,21 @@ export class ExcelService {
     };
   }
 
-  async downloadExcel(course: Course) {
+  async downloadStudentList(course: Course) {
     const enrollments = await this.prisma.enrollment.findMany({
       where: {
         courseId: course.id,
       },
       select: {
         studentId: true,
-        student: {
-          select: {
-            firstName: true,
-            lastName: true,
-          },
-        },
+        fullName: true,
       },
     });
 
-    const data = enrollments.map((item) => {
+    const students = enrollments.map((enrollment): IStudentEnrollment => {
       return {
-        studentId: Number(item.studentId),
-        fullName: `${item.student.firstName} ${item.student.lastName}`,
+        studentId: Number(enrollment.studentId) || 0,
+        fullName: enrollment.fullName,
       };
     });
 
@@ -60,12 +57,12 @@ export class ExcelService {
     const sheet = workbook.addWorksheet('sheet1');
 
     sheet.columns = [
-      { header: 'StudentId', key: 'StudentId', width: 20 },
-      { header: 'Full name', key: 'Full name', width: 20 },
+      { header: 'StudentId', key: 'studentId', width: 20 },
+      { header: 'Full name', key: 'fullName', width: 20 },
     ];
 
-    data.forEach((item) => {
-      sheet.addRow(item);
+    students.forEach((student: IStudentEnrollment) => {
+      sheet.addRow(student);
     });
 
     this.styleSheet(sheet);
@@ -76,21 +73,49 @@ export class ExcelService {
       postfix: '.xlsx',
       mode: parseInt('0600', 8),
     });
+
     await workbook.xlsx.writeFile(tmpFile.name);
 
     return tmpFile.name;
   }
 
-  async readFileExcel(file: Express.Multer.File) {
+  async readStudentList(course: Course, file: Express.Multer.File) {
     const workbook = new Workbook();
     await workbook.xlsx.load(file.buffer);
     const worksheet = workbook.getWorksheet('sheet1');
-    worksheet.eachRow({ includeEmpty: true }, function (row, rowNumber) {
-      console.log('Row ' + rowNumber + ' = ' + JSON.stringify(row.values));
+
+    worksheet.eachRow({ includeEmpty: true }, async (row, rowNumber) => {
+      // Skip header
+      if (rowNumber === 1) return;
+      await this.prisma.enrollment.upsert({
+        where: {
+          studentId_courseId: {
+            studentId: String(row.values[1]),
+            courseId: course.id,
+          },
+        },
+        update: {
+          fullName: String(row.values[2]),
+        },
+        create: {
+          studentId: String(row.values[1]),
+          fullName: String(row.values[2]),
+          course: {
+            connect: {
+              id: course.id,
+            },
+          },
+          createdBy: {
+            connect: {
+              id: course.createdById,
+            },
+          },
+        },
+      });
     });
 
     return {
-      message: 'Read excel successfully',
+      message: EXCEL_MESSAGES.UPLOAD_STUDENT_LIST_SUCCESSFULLY,
     };
   }
 }
