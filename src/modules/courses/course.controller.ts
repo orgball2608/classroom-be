@@ -123,12 +123,12 @@ export class CourseController {
     return this.courseService.findAllUserInCourse(id);
   }
 
-  @Get('/my-courses/list')
+  @Get('/my-courses')
   findAllCourseOfMe(@Req() req: IUserRequest) {
     return this.courseService.findAllCourseOfMe(req.user.id);
   }
 
-  @Get('/checkEnrolled/:id')
+  @Get('/enrollment-status/:id')
   @ApiParam({ name: 'id', type: 'number', example: 1 })
   async checkEnrolled(@Req() req: IUserRequest) {
     const course = await this.courseService.findOne(Number(req.params.id));
