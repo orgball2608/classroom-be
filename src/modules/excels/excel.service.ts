@@ -4,7 +4,6 @@ import { Workbook, Worksheet } from 'exceljs';
 
 import { Course } from '@prisma/client';
 import { EXCEL_MESSAGES } from '@src/constants';
-import { IStudentEnrollment } from './excel.interface';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 
@@ -19,13 +18,16 @@ export class ExcelService {
       bold: true,
       color: { argb: 'FFFFFF' },
     };
+
     sheet.getRow(1).fill = {
       type: 'pattern',
       pattern: 'solid',
       fgColor: { argb: '000000' },
       bgColor: { argb: '000000' },
     };
+
     sheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+
     sheet.getRow(1).border = {
       top: { style: 'thin', color: { argb: '000000' } },
       left: { style: 'thin', color: { argb: 'FFFFFF' } },
@@ -34,42 +36,41 @@ export class ExcelService {
     };
   }
 
-  async downloadStudentList(course: Course) {
-    const enrollments = await this.prisma.enrollment.findMany({
-      where: {
-        courseId: course.id,
-      },
-      select: {
-        studentId: true,
-        fullName: true,
-      },
-    });
-
-    const students = enrollments.map((enrollment): IStudentEnrollment => {
-      return {
-        studentId: Number(enrollment.studentId) || 0,
-        fullName: enrollment.fullName,
-      };
-    });
-
+  async downloadStudentListTemplate() {
     const workbook = new Workbook();
 
-    const sheet = workbook.addWorksheet('sheet1');
+    const sheet = workbook.addWorksheet('list-student');
 
     sheet.columns = [
-      { header: 'StudentId', key: 'studentId', width: 20 },
-      { header: 'Full name', key: 'fullName', width: 20 },
+      {
+        header: 'StudentId',
+        key: 'studentId',
+        width: 20,
+        style: {
+          alignment: {
+            vertical: 'middle',
+            wrapText: true,
+          },
+        },
+      },
+      {
+        header: 'Full name',
+        key: 'fullName',
+        width: 40,
+        style: {
+          alignment: {
+            vertical: 'middle',
+            wrapText: true,
+          },
+        },
+      },
     ];
-
-    students.forEach((student: IStudentEnrollment) => {
-      sheet.addRow(student);
-    });
 
     this.styleSheet(sheet);
 
     const tmpFile = tmp.fileSync({
       discardDescriptor: true,
-      prefix: `${course.name}_`,
+      prefix: 'student-list-template',
       postfix: '.xlsx',
       mode: parseInt('0600', 8),
     });
