@@ -45,6 +45,9 @@ export class GradeController {
   }
 
   @Delete(':id')
+  @ApiParam({ name: 'courseId', type: Number, example: 1 })
+  @ApiParam({ name: 'compositionId', type: Number, example: 1 })
+  @ApiParam({ name: 'id', type: Number, example: 1 })
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.gradeService.remove(id);
   }
