@@ -27,8 +27,8 @@ export class ExcelController {
     'Content-type',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   )
-  async downloadStudentList(@Req() req: ICourseRequest, @Res() res: Response) {
-    const result = await this.excelService.downloadStudentList(req.course);
+  async downloadStudentListTemplate(@Res() res: Response) {
+    const result = await this.excelService.downloadStudentListTemplate();
     res.download(`${result}`);
   }
 
