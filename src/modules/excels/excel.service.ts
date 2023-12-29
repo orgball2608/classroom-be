@@ -80,6 +80,67 @@ export class ExcelService {
     return tmpFile.name;
   }
 
+  async downloadGradesTemplate(course: Course) {
+    const workbook = new Workbook();
+
+    const sheet = workbook.addWorksheet('grades');
+
+    sheet.columns = [
+      {
+        header: 'StudentId',
+        key: 'studentId',
+        width: 20,
+        style: {
+          alignment: {
+            vertical: 'middle',
+            wrapText: true,
+          },
+        },
+      },
+      {
+        header: 'Grade',
+        key: 'grade',
+        width: 20,
+        style: {
+          alignment: {
+            vertical: 'middle',
+            wrapText: true,
+          },
+        },
+      },
+    ];
+
+    const students = await this.prisma.enrollment.findMany({
+      where: {
+        courseId: course.id,
+      },
+      select: {
+        studentId: true,
+        fullName: true,
+      },
+    });
+
+    students.forEach((student) => {
+      sheet.addRow({
+        studentId: student.studentId,
+        fullName: student.fullName,
+      });
+    });
+
+    this.styleSheet(sheet);
+
+    const tmpFile = tmp.fileSync({
+      discardDescriptor: true,
+      prefix: `grades-${course.id}-template`,
+      postfix: '.xlsx',
+      mode: parseInt('0600', 8),
+    });
+
+    await workbook.xlsx.writeFile(tmpFile.name);
+
+    return tmpFile.name;
+  }
+
   async readStudentList(course: Course, file: Express.Multer.File) {
     const workbook = new Workbook();
     await workbook.xlsx.load(file.buffer);
