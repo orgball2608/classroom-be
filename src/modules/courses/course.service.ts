@@ -177,6 +177,7 @@ export class CourseService {
   async findAllCourseByTeacherId(teacherId: number) {
     const courses = await this.prisma.course.findMany({
       where: {
+        deleted: false,
         courseTeachers: {
           some: {
             teacherId: teacherId,
@@ -194,6 +195,7 @@ export class CourseService {
   async findAllCourseByStudentId(studentId: number) {
     const courses = await this.prisma.course.findMany({
       where: {
+        deleted: false,
         enrollments: {
           some: {
             userId: studentId,
@@ -656,7 +658,7 @@ export class CourseService {
       if (userCourse) {
         return {
           message: COURSES_MESSAGES.ENROLLED_TO_COURSE_SUCCESSFULLY,
-          data: course,
+          data: { ...course, courseId: userCourse.id },
         };
       }
 
