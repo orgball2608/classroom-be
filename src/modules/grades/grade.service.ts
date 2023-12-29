@@ -10,12 +10,11 @@ export class GradeService {
   async create(
     userId: number,
     compositionId: number,
-    { studentId, fullName, grade }: CreateGradeDto,
+    { studentId, grade }: CreateGradeDto,
   ) {
     const gradeData = await this.prisma.grade.create({
       data: {
         studentId,
-        fullName: fullName,
         gradeComposition: {
           connect: {
             id: compositionId,
