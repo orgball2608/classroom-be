@@ -766,4 +766,57 @@ export class CourseService {
       message: USERS_MESSAGES.UN_MAP_STUDENT_ID_WITH_USER_ID_SUCCESSFULLY,
     };
   }
+
+  async joinCourseByClassCode(classCode: string, user: User) {
+    const course = await this.prisma.course.findUnique({
+      where: {
+        code: classCode,
+      },
+      include: {
+        createdBy: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            avatar: true,
+          },
+        },
+      },
+    });
+
+    if (!course) {
+      throw new NotFoundException(COURSES_MESSAGES.COURSE_NOT_FOUND);
+    }
+
+    const userCourse = await this.prisma.course.findUnique({
+      where: {
+        id: course.id,
+        OR: [
+          {
+            enrollments: {
+              some: {
+                userId: user.id,
+              },
+            },
+          },
+          {
+            courseTeachers: {
+              some: {
+                teacherId: user.id,
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    if (userCourse) {
+      throw new BadRequestException(COURSES_MESSAGES.USER_ENROLLED_COURSE);
+    }
+
+    const result = await this.enrollToCourse(user, course, course.id);
+
+    return result;
+  }
 }
