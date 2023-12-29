@@ -42,12 +42,6 @@ export class ExcelService {
       select: {
         studentId: true,
         fullName: true,
-        student: {
-          select: {
-            firstName: true,
-            lastName: true,
-          },
-        },
       },
     });
 

@@ -9,6 +9,7 @@ import { CourseTeacher, User } from '@prisma/client';
 
 import { ConfigService } from '@nestjs/config';
 import { Course } from './entities/course.entity';
+import { CoursesPageOptionsDto } from './dto/course-page-options-dto';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { EMIT_MESSAGES } from '@src/constants';
 import { EnrollmentRole } from './course.enum';
@@ -17,14 +18,14 @@ import { INotification } from '@src/interfaces';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { MapStudentIdWithUserIdDto } from './dto/map-student-id.dto';
+import { PageDto } from '@src/common/dto/page.dto';
+import { PageMetaDto } from '@src/common/dto/page-meta.dto';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { StorageService } from '@src/shared/storage/services/storage.service';
 import { UpdateCourseDto } from './dto/update-course.dto';
+import _ from 'lodash';
 import { generateCourseCode } from '@src/common/utils';
 import { v4 as uuid4 } from 'uuid';
-import { CoursesPageOptionsDto } from './dto/course-page-options-dto';
-import { PageMetaDto } from '@src/common/dto/page-meta.dto';
-import { PageDto } from '@src/common/dto/page.dto';
 
 @Injectable()
 export class CourseService {
@@ -395,7 +396,7 @@ export class CourseService {
       },
     });
 
-    courses
+    const responseCourses = courses
       .map((course) => {
         if (
           course.courseTeachers.some((teacher) => teacher.teacherId === userId)
@@ -404,7 +405,7 @@ export class CourseService {
             (teacher) => teacher.teacherId === userId,
           ).createdAt;
           return {
-            ...course,
+            ..._.omit(course, ['enrollments', 'courseTeachers']),
             joinedAt: joinedAt,
           };
         } else {
@@ -412,7 +413,7 @@ export class CourseService {
             (enrollment) => enrollment.userId === userId,
           ).createdAt;
           return {
-            ...course,
+            ..._.omit(course, ['enrollments', 'courseTeachers']),
             joinedAt: joinedAt,
           };
         }
@@ -421,7 +422,7 @@ export class CourseService {
 
     return {
       message: COURSES_MESSAGES.GET_COURSES_ENROLLED_SUCCESSFULLY,
-      data: courses,
+      data: responseCourses,
     };
   }
 
