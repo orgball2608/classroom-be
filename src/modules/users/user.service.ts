@@ -361,16 +361,12 @@ export class UserService {
   }
 
   async deleteUserList(idArray: number[]) {
-    idArray.forEach(async (id) => {
-      const user = await this.prisma.user.delete({ where: { id } });
-      if (!user) {
-        throw new NotFoundException({
-          message: USERS_MESSAGES.USER_NOT_FOUND,
-          data: {
-            idNotFound: id,
-          },
-        });
-      }
+    await this.prisma.user.deleteMany({
+      where: {
+        id: {
+          in: idArray,
+        },
+      },
     });
 
     return {
