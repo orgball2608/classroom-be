@@ -221,9 +221,23 @@ export class CourseController {
   }
 
   @Post('/join/:token')
+  @ApiParam({ name: 'token', type: 'string', example: 1 })
   joinCourse(@Req() req: IUserRequest, @Param() token: { token: string }) {
     const t = token.token as string;
     return this.courseService.verifyInvitationEmailToken(req.user.id, t);
+  }
+
+  //join course by classcode
+  @Post('/join-by-code')
+  // @ApiBody({ type: InviteEmailDto })
+  joinCourseByClassCode(
+    @Req() req: IUserRequest,
+    @Body() body: { classCode: string },
+  ) {
+    return this.courseService.joinCourseByClassCode(
+      body.classCode as string,
+      req.user,
+    );
   }
 
   @Delete(':courseId/users/:userId')
