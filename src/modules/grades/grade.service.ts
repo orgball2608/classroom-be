@@ -1,4 +1,3 @@
-import { CreateGradeDto } from './dto/create-grade.dto';
 import { GRADE_MESSAGES } from '@src/constants';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
@@ -7,30 +6,24 @@ import { UpdateGradeDto } from './dto/update-grade.dto';
 @Injectable()
 export class GradeService {
   constructor(private readonly prisma: PrismaService) {}
-  async create(
-    userId: number,
+  async updateGrade(
     compositionId: number,
-    { studentId, grade }: CreateGradeDto,
+    { studentId, grade }: UpdateGradeDto,
   ) {
-    const gradeData = await this.prisma.grade.create({
+    const gradeData = await this.prisma.grade.update({
+      where: {
+        studentId_gradeCompositionId: {
+          studentId,
+          gradeCompositionId: compositionId,
+        },
+      },
       data: {
-        studentId,
-        gradeComposition: {
-          connect: {
-            id: compositionId,
-          },
-        },
-        createdBy: {
-          connect: {
-            id: userId,
-          },
-        },
         grade,
       },
     });
 
     return {
-      message: GRADE_MESSAGES.CREATE_GRADE_SUCCESSFULLY,
+      message: GRADE_MESSAGES.UPDATE_GRADE_SUCCESSFULLY,
       data: gradeData,
     };
   }
@@ -46,14 +39,6 @@ export class GradeService {
       message: GRADE_MESSAGES.GET_GRADES_SUCCESSFULLY,
       data: grades,
     };
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} grade`;
-  }
-
-  update(id: number, updateGradeDto: UpdateGradeDto) {
-    return updateGradeDto;
   }
 
   remove(id: number) {

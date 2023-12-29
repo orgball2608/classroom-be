@@ -1,22 +1,20 @@
 import {
   Controller,
   Get,
-  Post,
   Body,
-  Patch,
   Param,
   Delete,
   ParseIntPipe,
   Req,
+  Patch,
 } from '@nestjs/common';
 import { GradeService } from './grade.service';
-import { CreateGradeDto } from './dto/create-grade.dto';
-import { UpdateGradeDto } from './dto/update-grade.dto';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
-import { ApiCreate, ApiFindAll } from '@src/decorators';
+import { ApiFindAll, ApiUpdate } from '@src/decorators';
 import { Grade } from './entities/grade.entity';
 import { IGradeCompositionRequest } from '@src/interfaces';
 import { ROUTES } from '@src/constants';
+import { UpdateGradeDto } from './dto/update-grade.dto';
 
 @ApiTags('Grades')
 @ApiBearerAuth()
@@ -24,18 +22,17 @@ import { ROUTES } from '@src/constants';
 export class GradeController {
   constructor(private readonly gradeService: GradeService) {}
 
-  @Post()
-  @ApiCreate(CreateGradeDto, Grade)
+  @Patch()
+  @ApiUpdate(UpdateGradeDto, Grade)
   @ApiParam({ name: 'courseId', type: Number, example: 1 })
   @ApiParam({ name: 'compositionId', type: Number, example: 1 })
-  create(
+  updateGrade(
     @Req() req: IGradeCompositionRequest,
-    @Body() createGradeDto: CreateGradeDto,
+    @Body() updateGradeDto: UpdateGradeDto,
   ) {
-    return this.gradeService.create(
-      req.user.id,
+    return this.gradeService.updateGrade(
       req.gradeComposition.id,
-      createGradeDto,
+      updateGradeDto,
     );
   }
 
@@ -45,19 +42,6 @@ export class GradeController {
   @ApiParam({ name: 'compositionId', type: Number, example: 1 })
   findAll(@Req() req: IGradeCompositionRequest) {
     return this.gradeService.findAll(req.gradeComposition.id);
-  }
-
-  @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.gradeService.findOne(id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateGradeDto: UpdateGradeDto,
-  ) {
-    return this.gradeService.update(id, updateGradeDto);
   }
 
   @Delete(':id')
