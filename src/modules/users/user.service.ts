@@ -360,11 +360,11 @@ export class UserService {
     };
   }
 
-  async deleteUserList(idArray: number[]) {
+  async deleteUserList(userIds: number[]) {
     await this.prisma.user.deleteMany({
       where: {
         id: {
-          in: idArray,
+          in: userIds,
         },
       },
     });
