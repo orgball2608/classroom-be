@@ -11,7 +11,7 @@ import {
 
 import { Response } from 'express';
 import { ExcelService } from './excel.service';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ROUTES } from '@src/constants';
 import { ICourseRequest } from '@src/interfaces';
@@ -22,7 +22,7 @@ import { ICourseRequest } from '@src/interfaces';
 export class ExcelController {
   constructor(private excelService: ExcelService) {}
 
-  @Get('/enrollments/download')
+  @Get('/students-template/download')
   @Header(
     'Content-type',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -32,7 +32,21 @@ export class ExcelController {
     res.download(`${result}`);
   }
 
-  @Post('/enrollments/upload')
+  @Get('courses/:courseId/grades-template/download')
+  @Header(
+    'Content-type',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  )
+  @ApiParam({ name: 'courseId', type: 'number', example: 1 })
+  async downloadGradesTemplate(
+    @Req() req: ICourseRequest,
+    @Res() res: Response,
+  ) {
+    const result = await this.excelService.downloadGradesTemplate(req.course);
+    res.download(`${result}`);
+  }
+
+  @Post('courses/:courseId/students/upload')
   @UseInterceptors(FileInterceptor('file'))
   uploadStudentList(
     @Req() req: ICourseRequest,
