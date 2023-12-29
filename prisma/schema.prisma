@@ -123,12 +123,13 @@ model CourseTeacher {
 }
 
 model GradeComposition {
-  id          Int    @id @default(autoincrement())
-  courseId    Int    @map("course_id")
-  createdById Int    @map("created_by_id")
+  id          Int     @id @default(autoincrement())
+  courseId    Int     @map("course_id")
+  createdById Int     @map("created_by_id")
   name        String
   scale       Int
   index       Int?
+  isFinalized Boolean @default(false)
 
   course    Course  @relation(fields: [courseId], references: [id])
   createdBy User    @relation(fields: [createdById], references: [id])
@@ -144,7 +145,6 @@ model GradeComposition {
 model Grade {
   id                 Int    @id @default(autoincrement())
   studentId          String @map("student_id")
-  fullName           String @map("full_name")
   gradeCompositionId Int    @map("grade_composition_id")
   grade              Float?
   createdById        Int    @map("created_by_id")
@@ -155,6 +155,7 @@ model Grade {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@unique([studentId, gradeCompositionId])
   @@map("grades")
 }
 

@@ -1,8 +1,8 @@
 import * as tmp from 'tmp';
 
+import { Course, GradeComposition } from '@prisma/client';
 import { Workbook, Worksheet } from 'exceljs';
 
-import { Course } from '@prisma/client';
 import { EXCEL_MESSAGES } from '@src/constants';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
@@ -39,7 +39,7 @@ export class ExcelService {
   async downloadStudentListTemplate() {
     const workbook = new Workbook();
 
-    const sheet = workbook.addWorksheet('list-student');
+    const sheet = workbook.addWorksheet('student-list');
 
     sheet.columns = [
       {
@@ -144,7 +144,7 @@ export class ExcelService {
   async readStudentList(course: Course, file: Express.Multer.File) {
     const workbook = new Workbook();
     await workbook.xlsx.load(file.buffer);
-    const worksheet = workbook.getWorksheet('sheet1');
+    const worksheet = workbook.getWorksheet('student-list');
 
     worksheet.eachRow({ includeEmpty: true }, async (row, rowNumber) => {
       // Skip header
@@ -178,6 +178,49 @@ export class ExcelService {
 
     return {
       message: EXCEL_MESSAGES.UPLOAD_STUDENT_LIST_SUCCESSFULLY,
+    };
+  }
+
+  async readGrades(
+    gradeComposition: GradeComposition,
+    file: Express.Multer.File,
+  ) {
+    const workbook = new Workbook();
+    await workbook.xlsx.load(file.buffer);
+    const worksheet = workbook.getWorksheet('grades');
+
+    worksheet.eachRow({ includeEmpty: true }, async (row, rowNumber) => {
+      // Skip header
+      if (rowNumber === 1) return;
+      await this.prisma.grade.upsert({
+        where: {
+          studentId_gradeCompositionId: {
+            studentId: String(row.values[1]),
+            gradeCompositionId: gradeComposition.id,
+          },
+        },
+        update: {
+          grade: Number(row.values[2]),
+        },
+        create: {
+          studentId: String(row.values[1]),
+          gradeComposition: {
+            connect: {
+              id: gradeComposition.id,
+            },
+          },
+          createdBy: {
+            connect: {
+              id: gradeComposition.createdById,
+            },
+          },
+          grade: Number(row.values[2]),
+        },
+      });
+    });
+
+    return {
+      message: EXCEL_MESSAGES.UPLOAD_GRADES_SUCCESSFULLY,
     };
   }
 }
