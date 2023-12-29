@@ -104,6 +104,7 @@ export const GRADE_COMPOSITION_MESSAGES = {
   SWITCH_GRADE_COMPOSITION_INDEX_SUCCESSFULLY:
     'Switch grade composition index successfully',
   INVALID_SWITCH_TO_INDEX: 'Invalid switch to index',
+  GRADE_COMPOSITION_IS_NOT_FINALIZED: 'Grade composition is not finalized',
 };
 
 export const GRADE_MESSAGES = {
@@ -117,4 +118,5 @@ export const GRADE_MESSAGES = {
 
 export const EXCEL_MESSAGES = {
   UPLOAD_STUDENT_LIST_SUCCESSFULLY: 'Upload student list successfully',
+  UPLOAD_GRADES_SUCCESSFULLY: 'Upload grades successfully',
 };

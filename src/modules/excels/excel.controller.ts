@@ -14,7 +14,7 @@ import { ExcelService } from './excel.service';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ROUTES } from '@src/constants';
-import { ICourseRequest } from '@src/interfaces';
+import { ICourseRequest, IGradeCompositionRequest } from '@src/interfaces';
 
 @ApiTags('Excels')
 @ApiBearerAuth()
@@ -53,5 +53,14 @@ export class ExcelController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     return this.excelService.readStudentList(req.course, file);
+  }
+
+  @Post('courses/:courseId/grade-compositions/:id/grades/upload')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadGrades(
+    @Req() req: IGradeCompositionRequest,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.excelService.readGrades(req.gradeComposition, file);
   }
 }
