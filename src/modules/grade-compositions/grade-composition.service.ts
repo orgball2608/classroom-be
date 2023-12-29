@@ -295,4 +295,20 @@ export class GradeCompositionService {
       data: gradeCompositions,
     };
   }
+
+  async markFinalize(id: number) {
+    const gradeComposition = await this.prisma.gradeComposition.update({
+      where: {
+        id,
+      },
+      data: {
+        isFinalized: true,
+      },
+    });
+
+    return {
+      message: GRADE_COMPOSITION_MESSAGES.MARK_AS_FINALIZED_SUCCESSFULLY,
+      data: gradeComposition,
+    };
+  }
 }
