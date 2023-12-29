@@ -41,7 +41,18 @@ export class GradeService {
     };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} grade`;
+  async remove(id: number) {
+    await this.prisma.grade.update({
+      where: {
+        id,
+      },
+      data: {
+        grade: null,
+      },
+    });
+
+    return {
+      message: GRADE_MESSAGES.REMOVE_GRADE_SUCCESSFULLY,
+    };
   }
 }

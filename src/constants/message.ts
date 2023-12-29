@@ -111,8 +111,8 @@ export const GRADE_COMPOSITION_MESSAGES = {
 export const GRADE_MESSAGES = {
   GRADE_NOT_FOUND: 'Grade not found',
   GET_GRADES_SUCCESSFULLY: 'Get grades successfully',
-  UPDATE_GRADE_SUCCESSFULLY: 'Update grade successfully',
-  DELETE_GRADE_SUCCESSFULLY: 'Delete grade successfully',
+  UPDATE_GRADE_SUCCESSFULLY: 'Update grade of student successfully',
+  REMOVE_GRADE_SUCCESSFULLY: 'Remove grade of student successfully',
 };
 
 export const EXCEL_MESSAGES = {
