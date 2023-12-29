@@ -6,11 +6,6 @@ export class CreateGradeDto {
   })
   studentId: string;
 
-  @StringField({
-    example: 'Nguyễn Văn A',
-  })
-  fullName: string;
-
   @NumberField({
     example: 10,
   })

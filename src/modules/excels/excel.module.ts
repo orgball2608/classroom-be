@@ -1,6 +1,6 @@
+import { CourseMiddleware, GradeCompositionMiddleware } from '@src/middlewares';
 import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 
-import { CourseMiddleware } from '@src/middlewares';
 import { ExcelController } from './excel.controller';
 import { ExcelService } from './excel.service';
 
@@ -20,5 +20,10 @@ export class ExcelModule {
         method: RequestMethod.GET,
       },
     );
+
+    consumer.apply(GradeCompositionMiddleware).forRoutes({
+      path: 'excels/courses/:courseId/grade-compositions/:id/grades/upload',
+      method: RequestMethod.POST,
+    });
   }
 }
