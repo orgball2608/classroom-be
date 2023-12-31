@@ -11,6 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
+import { MapStudentIdWithUserIdDto } from './dto/map-student-id.dto';
 import { PageDto } from '@src/common/dto/page.dto';
 import { PageMetaDto } from '@src/common/dto/page-meta.dto';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
@@ -345,6 +346,40 @@ export class UserService {
         'googleId',
         'facebookId',
       ]),
+    };
+  }
+
+  async mapStudentIdWithUserId(
+    userId: number,
+    mapStudentIdWithUserIdDto: MapStudentIdWithUserIdDto,
+  ) {
+    const data = await this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        studentId: mapStudentIdWithUserIdDto.studentId,
+      },
+    });
+
+    return {
+      message: USERS_MESSAGES.MAP_STUDENT_ID_WITH_USER_ID_SUCCESSFULLY,
+      data,
+    };
+  }
+
+  async unMapStudentId(userId: number) {
+    await this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        studentId: null,
+      },
+    });
+
+    return {
+      message: USERS_MESSAGES.UN_MAP_STUDENT_ID_WITH_USER_ID_SUCCESSFULLY,
     };
   }
 
