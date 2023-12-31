@@ -275,17 +275,13 @@ export class CourseService {
     };
   }
 
-  async remove(idArray: number[]) {
-    idArray.forEach(async (id) => {
-      const course = await this.prisma.course.delete({ where: { id } });
-      if (!course) {
-        throw new NotFoundException({
-          message: COURSES_MESSAGES.COURSE_NOT_FOUND,
-          data: {
-            idNotFound: id,
-          },
-        });
-      }
+  async remove(courseIds: number[]) {
+    await this.prisma.course.deleteMany({
+      where: {
+        id: {
+          in: courseIds,
+        },
+      },
     });
 
     return {
