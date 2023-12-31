@@ -11,7 +11,13 @@ import {
 
 import { Response } from 'express';
 import { ExcelService } from './excel.service';
-import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ROUTES } from '@src/constants';
 import { ICourseRequest, IGradeCompositionRequest } from '@src/interfaces';
@@ -46,6 +52,19 @@ export class ExcelController {
     res.download(`${result}`);
   }
 
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiParam({ name: 'courseId', type: 'number', example: 1 })
   @Post('courses/:courseId/students/upload')
   @UseInterceptors(FileInterceptor('file'))
   uploadStudentList(
@@ -55,6 +74,20 @@ export class ExcelController {
     return this.excelService.readStudentList(req.course, file);
   }
 
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiParam({ name: 'courseId', type: 'number', example: 1 })
+  @ApiParam({ name: 'id', type: 'number', example: 1 })
   @Post('courses/:courseId/grade-compositions/:id/grades/upload')
   @UseInterceptors(FileInterceptor('file'))
   uploadGrades(
