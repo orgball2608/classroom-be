@@ -13,6 +13,7 @@ import { CustomMailerModule } from './shared/mailer/mailer.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ExcelModule } from './modules/excels/excel.module';
 import { GatewayModule } from './shared/gateway/gateway.module';
+import { GradeBoardModule } from './modules/grade-boards/grade-board.module';
 import { GradeCompositionModule } from './modules/grade-compositions/grade-composition.module';
 import { GradeModule } from './modules/grades/grade.module';
 import { HealthModule } from './modules/health/health.module';
@@ -58,6 +59,7 @@ import redisConfig from './configs/redis.config';
     HealthModule,
     NotificationModule,
     GradeCompositionModule,
+    GradeBoardModule,
     GradeModule,
     ExcelModule,
   ],

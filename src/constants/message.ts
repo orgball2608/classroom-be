@@ -108,6 +108,12 @@ export const GRADE_COMPOSITION_MESSAGES = {
   MARK_AS_FINALIZED_SUCCESSFULLY: 'Mark as finalized successfully',
 };
 
+export const GRADE_BOARS_MESSAGES = {
+  GET_GRADE_BOARD_TEMPLATE_FOR_COURSE_SUCCESSFULLY:
+    'Get grade board template for course successfully',
+  GET_FINAL_GRADE_BOARD_SUCCESSFULLY: 'Get final grade board successfully',
+};
+
 export const GRADE_MESSAGES = {
   GRADE_NOT_FOUND: 'Grade not found',
   GET_GRADES_SUCCESSFULLY: 'Get grades successfully',
