@@ -19,6 +19,10 @@ export class ExcelModule {
         path: 'excels/courses/:courseId/grades-template/download',
         method: RequestMethod.GET,
       },
+      {
+        path: 'excels/courses/:courseId/grade-compositions/:id/grades/upload',
+        method: RequestMethod.POST,
+      },
     );
 
     consumer.apply(GradeCompositionMiddleware).forRoutes({
