@@ -96,4 +96,15 @@ export class ExcelController {
   ) {
     return this.excelService.readGrades(req.gradeComposition, file);
   }
+
+  @Get('courses/:courseId/grade-board/download')
+  @Header(
+    'Content-type',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  )
+  @ApiParam({ name: 'courseId', type: 'number', example: 1 })
+  async downloadGradeBoard(@Req() req: ICourseRequest, @Res() res: Response) {
+    const result = await this.excelService.downloadGradeBoard(req.course);
+    res.download(`${result}`);
+  }
 }
