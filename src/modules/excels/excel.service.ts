@@ -149,19 +149,27 @@ export class ExcelService {
     worksheet.eachRow({ includeEmpty: true }, async (row, rowNumber) => {
       // Skip header
       if (rowNumber === 1) return;
+      const studentId: string = String(row.values[1]);
+      const fullName: string = String(row.values[2]);
+
       await this.prisma.enrollment.upsert({
         where: {
           studentId_courseId: {
-            studentId: String(row.values[1]),
+            studentId: studentId,
             courseId: course.id,
           },
         },
         update: {
-          fullName: String(row.values[2]),
+          fullName: fullName,
         },
         create: {
-          studentId: String(row.values[1]),
-          fullName: String(row.values[2]),
+          studentId: studentId,
+          student: {
+            connect: {
+              studentId: studentId,
+            },
+          },
+          fullName: fullName,
           course: {
             connect: {
               id: course.id,
