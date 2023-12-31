@@ -43,11 +43,24 @@ export class ExcelService {
 
     sheet.columns = [
       {
+        header: 'STT',
+        key: 'stt',
+        width: 10,
+        style: {
+          alignment: {
+            horizontal: 'center',
+            vertical: 'middle',
+            wrapText: true,
+          },
+        },
+      },
+      {
         header: 'StudentId',
         key: 'studentId',
         width: 20,
         style: {
           alignment: {
+            horizontal: 'center',
             vertical: 'middle',
             wrapText: true,
           },
@@ -177,8 +190,8 @@ export class ExcelService {
     worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
       // Skip header
       if (rowNumber === 1) return;
-      const studentId: string = String(row.values[1]);
-      const fullName: string = String(row.values[2]);
+      const studentId: string = String(row.values[2]);
+      const fullName: string = String(row.values[3]);
 
       const promise = this.prisma.$transaction(
         async (tx) => {
