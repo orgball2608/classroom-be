@@ -54,19 +54,7 @@ export class CourseModule implements NestModule {
         method: RequestMethod.DELETE,
       },
       {
-        path: 'courses/:id/enrollments/student-id',
-        method: RequestMethod.PATCH,
-      },
-      {
-        path: 'courses/:id/enrollments/:userId/student-id',
-        method: RequestMethod.PATCH,
-      },
-      {
         path: 'courses/:id/enrollments/me/leave',
-        method: RequestMethod.DELETE,
-      },
-      {
-        path: 'courses/:id/enrollments/:userId/student-id',
         method: RequestMethod.DELETE,
       },
     );
