@@ -22,6 +22,7 @@ model User {
   phoneNumber         String?      @map("phone_number")
   address             String?      @map("address")
   avatar              String?      @map("avatar")
+  studentId           String?      @unique @map("student_id")
   verifyEmailToken    String?      @map("verify_email_token")
   forgotPasswordToken String?      @map("forgot_password_token")
   verify              VerifyStatus @default(UNVERIFY)
@@ -91,7 +92,6 @@ model Enrollment {
   id          Int     @id @default(autoincrement())
   courseId    Int     @map("course_id")
   userId      Int?    @map("user_id")
-  studentId   String? @map("student_id")
   fullName    String? @map("full_name")
   createdById Int     @map("created_by_id")
 
@@ -102,7 +102,6 @@ model Enrollment {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@unique([studentId, courseId])
   @@unique([userId, courseId])
   @@map("enrollments")
 }

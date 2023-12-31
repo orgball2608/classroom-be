@@ -35,6 +35,8 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { UpdateFullFieldUserDto } from './dto/update-full-field-user.dto';
 import { ROUTES } from '@src/constants';
 import { ExcludeFieldsInterceptor } from '@src/interceptors';
+import { ApiDelete } from '@src/decorators';
+import { MapStudentIdWithUserIdDto } from './dto/map-student-id.dto';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -138,6 +140,30 @@ export class UserController {
     return this.userService.update(id, updateUserDto, avatar);
   }
 
+  @Patch('student-id')
+  @ApiBody({ type: MapStudentIdWithUserIdDto })
+  updateStudentId(
+    @Req() req: IUserRequest,
+    @Body() mapStudentIdWithUserIdDto: MapStudentIdWithUserIdDto,
+  ) {
+    return this.userService.mapStudentIdWithUserId(
+      req.user.id,
+      mapStudentIdWithUserIdDto,
+    );
+  }
+
+  @Patch(':id/student-id')
+  @ApiParam({ name: 'id', type: 'number', example: 1 })
+  updateStudentIdWithUser(
+    @Req() req: IUserRequest,
+    @Body() mapStudentIdWithUserIdDto: MapStudentIdWithUserIdDto,
+  ) {
+    return this.userService.mapStudentIdWithUserId(
+      req.user.id,
+      mapStudentIdWithUserIdDto,
+    );
+  }
+
   @ApiBody({
     schema: {
       type: 'object',
@@ -206,6 +232,12 @@ export class UserController {
   @Patch(':id/unlock')
   unlockUser(@Param('id', ParseIntPipe) id: number) {
     return this.userService.unlockUser(id);
+  }
+
+  @Delete(':id/student-id')
+  @ApiDelete()
+  deleteStudentId(@Req() req: IUserRequest) {
+    return this.userService.unMapStudentId(req.user.id);
   }
 
   @ApiParam({ name: 'id', type: Number, example: 1 })

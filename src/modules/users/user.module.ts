@@ -35,14 +35,10 @@ export class UserModule implements NestModule {
         { path: 'users', method: RequestMethod.GET },
         {
           path: 'users/:id',
-          method: RequestMethod.DELETE,
+          method: RequestMethod.PATCH,
         },
         {
-          path: 'users/list/:ids',
-          method: RequestMethod.DELETE,
-        },
-        {
-          path: 'users/:id',
+          path: 'users/:id/student-id',
           method: RequestMethod.PATCH,
         },
         {
@@ -52,6 +48,18 @@ export class UserModule implements NestModule {
         {
           path: 'users/:id/unlock',
           method: RequestMethod.PATCH,
+        },
+        {
+          path: 'users/:id',
+          method: RequestMethod.DELETE,
+        },
+        {
+          path: 'users/list/:ids',
+          method: RequestMethod.DELETE,
+        },
+        {
+          path: 'users/:id/student-id',
+          method: RequestMethod.DELETE,
         },
       );
   }
