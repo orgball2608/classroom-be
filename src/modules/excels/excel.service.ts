@@ -1,7 +1,7 @@
 import * as tmp from 'tmp';
 
+import { Column, Workbook, Worksheet } from 'exceljs';
 import { Course, GradeComposition } from '@prisma/client';
-import { Workbook, Worksheet } from 'exceljs';
 
 import { EXCEL_MESSAGES } from '@src/constants';
 import { Injectable } from '@nestjs/common';
@@ -87,11 +87,24 @@ export class ExcelService {
 
     sheet.columns = [
       {
+        header: 'STT',
+        key: 'stt',
+        width: 10,
+        style: {
+          alignment: {
+            horizontal: 'center',
+            vertical: 'middle',
+            wrapText: true,
+          },
+        },
+      },
+      {
         header: 'StudentId',
         key: 'studentId',
         width: 20,
         style: {
           alignment: {
+            horizontal: 'center',
             vertical: 'middle',
             wrapText: true,
           },
@@ -103,6 +116,7 @@ export class ExcelService {
         width: 20,
         style: {
           alignment: {
+            horizontal: 'center',
             vertical: 'middle',
             wrapText: true,
           },
@@ -120,8 +134,11 @@ export class ExcelService {
       },
     });
 
+    let stt = 1;
+
     students.forEach((student) => {
       sheet.addRow({
+        stt: stt++,
         studentId: student.studentId,
         fullName: student.fullName,
       });
@@ -131,7 +148,7 @@ export class ExcelService {
 
     const tmpFile = tmp.fileSync({
       discardDescriptor: true,
-      prefix: `grades-${course.id}-template`,
+      prefix: `grades-template-course-${course.id}`,
       postfix: '.xlsx',
       mode: parseInt('0600', 8),
     });
@@ -247,8 +264,8 @@ export class ExcelService {
     worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
       // Skip header
       if (rowNumber === 1) return;
-      const studentId: string = String(row.values[1]);
-      const grade: number = Number(row.values[2]);
+      const studentId: string = String(row.values[2]);
+      const grade: number = Number(row.values[3]);
 
       const promise = this.prisma.grade.upsert({
         where: {
@@ -284,5 +301,121 @@ export class ExcelService {
     return {
       message: EXCEL_MESSAGES.UPLOAD_GRADES_SUCCESSFULLY,
     };
+  }
+
+  async downloadGradeBoard(course: Course) {
+    const workbook = new Workbook();
+
+    const sheet = workbook.addWorksheet('grade-board');
+
+    const gradeCompositions = await this.prisma.gradeComposition.findMany({
+      where: {
+        courseId: course.id,
+      },
+      orderBy: {
+        index: 'asc',
+      },
+    });
+
+    const sheetColumns: Partial<Column>[] = [
+      {
+        header: 'STT',
+        key: 'stt',
+        width: 10,
+        style: {
+          alignment: {
+            horizontal: 'center',
+            vertical: 'middle',
+            wrapText: true,
+          },
+        },
+      },
+      {
+        header: 'StudentId',
+        key: 'studentId',
+        width: 20,
+        style: {
+          alignment: {
+            horizontal: 'center',
+            vertical: 'middle',
+            wrapText: true,
+          },
+        },
+      },
+    ];
+
+    gradeCompositions.forEach((gradeComposition) => {
+      const columnKey = `grade-composition-${gradeComposition.id}`;
+      sheetColumns.push({
+        header: gradeComposition.name,
+        key: columnKey,
+        width: 20,
+        style: {
+          alignment: {
+            horizontal: 'center',
+            vertical: 'middle',
+            wrapText: true,
+          },
+        },
+      });
+    });
+
+    sheet.columns = sheetColumns;
+
+    const enrollments = await this.prisma.enrollment.findMany({
+      where: {
+        courseId: course.id,
+      },
+    });
+
+    let stt = 1;
+
+    await Promise.all(
+      enrollments.map(async (enrollment) => {
+        const grades = await this.prisma.grade.findMany({
+          where: {
+            studentId: enrollment.studentId,
+            gradeCompositionId: {
+              in: gradeCompositions.map((gc) => gc.id),
+            },
+          },
+        });
+
+        const rowData = {
+          stt: stt++,
+          studentId: enrollment.studentId,
+          fullName: enrollment.fullName,
+        };
+
+        for (const gradeComposition of gradeCompositions) {
+          const grade = grades.find(
+            (grade) => grade.gradeCompositionId === gradeComposition.id,
+          );
+
+          const columnKey = `grade-composition-${gradeComposition.id}`;
+
+          if (grade) {
+            rowData[columnKey] = grade.grade || 0;
+          } else {
+            rowData[columnKey] = 'N/A';
+          }
+        }
+
+        sheet.addRow(rowData);
+      }),
+    );
+
+    this.styleSheet(sheet);
+
+    const tmpFile = tmp.fileSync({
+      discardDescriptor: true,
+      prefix: `grade-board-course-${course.id}`,
+      postfix: '.xlsx',
+      mode: parseInt('0600', 8),
+    });
+
+    await workbook.xlsx.writeFile(tmpFile.name);
+
+    return tmpFile.name;
   }
 }

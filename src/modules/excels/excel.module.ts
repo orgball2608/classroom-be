@@ -23,6 +23,10 @@ export class ExcelModule {
         path: 'excels/courses/:courseId/grade-compositions/:id/grades/upload',
         method: RequestMethod.POST,
       },
+      {
+        path: 'excels/courses/:courseId/grade-board/download',
+        method: RequestMethod.GET,
+      },
     );
 
     consumer.apply(GradeCompositionMiddleware).forRoutes({
