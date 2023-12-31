@@ -17,7 +17,6 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { INotification } from '@src/interfaces';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
-import { MapStudentIdWithUserIdDto } from './dto/map-student-id.dto';
 import { PageDto } from '@src/common/dto/page.dto';
 import { PageMetaDto } from '@src/common/dto/page-meta.dto';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
@@ -321,7 +320,6 @@ export class CourseService {
                 createdAt: true,
               },
             },
-            studentId: true,
           },
           orderBy: {
             createdAt: 'asc',
@@ -733,47 +731,6 @@ export class CourseService {
     const result = await this.leaveCourse(userId, course, courseId);
 
     return result;
-  }
-
-  async mapStudentIdWithUserId(
-    userId: number,
-    courseId: number,
-    mapStudentIdWithUserIdDto: MapStudentIdWithUserIdDto,
-  ) {
-    const data = await this.prisma.enrollment.update({
-      where: {
-        userId_courseId: {
-          courseId: courseId,
-          userId: userId,
-        },
-      },
-      data: {
-        studentId: mapStudentIdWithUserIdDto.studentId,
-      },
-    });
-
-    return {
-      message: USERS_MESSAGES.MAP_STUDENT_ID_WITH_USER_ID_SUCCESSFULLY,
-      data,
-    };
-  }
-
-  async unMapStudentId(userId: number, courseId: number) {
-    await this.prisma.enrollment.update({
-      where: {
-        userId_courseId: {
-          courseId: courseId,
-          userId: userId,
-        },
-      },
-      data: {
-        studentId: null,
-      },
-    });
-
-    return {
-      message: USERS_MESSAGES.UN_MAP_STUDENT_ID_WITH_USER_ID_SUCCESSFULLY,
-    };
   }
 
   async joinCourseByClassCode(classCode: string, user: User) {
