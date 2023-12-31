@@ -146,43 +146,88 @@ export class ExcelService {
     await workbook.xlsx.load(file.buffer);
     const worksheet = workbook.getWorksheet('student-list');
 
-    worksheet.eachRow({ includeEmpty: true }, async (row, rowNumber) => {
+    const gradeCompositions = await this.prisma.gradeComposition.findMany({
+      where: {
+        courseId: course.id,
+      },
+      orderBy: {
+        index: 'asc',
+      },
+    });
+
+    const promises: Promise<any>[] = [];
+
+    worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
       // Skip header
       if (rowNumber === 1) return;
       const studentId: string = String(row.values[1]);
       const fullName: string = String(row.values[2]);
 
-      await this.prisma.enrollment.upsert({
-        where: {
-          studentId_courseId: {
-            studentId: studentId,
-            courseId: course.id,
-          },
-        },
-        update: {
-          fullName: fullName,
-        },
-        create: {
-          studentId: studentId,
-          student: {
-            connect: {
+      const promise = this.prisma.$transaction(
+        async (tx) => {
+          await tx.enrollment.upsert({
+            where: {
+              studentId_courseId: {
+                studentId: studentId,
+                courseId: course.id,
+              },
+            },
+            update: {
+              fullName: fullName,
+            },
+            create: {
               studentId: studentId,
+              fullName: fullName,
+              course: {
+                connect: {
+                  id: course.id,
+                },
+              },
+              createdBy: {
+                connect: {
+                  id: course.createdById,
+                },
+              },
             },
-          },
-          fullName: fullName,
-          course: {
-            connect: {
-              id: course.id,
-            },
-          },
-          createdBy: {
-            connect: {
-              id: course.createdById,
-            },
-          },
+          });
+
+          await Promise.all(
+            gradeCompositions.map(async (gradeComposition) => {
+              await tx.grade.upsert({
+                where: {
+                  studentId_gradeCompositionId: {
+                    studentId: studentId,
+                    gradeCompositionId: gradeComposition.id,
+                  },
+                },
+                update: {},
+                create: {
+                  studentId: studentId,
+                  gradeComposition: {
+                    connect: {
+                      id: gradeComposition.id,
+                    },
+                  },
+                  createdBy: {
+                    connect: {
+                      id: course.createdById,
+                    },
+                  },
+                },
+              });
+            }),
+          );
         },
-      });
+        {
+          maxWait: 5000, // default: 2000
+          timeout: 10000, // default: 5000
+        },
+      );
+
+      promises.push(promise);
     });
+
+    await Promise.all(promises);
 
     return {
       message: EXCEL_MESSAGES.UPLOAD_STUDENT_LIST_SUCCESSFULLY,
@@ -200,18 +245,21 @@ export class ExcelService {
     worksheet.eachRow({ includeEmpty: true }, async (row, rowNumber) => {
       // Skip header
       if (rowNumber === 1) return;
+      const studentId: string = String(row.values[1]);
+      const grade: number = Number(row.values[2]);
+
       await this.prisma.grade.upsert({
         where: {
           studentId_gradeCompositionId: {
-            studentId: String(row.values[1]),
+            studentId: studentId,
             gradeCompositionId: gradeComposition.id,
           },
         },
         update: {
-          grade: Number(row.values[2]),
+          grade: grade,
         },
         create: {
-          studentId: String(row.values[1]),
+          studentId: studentId,
           gradeComposition: {
             connect: {
               id: gradeComposition.id,
@@ -222,7 +270,7 @@ export class ExcelService {
               id: gradeComposition.createdById,
             },
           },
-          grade: Number(row.values[2]),
+          grade: grade,
         },
       });
     });
