@@ -242,13 +242,15 @@ export class ExcelService {
     await workbook.xlsx.load(file.buffer);
     const worksheet = workbook.getWorksheet('grades');
 
-    worksheet.eachRow({ includeEmpty: true }, async (row, rowNumber) => {
+    const promises: Promise<any>[] = [];
+
+    worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
       // Skip header
       if (rowNumber === 1) return;
       const studentId: string = String(row.values[1]);
       const grade: number = Number(row.values[2]);
 
-      await this.prisma.grade.upsert({
+      const promise = this.prisma.grade.upsert({
         where: {
           studentId_gradeCompositionId: {
             studentId: studentId,
@@ -273,7 +275,11 @@ export class ExcelService {
           grade: grade,
         },
       });
+
+      promises.push(promise);
     });
+
+    await Promise.all(promises);
 
     return {
       message: EXCEL_MESSAGES.UPLOAD_GRADES_SUCCESSFULLY,
