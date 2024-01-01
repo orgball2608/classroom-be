@@ -20,6 +20,9 @@ export class GradeBoardService {
     const enrollments = await this.prisma.enrollment.findMany({
       where: {
         courseId: courseId,
+        studentId: {
+          not: null,
+        },
       },
       orderBy: {
         studentId: 'asc',
@@ -97,6 +100,9 @@ export class GradeBoardService {
     const enrollments = await this.prisma.enrollment.findMany({
       where: {
         courseId: courseId,
+        studentId: {
+          not: null,
+        },
       },
       orderBy: {
         studentId: 'asc',
