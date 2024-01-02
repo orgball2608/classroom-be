@@ -9,6 +9,9 @@ export class UpdateUserDto extends PartialType(
   OmitType(RegisterDto, ['email', 'password']),
 ) {
   @IsOptional()
+  studentId: string;
+
+  @IsOptional()
   firstName: string;
 
   @IsOptional()

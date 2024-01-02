@@ -86,7 +86,7 @@ export class UserController {
   }
 
   @ApiBody({ type: ChangePasswordDto })
-  @Patch('/change-password')
+  @Patch('/me/change-password')
   changePassword(
     @Req() req: IUserRequest,
     @Body() changePasswordDto: ChangePasswordDto,
@@ -137,7 +137,8 @@ export class UserController {
     @UploadedFile() avatar: Express.Multer.File,
   ) {
     const id = req.user.id;
-    return this.userService.update(id, updateUserDto, avatar);
+    const studentId = req.user.studentId;
+    return this.userService.update(id, updateUserDto, avatar, studentId);
   }
 
   @Patch('student-id')
@@ -157,9 +158,10 @@ export class UserController {
   updateStudentIdWithUser(
     @Req() req: IUserRequest,
     @Body() mapStudentIdWithUserIdDto: MapStudentIdWithUserIdDto,
+    @Param('id', ParseIntPipe) id: number,
   ) {
     return this.userService.mapStudentIdWithUserId(
-      req.user.id,
+      id,
       mapStudentIdWithUserIdDto,
     );
   }
@@ -236,8 +238,11 @@ export class UserController {
 
   @Delete(':id/student-id')
   @ApiDelete()
-  deleteStudentId(@Req() req: IUserRequest) {
-    return this.userService.unMapStudentId(req.user.id);
+  deleteStudentId(
+    @Req() req: IUserRequest,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.userService.unMapStudentId(id);
   }
 
   @ApiParam({ name: 'id', type: Number, example: 1 })

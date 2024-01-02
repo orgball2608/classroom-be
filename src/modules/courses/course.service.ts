@@ -293,16 +293,21 @@ export class CourseService {
     const course = await this.prisma.course.findMany({
       where: {
         id: courseId,
+        // enrollments: {
+        //   some: {
+        //     userId: {
+        //       not: null,
+        //     },
+        //   },
+        // },
+      },
+      include: {
         enrollments: {
-          some: {
+          where: {
             userId: {
               not: null,
             },
           },
-        },
-      },
-      include: {
-        enrollments: {
           select: {
             student: {
               select: {
@@ -314,6 +319,7 @@ export class CourseService {
                 address: true,
                 phoneNumber: true,
                 createdAt: true,
+                studentId: true,
               },
             },
           },
