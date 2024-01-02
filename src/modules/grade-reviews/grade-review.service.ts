@@ -1,6 +1,7 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+
 import { CreateGradeReviewDto } from './dto/create-grade-review.dto';
 import { GRADE_REVIEW_MESSAGES } from '@src/constants';
-import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { UpdateGradeReviewDto } from './dto/update-grade-review.dto';
 
@@ -36,13 +37,21 @@ export class GradeReviewService {
       where: {
         id,
       },
+      include: {
+        createdBy: {
+          select: {
+            id: true,
+            email: true,
+            avatar: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
     });
 
-    if (!gradeReview) {
-      return {
-        message: GRADE_REVIEW_MESSAGES.GRADE_REVIEW_NOT_FOUND,
-      };
-    }
+    if (!gradeReview)
+      throw new NotFoundException(GRADE_REVIEW_MESSAGES.GRADE_REVIEW_NOT_FOUND);
 
     return {
       message: GRADE_REVIEW_MESSAGES.GET_GRADE_REVIEW_BY_ID_SUCCESSFULLY,

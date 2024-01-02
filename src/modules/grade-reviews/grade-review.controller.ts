@@ -12,9 +12,17 @@ import {
 import { GradeReviewService } from './grade-review.service';
 import { CreateGradeReviewDto } from './dto/create-grade-review.dto';
 import { UpdateGradeReviewDto } from './dto/update-grade-review.dto';
-import { ApiBearerAuth, ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { ROUTES } from '@src/constants';
 import { IGradeRequest } from '@src/interfaces';
+import {
+  ApiFindAll,
+  ApiFindOne,
+  ApiCreate,
+  ApiUpdate,
+  ApiDelete,
+} from '@src/decorators';
+import { GradeReview } from './entities/grade-review.entity';
 
 @ApiTags('Grade reviews')
 @ApiBearerAuth()
@@ -26,7 +34,7 @@ export class GradeReviewController {
   @ApiParam({ name: 'courseId', type: Number, example: 1 })
   @ApiParam({ name: 'compositionId', type: Number, example: 1 })
   @ApiParam({ name: 'gradeId', type: Number, example: 1 })
-  @ApiBody({ type: CreateGradeReviewDto })
+  @ApiCreate(CreateGradeReviewDto, GradeReview)
   create(
     @Req() req: IGradeRequest,
     @Body() createGradeReviewDto: CreateGradeReviewDto,
@@ -39,6 +47,7 @@ export class GradeReviewController {
   }
 
   @Get()
+  @ApiFindAll(GradeReview)
   findAll() {
     return this.gradeReviewService.findAll();
   }
@@ -48,6 +57,7 @@ export class GradeReviewController {
   @ApiParam({ name: 'compositionId', type: Number, example: 1 })
   @ApiParam({ name: 'gradeId', type: Number, example: 1 })
   @ApiParam({ name: 'id', type: Number, example: 1 })
+  @ApiFindOne(GradeReview)
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.gradeReviewService.findOne(id);
   }
@@ -57,7 +67,7 @@ export class GradeReviewController {
   @ApiParam({ name: 'compositionId', type: Number, example: 1 })
   @ApiParam({ name: 'gradeId', type: Number, example: 1 })
   @ApiParam({ name: 'id', type: Number, example: 1 })
-  @ApiBody({ type: UpdateGradeReviewDto })
+  @ApiUpdate(UpdateGradeReviewDto, GradeReview)
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateGradeReviewDto: UpdateGradeReviewDto,
@@ -70,6 +80,7 @@ export class GradeReviewController {
   @ApiParam({ name: 'compositionId', type: Number, example: 1 })
   @ApiParam({ name: 'gradeId', type: Number, example: 1 })
   @ApiParam({ name: 'id', type: Number, example: 1 })
+  @ApiDelete()
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.gradeReviewService.remove(id);
   }
