@@ -32,6 +32,7 @@ export const USERS_MESSAGES = {
   GET_USERS_LIST_SUCCESSFULLY: 'Get users successfully',
   LOCK_USER_SUCCESSFULLY: 'Lock user successfully',
   UNLOCK_USER_SUCCESSFULLY: 'Unlock user successfully',
+  STUDENT_ID_USED: 'Student ID already used',
 } as const;
 
 export const TOKEN_MESSAGES = {
