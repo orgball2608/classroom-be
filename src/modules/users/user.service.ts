@@ -63,6 +63,12 @@ export class UserService {
               mode: 'insensitive',
             },
           },
+          {
+            studentId: {
+              contains: searchQuery,
+              mode: 'insensitive',
+            },
+          },
         ],
       };
     }
@@ -267,13 +273,31 @@ export class UserService {
     };
   }
 
+  //check studentid used?
+  async checkStudentIdUsed(studentId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        studentId,
+      },
+    });
+
+    if (user) {
+      throw new BadRequestException(USERS_MESSAGES.STUDENT_ID_USED);
+    }
+  }
+
   async update(
     id: number,
     updateUserDto: UpdateUserDto,
     avatar: Express.Multer.File,
+    studentId: string,
   ) {
     const key = uuidv4();
     let avatarURL: string;
+
+    if (updateUserDto?.studentId && !studentId) {
+      await this.checkStudentIdUsed(updateUserDto.studentId);
+    }
 
     if (avatar) {
       avatarURL = await this.storageService.uploadFile({
@@ -282,12 +306,16 @@ export class UserService {
       });
     }
 
+    const dataUpdate = !avatarURL
+      ? { ...updateUserDto }
+      : {
+          ...updateUserDto,
+          avatar: avatarURL ? avatarURL : null,
+        };
+
     const user = await this.prisma.user.update({
       where: { id },
-      data: {
-        ...updateUserDto,
-        avatar: avatarURL ? avatarURL : null,
-      },
+      data: dataUpdate,
     });
 
     if (!user) throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
@@ -353,6 +381,7 @@ export class UserService {
     userId: number,
     mapStudentIdWithUserIdDto: MapStudentIdWithUserIdDto,
   ) {
+    await this.checkStudentIdUsed(mapStudentIdWithUserIdDto.studentId);
     const data = await this.prisma.user.update({
       where: {
         id: userId,
@@ -361,6 +390,9 @@ export class UserService {
         studentId: mapStudentIdWithUserIdDto.studentId,
       },
     });
+    if (!data) {
+      throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
+    }
 
     return {
       message: USERS_MESSAGES.MAP_STUDENT_ID_WITH_USER_ID_SUCCESSFULLY,
