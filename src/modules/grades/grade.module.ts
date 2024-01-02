@@ -10,10 +10,9 @@ import { GradeService } from './grade.service';
 })
 export class GradeModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(GradeCompositionMiddleware).forRoutes({
-      path: 'courses/:courseId/grade-compositions/:compositionId',
-      method: RequestMethod.ALL,
-    });
+    consumer
+      .apply(GradeCompositionMiddleware)
+      .forRoutes('courses/:courseId/grade-compositions/:compositionId/grades');
 
     consumer.apply(GradeMiddleware).forRoutes({
       path: 'courses/:courseId/grade-compositions/:compositionId/grades',

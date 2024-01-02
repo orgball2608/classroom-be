@@ -15,7 +15,8 @@ export class GradeCompositionMiddleware implements NestMiddleware {
   constructor(private readonly prisma: PrismaService) {}
 
   async use(req: IGradeCompositionRequest, res: Response, next: NextFunction) {
-    const gradeCompositionId = req.params.id;
+    console.log('GradeCompositionMiddleware');
+    const gradeCompositionId = req.params.compositionId || req.params.id;
     const gradeCompositionIdNumber = Number(gradeCompositionId);
 
     if (isNaN(gradeCompositionIdNumber)) {
