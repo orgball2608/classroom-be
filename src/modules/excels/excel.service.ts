@@ -140,6 +140,9 @@ export class ExcelService {
     const students = await this.prisma.enrollment.findMany({
       where: {
         courseId: course.id,
+        studentId: {
+          not: null,
+        },
       },
       select: {
         studentId: true,
@@ -316,7 +319,16 @@ export class ExcelService {
     };
   }
 
-  async downloadGradeBoard(course: Course) {
+  async downloadGradeBoard(userId: number, course: Course) {
+    const isTeacher = await this.prisma.courseTeacher.findUnique({
+      where: {
+        courseId_teacherId: {
+          teacherId: userId,
+          courseId: course.id,
+        },
+      },
+    });
+
     const workbook = new Workbook();
 
     const sheet = workbook.addWorksheet('grade-board');
@@ -378,6 +390,9 @@ export class ExcelService {
     const enrollments = await this.prisma.enrollment.findMany({
       where: {
         courseId: course.id,
+        studentId: {
+          not: null,
+        },
       },
     });
 
@@ -407,10 +422,10 @@ export class ExcelService {
 
           const columnKey = `grade-composition-${gradeComposition.id}`;
 
-          if (grade) {
-            rowData[columnKey] = grade.grade || 0;
+          if (isTeacher || enrollment.userId === userId) {
+            rowData[columnKey] = grade ? grade.grade || 0 : 'N/A';
           } else {
-            rowData[columnKey] = 'N/A';
+            rowData[columnKey] = 0;
           }
         }
 

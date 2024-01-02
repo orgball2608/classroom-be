@@ -54,6 +54,11 @@ export class CourseController {
     return this.courseService.findAll(pageOptionsDto);
   }
 
+  @Get('/my-courses')
+  findAllCourseOfMe(@Req() req: IUserRequest) {
+    return this.courseService.findAllCourseOfMe(req.user.id);
+  }
+
   @Get(':id')
   @ApiParam({ name: 'id', type: 'number', example: 1 })
   findOne(@Param('id', ParseIntPipe) id: number) {
@@ -120,11 +125,6 @@ export class CourseController {
   @ApiParam({ name: 'id', type: 'number', example: 1 })
   findAllUserInCourse(@Param('id', ParseIntPipe) id: number) {
     return this.courseService.findAllUserInCourse(id);
-  }
-
-  @Get('/my-courses')
-  findAllCourseOfMe(@Req() req: IUserRequest) {
-    return this.courseService.findAllCourseOfMe(req.user.id);
   }
 
   @Get('/enrollment-status/:id')

@@ -28,35 +28,41 @@ export class CourseModule implements NestModule {
       },
     );
 
-    consumer.apply(CourseMiddleware).forRoutes(
-      {
-        path: 'courses/:id',
+    consumer
+      .apply(CourseMiddleware)
+      .exclude({
+        path: 'courses/my-courses',
         method: RequestMethod.GET,
-      },
-      {
-        path: 'courses/:id/users',
-        method: RequestMethod.GET,
-      },
-      {
-        path: 'courses/checkEnrolled/:id',
-        method: RequestMethod.GET,
-      },
-      {
-        path: 'courses/:id/enroll',
-        method: RequestMethod.PATCH,
-      },
-      {
-        path: 'courses/:id',
-        method: RequestMethod.PATCH,
-      },
-      {
-        path: 'courses/:id/users/:userId',
-        method: RequestMethod.DELETE,
-      },
-      {
-        path: 'courses/:id/enrollments/me/leave',
-        method: RequestMethod.DELETE,
-      },
-    );
+      })
+      .forRoutes(
+        {
+          path: 'courses/:id',
+          method: RequestMethod.GET,
+        },
+        {
+          path: 'courses/:id/users',
+          method: RequestMethod.GET,
+        },
+        {
+          path: 'courses/enrollment-status/:id',
+          method: RequestMethod.GET,
+        },
+        {
+          path: 'courses/:id/enroll',
+          method: RequestMethod.PATCH,
+        },
+        {
+          path: 'courses/:id',
+          method: RequestMethod.PATCH,
+        },
+        {
+          path: 'courses/:id/users/:userId',
+          method: RequestMethod.DELETE,
+        },
+        {
+          path: 'courses/:id/enrollments/me/leave',
+          method: RequestMethod.DELETE,
+        },
+      );
   }
 }
