@@ -29,20 +29,14 @@ export class ExcelController {
   constructor(private excelService: ExcelService) {}
 
   @Get('/students-template/download')
-  @Header(
-    'Content-type',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  )
+  @Header('Content-type', 'text/xlsx')
   async downloadStudentListTemplate(@Res() res: Response) {
     const result = await this.excelService.downloadStudentListTemplate();
     res.download(`${result}`);
   }
 
   @Get('courses/:courseId/grades-template/download')
-  @Header(
-    'Content-type',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  )
+  @Header('Content-type', 'text/xlsx')
   @ApiParam({ name: 'courseId', type: 'number', example: 1 })
   async downloadGradesTemplate(
     @Req() req: ICourseRequest,
@@ -98,13 +92,13 @@ export class ExcelController {
   }
 
   @Get('courses/:courseId/grade-board/download')
-  @Header(
-    'Content-type',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  )
+  @Header('Content-type', 'text/xlsx')
   @ApiParam({ name: 'courseId', type: 'number', example: 1 })
   async downloadGradeBoard(@Req() req: ICourseRequest, @Res() res: Response) {
-    const result = await this.excelService.downloadGradeBoard(req.course);
+    const result = await this.excelService.downloadGradeBoard(
+      req.user.id,
+      req.course,
+    );
     res.download(`${result}`);
   }
 }

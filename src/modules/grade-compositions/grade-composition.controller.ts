@@ -62,6 +62,13 @@ export class GradeCompositionController {
     return this.gradeCompositionService.findOne(id);
   }
 
+  @Patch(':id/finalize')
+  @ApiParam({ name: 'courseId', type: 'number', example: 1 })
+  @ApiParam({ name: 'id', type: Number, example: 1 })
+  markFinalize(@Param('id', ParseIntPipe) id: number) {
+    return this.gradeCompositionService.markFinalize(id);
+  }
+
   @Patch(':id')
   @ApiParam({ name: 'courseId', type: 'number', example: 1 })
   @ApiUpdate(UpdateGradeCompositionDto, GradeCompositionEntity)
@@ -91,12 +98,5 @@ export class GradeCompositionController {
       firstId,
       secondId,
     );
-  }
-
-  @Patch(':id/finalize')
-  @ApiParam({ name: 'courseId', type: 'number', example: 1 })
-  @ApiParam({ name: 'id', type: Number, example: 1 })
-  markFinalize(@Param('id', ParseIntPipe) id: number) {
-    return this.gradeCompositionService.markFinalize(id);
   }
 }
