@@ -38,5 +38,11 @@ jobs:
       - name: Run build
         run: yarn build
 
+      - name: Sonar cloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_CLOUD_TOKEN }}
+
       # - name: Run test
       #   run: yarn test
