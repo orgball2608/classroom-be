@@ -16,6 +16,7 @@ import { GatewayModule } from './shared/gateway/gateway.module';
 import { GradeBoardModule } from './modules/grade-boards/grade-board.module';
 import { GradeCompositionModule } from './modules/grade-compositions/grade-composition.module';
 import { GradeModule } from './modules/grades/grade.module';
+import { GradeReviewModule } from './modules/grade-reviews/grade-review.module';
 import { HealthModule } from './modules/health/health.module';
 import { JwtModule } from '@nestjs/jwt';
 import { NotificationModule } from './modules/notifications/notification.module';
@@ -62,6 +63,7 @@ import redisConfig from './configs/redis.config';
     GradeBoardModule,
     GradeModule,
     ExcelModule,
+    GradeReviewModule,
   ],
   providers: [],
 })

@@ -125,3 +125,12 @@ export const EXCEL_MESSAGES = {
   UPLOAD_STUDENT_LIST_SUCCESSFULLY: 'Upload student list successfully',
   UPLOAD_GRADES_SUCCESSFULLY: 'Upload grades successfully',
 };
+
+export const GRADE_REVIEW_MESSAGES = {
+  GRADE_REVIEW_NOT_FOUND: 'Grade review not found',
+  CREATED_GRADE_REVIEW_SUCCESSFULLY: 'Created grade review successfully',
+  GET_GRADE_REVIEW_BY_ID_SUCCESSFULLY: 'Get grade review by id successfully',
+  GET_GRADE_REVIEWS_SUCCESSFULLY: 'Get grade reviews successfully',
+  UPDATE_GRADE_REVIEW_SUCCESSFULLY: 'Update grade review successfully',
+  DELETE_GRADE_REVIEW_SUCCESSFULLY: 'Delete grade review successfully',
+};

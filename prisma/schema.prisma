@@ -164,12 +164,12 @@ model Grade {
 }
 
 model GradeReview {
-  id          Int     @id @default(autoincrement())
-  gradeId     Int     @map("grade_id")
-  expectGrade Float   @map("expect_grade")
-  explanation String?
-  isResolve   Boolean @default(false)
-  createdById Int     @map("created_by_id")
+  id            Int     @id @default(autoincrement())
+  gradeId       Int     @map("grade_id")
+  expectedGrade Float   @map("expected_grade")
+  explanation   String?
+  isResolve     Boolean @default(false)
+  createdById   Int     @map("created_by_id")
 
   reviewComments ReviewComment[]
   grade          Grade           @relation(fields: [gradeId], references: [id])

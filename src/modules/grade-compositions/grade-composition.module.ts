@@ -4,6 +4,7 @@ import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { CourseMiddleware } from '@src/middlewares/course.middleware';
 import { GradeCompositionController } from './grade-composition.controller';
 import { GradeCompositionService } from './grade-composition.service';
+import { ROUTES } from '@src/constants';
 import { UserRole } from '@prisma/client';
 
 @Module({
@@ -27,9 +28,7 @@ export class GradeCompositionModule {
       },
     );
 
-    consumer
-      .apply(CourseMiddleware)
-      .forRoutes('courses/:courseId/grade-compositions');
+    consumer.apply(CourseMiddleware).forRoutes(ROUTES.GRADE_COMPOSITIONS);
 
     consumer
       .apply(GradeCompositionMiddleware)
