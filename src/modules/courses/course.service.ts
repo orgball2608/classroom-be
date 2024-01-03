@@ -12,7 +12,7 @@ import { Course } from './entities/course.entity';
 import { CoursesPageOptionsDto } from './dto/course-page-options-dto';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { EMIT_MESSAGES } from '@src/constants';
-import { EnrollmentRole } from './course.enum';
+import { EnrollmentRole, RoleInCourse } from './course.enum';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { INotification } from '@src/interfaces';
 import { JwtService } from '@nestjs/jwt';
@@ -542,14 +542,8 @@ export class CourseService {
     };
   }
 
-  async inviteByEmail(
-    email: string,
-    courseId: number,
-    role: EnrollmentRole,
-    fullName: string,
-  ) {
-    const course = await this.checkCourse(courseId);
-    const user = await this.prisma.course.findUnique({
+  async findUserInCourseByEmail(email: string, courseId: number) {
+    const userCourse = await this.prisma.course.findUnique({
       where: {
         id: courseId,
         OR: [
@@ -574,6 +568,17 @@ export class CourseService {
         ],
       },
     });
+    return userCourse;
+  }
+
+  async inviteByEmail(
+    email: string,
+    courseId: number,
+    role: EnrollmentRole,
+    fullName: string,
+  ) {
+    const course = await this.checkCourse(courseId);
+    const user = await this.findUserInCourseByEmail(email, courseId);
 
     if (user) {
       throw new BadRequestException(COURSES_MESSAGES.USER_ENROLLED_COURSE);
@@ -637,31 +642,7 @@ export class CourseService {
 
       const course = await this.checkCourse(courseId);
 
-      const userCourse = await this.prisma.course.findUnique({
-        where: {
-          id: courseId,
-          OR: [
-            {
-              enrollments: {
-                some: {
-                  student: {
-                    email: email,
-                  },
-                },
-              },
-            },
-            {
-              courseTeachers: {
-                some: {
-                  teacher: {
-                    email: email,
-                  },
-                },
-              },
-            },
-          ],
-        },
-      });
+      const userCourse = await this.findUserInCourseByEmail(email, courseId);
 
       if (userCourse) {
         return {
@@ -735,6 +716,31 @@ export class CourseService {
     return result;
   }
 
+  async findUserInCourseById(userId: number, courseId: number) {
+    const userCourse = await this.prisma.course.findUnique({
+      where: {
+        id: courseId,
+        OR: [
+          {
+            enrollments: {
+              some: {
+                userId: userId,
+              },
+            },
+          },
+          {
+            courseTeachers: {
+              some: {
+                teacherId: userId,
+              },
+            },
+          },
+        ],
+      },
+    });
+    return userCourse;
+  }
+
   async joinCourseByClassCode(classCode: string, user: User) {
     const course = await this.prisma.course.findUnique({
       where: {
@@ -757,27 +763,7 @@ export class CourseService {
       throw new NotFoundException(COURSES_MESSAGES.COURSE_NOT_FOUND);
     }
 
-    const userCourse = await this.prisma.course.findUnique({
-      where: {
-        id: course.id,
-        OR: [
-          {
-            enrollments: {
-              some: {
-                userId: user.id,
-              },
-            },
-          },
-          {
-            courseTeachers: {
-              some: {
-                teacherId: user.id,
-              },
-            },
-          },
-        ],
-      },
-    });
+    const userCourse = await this.findUserInCourseById(user.id, course.id);
 
     if (userCourse) {
       throw new BadRequestException(COURSES_MESSAGES.USER_ENROLLED_COURSE);
@@ -786,5 +772,44 @@ export class CourseService {
     const result = await this.enrollToCourse(user, course, course.id);
 
     return result;
+  }
+
+  async getRoleOfUserInCourse(userId: number, courseId: number) {
+    const course = await this.prisma.course.findUnique({
+      where: {
+        id: courseId,
+      },
+      include: {
+        enrollments: {
+          where: {
+            userId: userId,
+          },
+        },
+        courseTeachers: {
+          where: {
+            teacherId: userId,
+          },
+        },
+      },
+    });
+
+    if (!course) {
+      throw new NotFoundException(COURSES_MESSAGES.COURSE_NOT_FOUND);
+    }
+
+    let data = RoleInCourse.NONE;
+    let message = COURSES_MESSAGES.GET_ROLE_OF_USER_IN_COURSE_SUCCESSFULLY;
+    if (course.courseTeachers.length > 0) {
+      data = RoleInCourse.TEACHER;
+    } else if (course.enrollments.length > 0) {
+      data = RoleInCourse.STUDENT;
+    } else {
+      message = COURSES_MESSAGES.USER_NOT_IN_COURSE;
+    }
+
+    return {
+      message,
+      data,
+    };
   }
 }
