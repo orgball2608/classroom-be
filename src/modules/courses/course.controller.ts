@@ -211,4 +211,15 @@ export class CourseController {
   ) {
     return this.courseService.removeUserInCourse(userId, req.course, courseId);
   }
+
+  //get role of user in course
+  @Get(':courseId/get-role/:userId')
+  @ApiParam({ name: 'courseId', type: 'number', example: 1 })
+  @ApiParam({ name: 'userId', type: 'number', example: 1 })
+  getRoleOfUserInCourse(
+    @Param('courseId', ParseIntPipe) courseId: number,
+    @Param('userId', ParseIntPipe) userId: number,
+  ) {
+    return this.courseService.getRoleOfUserInCourse(userId, courseId);
+  }
 }
