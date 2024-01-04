@@ -310,7 +310,7 @@ export class UserService {
       ? { ...updateUserDto }
       : {
           ...updateUserDto,
-          avatar: avatarURL ? avatarURL : null,
+          avatar: avatarURL || null,
         };
 
     const user = await this.prisma.user.update({
@@ -355,7 +355,7 @@ export class UserService {
       ? { ...updateFullFieldUserDto }
       : {
           ...updateFullFieldUserDto,
-          avatar: avatarURL ? avatarURL : null,
+          avatar: avatarURL || null,
         };
 
     const user = await this.prisma.user.update({

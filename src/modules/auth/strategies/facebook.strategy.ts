@@ -14,7 +14,7 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
       ),
       callbackURL: configService.getOrThrow<string>('auth.facebookCallbackURL'),
       scope: 'email',
-      profileFields: ['id', , 'emails', 'name'],
+      profileFields: ['id', 'emails', 'name'],
     });
   }
 
