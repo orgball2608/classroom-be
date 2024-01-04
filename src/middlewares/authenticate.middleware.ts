@@ -23,7 +23,7 @@ export class AuthenticateMiddleware implements NestMiddleware {
     console.log('AuthenticateMiddleware');
 
     const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(' ')[1];
+    const token = authHeader?.split(' ')[1];
 
     if (!token) {
       throw new TokenInvalidException(TOKEN_MESSAGES.TOKEN_IS_INVALID);
