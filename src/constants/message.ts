@@ -32,6 +32,7 @@ export const USERS_MESSAGES = {
   GET_USERS_LIST_SUCCESSFULLY: 'Get users successfully',
   LOCK_USER_SUCCESSFULLY: 'Lock user successfully',
   UNLOCK_USER_SUCCESSFULLY: 'Unlock user successfully',
+  STUDENT_ID_USED: 'Student ID already used',
 } as const;
 
 export const TOKEN_MESSAGES = {
@@ -68,6 +69,8 @@ export const COURSES_MESSAGES = {
     'Account enroll not correct with login account',
   REMOVE_USER_IN_COURSE_SUCCESSFULLY: 'Remove user in course successfully',
   YOU_ARE_NOT_COURSE_OWNER: 'You are not course owner',
+  GET_ROLE_OF_USER_IN_COURSE_SUCCESSFULLY:
+    'Get role of user in course successfully',
 };
 
 export const AUTHORIZATION_MESSAGES = {
