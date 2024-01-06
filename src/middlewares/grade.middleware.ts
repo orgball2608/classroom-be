@@ -10,7 +10,7 @@ export class GradeMiddleware implements NestMiddleware {
   constructor(private readonly prisma: PrismaService) {}
 
   async use(req: IGradeRequest, res: Response, next: NextFunction) {
-    console.log('GradeMiddleware', req.params);
+    console.log('GradeMiddleware');
     const gradeId = req.params.gradeId || req.params.id;
     const gradeIdNumber = Number(gradeId);
 

@@ -115,6 +115,8 @@ export const GRADE_BOARS_MESSAGES = {
   GET_GRADE_BOARD_TEMPLATE_FOR_COURSE_SUCCESSFULLY:
     'Get grade board template for course successfully',
   GET_FINAL_GRADE_BOARD_SUCCESSFULLY: 'Get final grade board successfully',
+  GET_MY_GRADE_BOARD_SUCCESSFULLY: 'Get my grade board successfully',
+  STUDENTID_HAS_NOT_BEEN_ENTERED: 'StudentID has not been entered',
 };
 
 export const GRADE_MESSAGES = {
@@ -136,4 +138,8 @@ export const GRADE_REVIEW_MESSAGES = {
   GET_GRADE_REVIEWS_SUCCESSFULLY: 'Get grade reviews successfully',
   UPDATE_GRADE_REVIEW_SUCCESSFULLY: 'Update grade review successfully',
   DELETE_GRADE_REVIEW_SUCCESSFULLY: 'Delete grade review successfully',
+  MARK_COMPLETED_GRADE_REVIEW_SUCCESSFULLY:
+    'Mark completed grade review successfully',
+  MARK_INCOMPLETE_GRADE_REVIEW_SUCCESSFULLY:
+    'Mark incomplete grade review successfully',
 };

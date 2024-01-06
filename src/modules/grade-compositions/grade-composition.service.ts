@@ -296,13 +296,13 @@ export class GradeCompositionService {
     };
   }
 
-  async markFinalize(id: number) {
+  async markFinalize(id: number, value: boolean) {
     const gradeComposition = await this.prisma.gradeComposition.update({
       where: {
         id,
       },
       data: {
-        isFinalized: true,
+        isFinalized: value,
       },
     });
 

@@ -65,8 +65,12 @@ export class GradeCompositionController {
   @Patch(':id/finalize')
   @ApiParam({ name: 'courseId', type: 'number', example: 1 })
   @ApiParam({ name: 'id', type: Number, example: 1 })
-  markFinalize(@Param('id', ParseIntPipe) id: number) {
-    return this.gradeCompositionService.markFinalize(id);
+  markFinalize(
+    @Param('id', ParseIntPipe) id: number,
+    // @Req() req: IGradeCompositionRequest,
+    @Body() body: UpdateGradeCompositionDto,
+  ) {
+    return this.gradeCompositionService.markFinalize(id, body.isFinalized);
   }
 
   @Patch(':id')

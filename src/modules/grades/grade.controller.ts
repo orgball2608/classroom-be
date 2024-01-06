@@ -22,7 +22,7 @@ import { UpdateGradeDto } from './dto/update-grade.dto';
 export class GradeController {
   constructor(private readonly gradeService: GradeService) {}
 
-  @Patch()
+  @Patch('/:gradeId')
   @ApiUpdate(UpdateGradeDto, Grade)
   @ApiParam({ name: 'courseId', type: Number, example: 1 })
   @ApiParam({ name: 'compositionId', type: Number, example: 1 })
@@ -30,6 +30,7 @@ export class GradeController {
     @Req() req: IGradeCompositionRequest,
     @Body() updateGradeDto: UpdateGradeDto,
   ) {
+    console.log(updateGradeDto);
     return this.gradeService.updateGrade(
       req.gradeComposition.id,
       updateGradeDto,

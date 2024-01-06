@@ -5,22 +5,22 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
+  // Delete,
   Req,
-  ParseIntPipe,
+  // ParseIntPipe,
 } from '@nestjs/common';
 import { GradeReviewService } from './grade-review.service';
 import { CreateGradeReviewDto } from './dto/create-grade-review.dto';
-import { UpdateGradeReviewDto } from './dto/update-grade-review.dto';
+// import { UpdateGradeReviewDto } from './dto/update-grade-review.dto';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { ROUTES } from '@src/constants';
-import { IGradeRequest } from '@src/interfaces';
+import { ICourseRequest, IGradeRequest } from '@src/interfaces';
 import {
-  ApiFindAll,
-  ApiFindOne,
+  // ApiFindAll,
+  // ApiFindOne,
   ApiCreate,
-  ApiUpdate,
-  ApiDelete,
+  // ApiUpdate,
+  // ApiDelete,
 } from '@src/decorators';
 import { GradeReview } from './entities/grade-review.entity';
 
@@ -30,7 +30,7 @@ import { GradeReview } from './entities/grade-review.entity';
 export class GradeReviewController {
   constructor(private readonly gradeReviewService: GradeReviewService) {}
 
-  @Post()
+  @Post('/grade-compositions/:compositionId/grades/:gradeId')
   @ApiParam({ name: 'courseId', type: Number, example: 1 })
   @ApiParam({ name: 'compositionId', type: Number, example: 1 })
   @ApiParam({ name: 'gradeId', type: Number, example: 1 })
@@ -46,42 +46,60 @@ export class GradeReviewController {
     );
   }
 
-  @Get()
-  @ApiFindAll(GradeReview)
-  findAll() {
-    return this.gradeReviewService.findAll();
+  @Get('/list')
+  @ApiParam({ name: 'courseId', type: Number, example: 1 })
+  getListReview(@Req() req: ICourseRequest) {
+    return this.gradeReviewService.getListReview(req.course.id);
   }
 
-  @Get(':id')
-  @ApiParam({ name: 'courseId', type: Number, example: 1 })
-  @ApiParam({ name: 'compositionId', type: Number, example: 1 })
-  @ApiParam({ name: 'gradeId', type: Number, example: 1 })
-  @ApiParam({ name: 'id', type: Number, example: 1 })
-  @ApiFindOne(GradeReview)
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.gradeReviewService.findOne(id);
+  @Patch('/:reviewId/mark-completed')
+  @ApiParam({ name: 'reviewId', type: Number, example: 1 })
+  markCompleted(@Param('reviewId') reviewId: number) {
+    return this.gradeReviewService.markCompleted(reviewId);
   }
 
-  @Patch(':id')
-  @ApiParam({ name: 'courseId', type: Number, example: 1 })
-  @ApiParam({ name: 'compositionId', type: Number, example: 1 })
-  @ApiParam({ name: 'gradeId', type: Number, example: 1 })
-  @ApiParam({ name: 'id', type: Number, example: 1 })
-  @ApiUpdate(UpdateGradeReviewDto, GradeReview)
-  update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateGradeReviewDto: UpdateGradeReviewDto,
-  ) {
-    return this.gradeReviewService.update(id, updateGradeReviewDto);
+  @Patch('/:reviewId/mark-incomplete')
+  @ApiParam({ name: 'reviewId', type: Number, example: 1 })
+  markInComplete(@Param('reviewId') reviewId: number) {
+    return this.gradeReviewService.markInComplete(reviewId);
   }
 
-  @Delete(':id')
-  @ApiParam({ name: 'courseId', type: Number, example: 1 })
-  @ApiParam({ name: 'compositionId', type: Number, example: 1 })
-  @ApiParam({ name: 'gradeId', type: Number, example: 1 })
-  @ApiParam({ name: 'id', type: Number, example: 1 })
-  @ApiDelete()
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.gradeReviewService.remove(id);
-  }
+  // @Get()
+  // @ApiFindAll(GradeReview)
+  // findAll() {
+  //   return this.gradeReviewService.findAll();
+  // }
+
+  // @Get(':id')
+  // @ApiParam({ name: 'courseId', type: Number, example: 1 })
+  // @ApiParam({ name: 'compositionId', type: Number, example: 1 })
+  // @ApiParam({ name: 'gradeId', type: Number, example: 1 })
+  // @ApiParam({ name: 'id', type: Number, example: 1 })
+  // @ApiFindOne(GradeReview)
+  // findOne(@Param('id', ParseIntPipe) id: number) {
+  //   return this.gradeReviewService.findOne(id);
+  // }
+
+  // @Patch(':id')
+  // @ApiParam({ name: 'courseId', type: Number, example: 1 })
+  // @ApiParam({ name: 'compositionId', type: Number, example: 1 })
+  // @ApiParam({ name: 'gradeId', type: Number, example: 1 })
+  // @ApiParam({ name: 'id', type: Number, example: 1 })
+  // @ApiUpdate(UpdateGradeReviewDto, GradeReview)
+  // update(
+  //   @Param('id', ParseIntPipe) id: number,
+  //   @Body() updateGradeReviewDto: UpdateGradeReviewDto,
+  // ) {
+  //   return this.gradeReviewService.update(id, updateGradeReviewDto);
+  // }
+
+  // @Delete(':id')
+  // @ApiParam({ name: 'courseId', type: Number, example: 1 })
+  // @ApiParam({ name: 'compositionId', type: Number, example: 1 })
+  // @ApiParam({ name: 'gradeId', type: Number, example: 1 })
+  // @ApiParam({ name: 'id', type: Number, example: 1 })
+  // @ApiDelete()
+  // remove(@Param('id', ParseIntPipe) id: number) {
+  //   return this.gradeReviewService.remove(id);
+  // }
 }

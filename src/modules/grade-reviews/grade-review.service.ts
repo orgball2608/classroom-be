@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { CreateGradeReviewDto } from './dto/create-grade-review.dto';
-import { GRADE_REVIEW_MESSAGES } from '@src/constants';
+import { GRADE_REVIEW_MESSAGES, Order } from '@src/constants';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { UpdateGradeReviewDto } from './dto/update-grade-review.dto';
 
@@ -82,6 +82,130 @@ export class GradeReviewService {
 
     return {
       message: GRADE_REVIEW_MESSAGES.DELETE_GRADE_REVIEW_SUCCESSFULLY,
+      data: gradeReview,
+    };
+  }
+
+  async getListReview(courseId: number) {
+    let message;
+
+    const data = [];
+
+    const gradeCompositions = await this.prisma.gradeComposition.findMany({
+      where: {
+        courseId: courseId,
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+
+    const grades = await this.prisma.grade.findMany({
+      where: {
+        gradeCompositionId: {
+          in: gradeCompositions.map((gc) => gc.id),
+        },
+        grade: {
+          not: null,
+        },
+      },
+      include: {
+        gradeComposition: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    const gradeReview = await this.prisma.gradeReview.findMany({
+      where: {
+        gradeId: {
+          in: grades.map((gc) => gc.id),
+        },
+      },
+      orderBy: {
+        createdAt: Order.ASC,
+      },
+    });
+
+    const enrollment = await this.prisma.enrollment.findMany({
+      where: {
+        courseId: courseId,
+        studentId: {
+          in: grades.map((gc) => gc.studentId),
+        },
+      },
+      select: {
+        studentId: true,
+        fullName: true,
+        courseId: true,
+      },
+    });
+
+    gradeReview.map((review) => {
+      const grade = grades.find((g) => g.id === review.gradeId);
+      const student = enrollment.find((e) => e.studentId === grade.studentId);
+      data.push({
+        id: review.id,
+        gradeId: grade.id,
+        studentId: grade.studentId,
+        fullName: student.fullName,
+        gradeName: grade.gradeComposition.name,
+        grade: grade.grade,
+        expectedGrade: review.expectedGrade,
+        explanation: review.explanation,
+        createdAt: review.createdAt,
+        isResolve: review.isResolve,
+        courseId: student.courseId,
+        compositionId: grade.gradeCompositionId,
+      });
+    });
+
+    return {
+      message,
+      data,
+    };
+  }
+
+  async markCompleted(reviewId: number) {
+    const gradeReview = await this.prisma.gradeReview.update({
+      where: {
+        id: reviewId,
+      },
+      data: {
+        isResolve: true,
+      },
+    });
+
+    if (!gradeReview) {
+      throw new NotFoundException(GRADE_REVIEW_MESSAGES.GRADE_REVIEW_NOT_FOUND);
+    }
+
+    return {
+      message: GRADE_REVIEW_MESSAGES.MARK_COMPLETED_GRADE_REVIEW_SUCCESSFULLY,
+      data: gradeReview,
+    };
+  }
+
+  async markInComplete(reviewId: number) {
+    const gradeReview = await this.prisma.gradeReview.update({
+      where: {
+        id: reviewId,
+      },
+      data: {
+        isResolve: false,
+      },
+    });
+
+    if (!gradeReview) {
+      throw new NotFoundException(GRADE_REVIEW_MESSAGES.GRADE_REVIEW_NOT_FOUND);
+    }
+
+    return {
+      message: GRADE_REVIEW_MESSAGES.MARK_INCOMPLETE_GRADE_REVIEW_SUCCESSFULLY,
       data: gradeReview,
     };
   }
