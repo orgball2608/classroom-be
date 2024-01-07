@@ -142,4 +142,5 @@ export const GRADE_REVIEW_MESSAGES = {
     'Mark completed grade review successfully',
   MARK_INCOMPLETE_GRADE_REVIEW_SUCCESSFULLY:
     'Mark incomplete grade review successfully',
+  GET_COMMENT_LIST_SUCCESSFULLY: 'Get comment list successfully',
 };

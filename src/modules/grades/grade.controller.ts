@@ -30,7 +30,6 @@ export class GradeController {
     @Req() req: IGradeCompositionRequest,
     @Body() updateGradeDto: UpdateGradeDto,
   ) {
-    console.log(updateGradeDto);
     return this.gradeService.updateGrade(
       req.gradeComposition.id,
       updateGradeDto,

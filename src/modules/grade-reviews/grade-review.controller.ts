@@ -23,6 +23,7 @@ import {
   // ApiDelete,
 } from '@src/decorators';
 import { GradeReview } from './entities/grade-review.entity';
+import { CreateCommentDto } from './dto/create-comment.dto';
 
 @ApiTags('Grade reviews')
 @ApiBearerAuth()
@@ -48,7 +49,7 @@ export class GradeReviewController {
 
   @Get('/list')
   @ApiParam({ name: 'courseId', type: Number, example: 1 })
-  getListReview(@Req() req: ICourseRequest) {
+  findAll(@Req() req: ICourseRequest) {
     return this.gradeReviewService.getListReview(req.course.id);
   }
 
@@ -62,6 +63,27 @@ export class GradeReviewController {
   @ApiParam({ name: 'reviewId', type: Number, example: 1 })
   markInComplete(@Param('reviewId') reviewId: number) {
     return this.gradeReviewService.markInComplete(reviewId);
+  }
+
+  @Post('/:reviewId/comment')
+  @ApiParam({ name: 'reviewId', type: Number, example: 1 })
+  createComment(
+    @Param('reviewId') reviewId: number,
+    @Body() createCommentDto: CreateCommentDto,
+    @Req() req: ICourseRequest,
+  ) {
+    return this.gradeReviewService.createComment(
+      reviewId,
+      createCommentDto,
+      req.user,
+      req.course,
+    );
+  }
+
+  @Get('/:reviewId/comment/list')
+  @ApiParam({ name: 'reviewId', type: Number, example: 1 })
+  getCommentList(@Param('reviewId') reviewId: number) {
+    return this.gradeReviewService.getCommentList(reviewId);
   }
 
   // @Get()

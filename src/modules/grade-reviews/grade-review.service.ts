@@ -1,13 +1,19 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { CreateGradeReviewDto } from './dto/create-grade-review.dto';
-import { GRADE_REVIEW_MESSAGES, Order } from '@src/constants';
+import { EMIT_MESSAGES, GRADE_REVIEW_MESSAGES, Order } from '@src/constants';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { UpdateGradeReviewDto } from './dto/update-grade-review.dto';
+import { CreateCommentDto } from './dto/create-comment.dto';
+import { Course, User } from '@prisma/client';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class GradeReviewService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly emitterEvent: EventEmitter2,
+  ) {}
 
   async create(
     userId: number,
@@ -45,6 +51,7 @@ export class GradeReviewService {
             avatar: true,
             firstName: true,
             lastName: true,
+            studentId: true,
           },
         },
       },
@@ -207,6 +214,109 @@ export class GradeReviewService {
     return {
       message: GRADE_REVIEW_MESSAGES.MARK_INCOMPLETE_GRADE_REVIEW_SUCCESSFULLY,
       data: gradeReview,
+    };
+  }
+
+  async findTeacherInCourse(courseId: number) {
+    const teacherList = await this.prisma.courseTeacher.findMany({
+      where: {
+        courseId: courseId,
+      },
+      include: {
+        teacher: {
+          select: {
+            id: true,
+            email: true,
+            avatar: true,
+            firstName: true,
+            lastName: true,
+            address: true,
+            phoneNumber: true,
+            createdAt: true,
+          },
+        },
+      },
+    });
+
+    return teacherList;
+  }
+
+  async createComment(
+    reviewId: number,
+    createCommentDto: CreateCommentDto,
+    user: User,
+    course: Course,
+  ) {
+    const commentReview = await this.prisma.reviewComment.create({
+      data: {
+        reviewId: reviewId,
+        body: createCommentDto.body,
+        createdById: user.id,
+      },
+      include: {
+        createdBy: {
+          select: {
+            id: true,
+            email: true,
+            avatar: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+    });
+    if (!commentReview) {
+      throw new NotFoundException(GRADE_REVIEW_MESSAGES.GRADE_REVIEW_NOT_FOUND);
+    }
+
+    const student = await this.prisma.user.findMany({
+      where: {
+        studentId: createCommentDto.studentId,
+      },
+    });
+
+    let userIds = [];
+    const teacherList = await this.findTeacherInCourse(course.id);
+
+    userIds = [...teacherList.map((t) => t.teacher.id), student[0].id];
+
+    this.emitterEvent.emit(EMIT_MESSAGES.REVIEW_COMMENTED, {
+      userIds: userIds,
+      comment: commentReview,
+    });
+
+    return {
+      message: GRADE_REVIEW_MESSAGES.MARK_INCOMPLETE_GRADE_REVIEW_SUCCESSFULLY,
+      data: commentReview,
+    };
+  }
+
+  async getCommentList(reviewId: number) {
+    await this.findOne(reviewId);
+
+    const reviewComment = await this.prisma.reviewComment.findMany({
+      where: {
+        reviewId: reviewId,
+      },
+      orderBy: {
+        createdAt: Order.ASC,
+      },
+      include: {
+        createdBy: {
+          select: {
+            id: true,
+            email: true,
+            avatar: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+    });
+
+    return {
+      message: GRADE_REVIEW_MESSAGES.GET_COMMENT_LIST_SUCCESSFULLY,
+      data: reviewComment,
     };
   }
 }

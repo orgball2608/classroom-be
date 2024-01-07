@@ -11,6 +11,7 @@ import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { SimpleUserEntity } from '@src/common/entity/simple-user.entity';
 import { UpdateGradeCompositionDto } from './dto/update-grade-composition.dto';
 import { User } from '@prisma/client';
+// import { INotification } from '@src/interfaces';
 
 @Injectable()
 export class GradeCompositionService {
