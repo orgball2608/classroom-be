@@ -13,6 +13,7 @@ import { Inject } from '@nestjs/common';
 import { IGatewaySessionManager } from './gateway.session';
 import { IAuthenticatedSocket, INotification } from '@src/interfaces';
 import _ from 'lodash';
+import { IcommentReview } from '@src/interfaces/ICommentReview';
 
 @WebSocketGateway({
   cors: {
@@ -80,5 +81,21 @@ export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         _.omit(message, 'updatedAt'),
       );
     }
+  }
+
+  @OnEvent(EMIT_MESSAGES.REVIEW_COMMENTED)
+  async sendComment(payload: {
+    userIds: number[];
+    comment: IcommentReview;
+  }): Promise<void> {
+    payload.userIds.map((userId) => {
+      const socket = this.sessions.getUserSocket(userId);
+      if (socket) {
+        socket.emit(
+          SOCKET_MESSAGES.REVIEW_COMMENTED,
+          _.omit(payload.comment, 'updatedAt'),
+        );
+      }
+    });
   }
 }

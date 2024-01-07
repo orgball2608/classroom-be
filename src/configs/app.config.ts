@@ -50,7 +50,11 @@ export default registerAs<AppConfig>('app', () => {
 
   return {
     nodeEnv: process.env.NODE_ENV || 'development',
-    port: process.env.PORT ? parseInt(process.env.PORT, 10) : 3000,
+    port: process.env.PORT
+      ? parseInt(process.env.APP_PORT, 10)
+      : process.env.PORT
+        ? parseInt(process.env.PORT, 10)
+        : 3000,
     apiPrefix: process.env.API_PREFIX || 'api',
     apiVersion: process.env.API_VERSION || 'v1',
     appURL: process.env.APP_URL || 'http://localhost:3001',

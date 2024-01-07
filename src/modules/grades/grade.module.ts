@@ -1,8 +1,9 @@
-import { GradeCompositionMiddleware, GradeMiddleware } from '@src/middlewares';
 import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 
 import { GradeController } from './grade.controller';
+import { GradeMiddleware } from '@src/middlewares';
 import { GradeService } from './grade.service';
+import { ROUTES } from '@src/constants';
 
 @Module({
   controllers: [GradeController],
@@ -10,12 +11,8 @@ import { GradeService } from './grade.service';
 })
 export class GradeModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(GradeCompositionMiddleware)
-      .forRoutes('courses/:courseId/grade-compositions/:compositionId/grades');
-
     consumer.apply(GradeMiddleware).forRoutes({
-      path: 'courses/:courseId/grade-compositions/:compositionId/grades',
+      path: ROUTES.GRADES,
       method: RequestMethod.ALL,
     });
   }

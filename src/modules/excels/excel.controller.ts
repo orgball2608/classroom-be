@@ -6,6 +6,7 @@ import {
   Req,
   Res,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 
@@ -21,6 +22,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ROUTES } from '@src/constants';
 import { ICourseRequest, IGradeCompositionRequest } from '@src/interfaces';
+import { TeacherGuard } from '@src/guards';
 
 @ApiTags('Excels')
 @ApiBearerAuth()
@@ -65,6 +67,7 @@ export class ExcelController {
   })
   @ApiConsumes('multipart/form-data')
   @ApiParam({ name: 'courseId', type: 'number', example: 1 })
+  @UseGuards(TeacherGuard)
   @Post('courses/:courseId/students/upload')
   @UseInterceptors(FileInterceptor('file'))
   uploadStudentList(
@@ -88,6 +91,7 @@ export class ExcelController {
   @ApiConsumes('multipart/form-data')
   @ApiParam({ name: 'courseId', type: 'number', example: 1 })
   @ApiParam({ name: 'id', type: 'number', example: 1 })
+  @UseGuards(TeacherGuard)
   @Post('courses/:courseId/grade-compositions/:id/grades/upload')
   @UseInterceptors(FileInterceptor('file'))
   uploadGrades(

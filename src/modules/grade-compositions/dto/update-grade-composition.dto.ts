@@ -10,4 +10,7 @@ export class UpdateGradeCompositionDto extends PartialType(
 
   @IsOptional()
   scale: number;
+
+  @IsOptional()
+  isFinalized: boolean;
 }

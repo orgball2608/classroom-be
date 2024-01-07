@@ -38,6 +38,8 @@ model User {
   createdGrades            Grade[]            @relation("created_grades")
   createdGradeCompositions GradeComposition[]
   createdNotifications     Notification[]
+  gradeReviews             GradeReview[]
+  reviewComments           ReviewComment[]
 
   deletedAt DateTime? @map("deleted_at")
   createdAt DateTime  @default(now()) @map("created_at")
@@ -153,11 +155,45 @@ model Grade {
   createdBy        User             @relation(name: "created_grades", fields: [createdById], references: [id])
   gradeComposition GradeComposition @relation(fields: [gradeCompositionId], references: [id])
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  GradeReview GradeReview[]
 
   @@unique([studentId, gradeCompositionId])
   @@map("grades")
+}
+
+model GradeReview {
+  id            Int     @id @default(autoincrement())
+  gradeId       Int     @map("grade_id")
+  expectedGrade Float   @map("expected_grade")
+  explanation   String?
+  isResolve     Boolean @default(false)
+  createdById   Int     @map("created_by_id")
+
+  reviewComments ReviewComment[]
+  grade          Grade           @relation(fields: [gradeId], references: [id])
+  createdBy      User            @relation(fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("grade_reviews")
+}
+
+model ReviewComment {
+  id          Int    @id @default(autoincrement())
+  reviewId    Int    @map("review_id")
+  body        String @db.Text
+  createdById Int    @map("created_by_id")
+
+  review    GradeReview @relation(fields: [reviewId], references: [id])
+  createdBy User        @relation(fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("review_comments")
 }
 
 enum NotificationStatus {
