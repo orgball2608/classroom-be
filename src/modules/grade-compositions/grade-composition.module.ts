@@ -1,10 +1,12 @@
-import { GradeCompositionMiddleware, RoleChecker } from '@src/middlewares';
+import { GradeCompositionMiddleware } from '@src/middlewares';
 import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 
 import { CourseMiddleware } from '@src/middlewares/course.middleware';
 import { GradeCompositionController } from './grade-composition.controller';
 import { GradeCompositionService } from './grade-composition.service';
-import { UserRole } from '@prisma/client';
+import { ROUTES } from '@src/constants';
+// import { UserRole } from '@prisma/client';
+import { TeacherMiddleware } from '@src/middlewares/teacher.middleware';
 
 @Module({
   controllers: [GradeCompositionController],
@@ -12,7 +14,22 @@ import { UserRole } from '@prisma/client';
 })
 export class GradeCompositionModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(RoleChecker([UserRole.TEACHER, UserRole.ADMIN])).forRoutes(
+    // consumer.apply(RoleChecker([UserRole.TEACHER, UserRole.ADMIN])).forRoutes(
+    //   {
+    //     path: 'courses/:courseId/grade-compositions',
+    //     method: RequestMethod.POST,
+    //   },
+    //   {
+    //     path: 'courses/:courseId/grade-compositions',
+    //     method: RequestMethod.PATCH,
+    //   },
+    //   {
+    //     path: 'courses/:courseId/grade-compositions/:id',
+    //     method: RequestMethod.DELETE,
+    //   },
+    // );
+    consumer.apply(CourseMiddleware).forRoutes(ROUTES.GRADE_COMPOSITIONS);
+    consumer.apply(TeacherMiddleware).forRoutes(
       {
         path: 'courses/:courseId/grade-compositions',
         method: RequestMethod.POST,
@@ -25,11 +42,11 @@ export class GradeCompositionModule {
         path: 'courses/:courseId/grade-compositions/:id',
         method: RequestMethod.DELETE,
       },
+      {
+        path: 'courses/:courseId/grade-compositions/:id/finalize',
+        method: RequestMethod.PATCH,
+      },
     );
-
-    consumer
-      .apply(CourseMiddleware)
-      .forRoutes('courses/:courseId/grade-compositions');
 
     consumer
       .apply(GradeCompositionMiddleware)

@@ -1,4 +1,4 @@
-import { GRADE_BOARS_MESSAGES } from '@src/constants';
+import { GRADE_BOARS_MESSAGES, Order } from '@src/constants';
 import { IGradeBoarRowData } from './grade-boar.interface';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
@@ -185,6 +185,52 @@ export class GradeBoardService {
         headers: headers,
         rows: finalGradeBoard,
       },
+    };
+  }
+
+  async getStudentGradeBoard(studentId: string, courseId: number) {
+    let message;
+    if (!studentId) {
+      message = GRADE_BOARS_MESSAGES.STUDENTID_HAS_NOT_BEEN_ENTERED;
+    } else {
+      message = GRADE_BOARS_MESSAGES.GET_MY_GRADE_BOARD_SUCCESSFULLY;
+    }
+
+    const enrollments = await this.prisma.enrollment.findMany({
+      where: {
+        courseId: courseId,
+        studentId: studentId,
+      },
+      select: {
+        studentId: true,
+        fullName: true,
+      },
+    });
+
+    const gradeCompositions = await this.prisma.gradeComposition.findMany({
+      where: {
+        courseId: courseId,
+      },
+      orderBy: {
+        index: Order.ASC,
+      },
+      include: {
+        grades: {
+          where: {
+            studentId: studentId || '',
+          },
+          select: { id: true, grade: true, GradeReview: true },
+        },
+      },
+    });
+    const data = {
+      infoStudent: enrollments[0],
+      gradeBoard: gradeCompositions,
+    };
+
+    return {
+      message,
+      data,
     };
   }
 }

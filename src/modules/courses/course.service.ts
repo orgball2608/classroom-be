@@ -11,10 +11,10 @@ import { ConfigService } from '@nestjs/config';
 import { Course } from './entities/course.entity';
 import { CoursesPageOptionsDto } from './dto/course-page-options-dto';
 import { CreateCourseDto } from './dto/create-course.dto';
-import { EMIT_MESSAGES } from '@src/constants';
+// import { EMIT_MESSAGES } from '@src/constants';
 import { EnrollmentRole, RoleInCourse } from './course.enum';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { INotification } from '@src/interfaces';
+// import { INotification } from '@src/interfaces';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { PageDto } from '@src/common/dto/page.dto';
@@ -449,18 +449,6 @@ export class CourseService {
       },
     });
 
-    const notificationData: INotification = {
-      userId: course.createdBy.id,
-      creatorId: user.id,
-      title: 'New enrollment to your course',
-      body: `${user.firstName} ${user.lastName} enrolled to course ${course.name}`,
-    };
-
-    this.emitterEvent.emit(EMIT_MESSAGES.NOTIFICATION_CREATED, {
-      userId: course.createdById,
-      notificationData,
-    });
-
     return {
       message: COURSES_MESSAGES.ENROLLED_TO_COURSE_SUCCESSFULLY,
       data: enrollment,
@@ -684,17 +672,17 @@ export class CourseService {
           },
         });
 
-        const notificationData: INotification = {
-          userId: course.createdBy.id,
-          creatorId: user.id,
-          title: 'New enrollment to your course',
-          body: `${user.firstName} ${user.lastName} enrolled to course ${course.name}`,
-        };
+        // const notificationData: INotification = {
+        //   userId: course.createdBy.id,
+        //   creatorId: user.id,
+        //   title: 'New enrollment to your course',
+        //   body: `${user.firstName} ${user.lastName} enrolled to course ${course.name}`,
+        // };
 
-        this.emitterEvent.emit(EMIT_MESSAGES.NOTIFICATION_CREATED, {
-          userId: course.createdById,
-          notificationData,
-        });
+        // this.emitterEvent.emit(EMIT_MESSAGES.NOTIFICATION_CREATED, {
+        //   userId: course.createdById,
+        //   notificationData,
+        // });
 
         return {
           message: COURSES_MESSAGES.ENROLLED_TO_COURSE_SUCCESSFULLY,

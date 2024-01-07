@@ -20,6 +20,16 @@ export class GradeBoardController {
   @Get('/final')
   @ApiParam({ name: 'courseId', type: Number, example: 1 })
   getFinalGradeBoard(@Req() req: ICourseRequest) {
-    return this.gradeBoardService.getFinalGradeBoard(req.course.id);
+    return this.gradeBoardService.getFinalGradeBoard(req.course?.id);
+  }
+  //get grade board of a student
+  @Get('/my-grade')
+  @ApiParam({ name: 'courseId', type: Number, example: 1 })
+  @ApiParam({ name: 'userId', type: Number, example: 1 })
+  getStudentGradeBoard(@Req() req: ICourseRequest) {
+    return this.gradeBoardService.getStudentGradeBoard(
+      req.user.studentId,
+      req.course.id,
+    );
   }
 }

@@ -1,4 +1,10 @@
-import { Course, Grade, GradeComposition, User } from '@prisma/client';
+import {
+  Course,
+  Grade,
+  GradeComposition,
+  GradeReview,
+  User,
+} from '@prisma/client';
 
 import type { Request as ExpressRequest } from 'express';
 import { Profile as FaceBookProfile } from 'passport-facebook';
@@ -22,6 +28,10 @@ export interface ICourseRequest extends IUserRequest {
 
 export interface IGradeCompositionRequest extends ICourseRequest {
   gradeComposition: GradeComposition;
+}
+
+export interface IGradeReviewRequest extends IGradeCompositionRequest {
+  gradeReview: GradeReview;
 }
 
 export interface IGradeRequest extends IGradeCompositionRequest {
