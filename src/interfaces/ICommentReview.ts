@@ -1,4 +1,4 @@
-export interface IcommentReview {
+export interface ICommentReview {
   id: number;
   reviewId: number;
   body: string;
