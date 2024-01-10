@@ -10,5 +10,4 @@ export const ROUTES = {
   GRADE_BOARDS: 'courses/:courseId/grade-boards',
   EXCELS: 'excels',
   GRADE_REVIEWS: 'courses/:courseId/reviews',
-  //grade-compositions/:compositionId/grades/:gradeId/reviews
 };

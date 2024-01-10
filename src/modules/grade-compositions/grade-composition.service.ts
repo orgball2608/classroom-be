@@ -3,19 +3,23 @@ import {
   ApiResponseOmitDataEntity,
 } from '@src/common/entity/response.entity';
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { Course, User } from '@prisma/client';
+import { EMIT_MESSAGES, GRADE_COMPOSITION_MESSAGES } from '@src/constants';
 
 import { CreateGradeCompositionDto } from './dto/create-grade-composition.dto';
-import { GRADE_COMPOSITION_MESSAGES } from '@src/constants';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { GradeCompositionEntity } from './entities/grade-composition.entity';
+import { INotification } from '@src/interfaces';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { SimpleUserEntity } from '@src/common/entity/simple-user.entity';
 import { UpdateGradeCompositionDto } from './dto/update-grade-composition.dto';
-import { User } from '@prisma/client';
-// import { INotification } from '@src/interfaces';
 
 @Injectable()
 export class GradeCompositionService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly emitterEvent: EventEmitter2,
+  ) {}
 
   async create(
     user: User,
@@ -297,7 +301,11 @@ export class GradeCompositionService {
     };
   }
 
-  async markFinalize(id: number, value: boolean) {
+  async markFinalize(
+    id: number,
+    course: Course & { createdBy: SimpleUserEntity },
+    value: boolean,
+  ) {
     const gradeComposition = await this.prisma.gradeComposition.update({
       where: {
         id,
@@ -305,6 +313,26 @@ export class GradeCompositionService {
       data: {
         isFinalized: value,
       },
+    });
+
+    const enrollments = await this.prisma.enrollment.findMany({
+      where: {
+        courseId: course.id,
+      },
+    });
+
+    enrollments.forEach((enrollment) => {
+      const notificationData: INotification = {
+        userId: enrollment.userId,
+        creatorId: course.createdBy.id,
+        title: 'Grade composition finalized',
+        body: `Grade composition ${gradeComposition.name} of course ${course.name} is finalized!, check it out`,
+      };
+
+      this.emitterEvent.emit(EMIT_MESSAGES.NOTIFICATION_CREATED, {
+        userId: enrollment.userId,
+        notificationData,
+      });
     });
 
     return {
