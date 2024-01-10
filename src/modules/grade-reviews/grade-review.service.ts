@@ -1,12 +1,13 @@
+import { Course, User } from '@prisma/client';
+import { EMIT_MESSAGES, GRADE_REVIEW_MESSAGES, Order } from '@src/constants';
 import { Injectable, NotFoundException } from '@nestjs/common';
 
+import { CreateCommentDto } from './dto/create-comment.dto';
 import { CreateGradeReviewDto } from './dto/create-grade-review.dto';
-import { EMIT_MESSAGES, GRADE_REVIEW_MESSAGES, Order } from '@src/constants';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { INotification } from '@src/interfaces';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { UpdateGradeReviewDto } from './dto/update-grade-review.dto';
-import { CreateCommentDto } from './dto/create-comment.dto';
-import { Course, User } from '@prisma/client';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class GradeReviewService {
@@ -16,7 +17,7 @@ export class GradeReviewService {
   ) {}
 
   async create(
-    userId: number,
+    user: User,
     gradeId: number,
     createGradeReviewDto: CreateGradeReviewDto,
   ) {
@@ -24,18 +25,48 @@ export class GradeReviewService {
       data: {
         gradeId: gradeId,
         ...createGradeReviewDto,
-        createdById: userId,
+        createdById: user.id,
       },
+      include: {
+        grade: {
+          select: {
+            createdBy: {
+              select: {
+                id: true,
+                email: true,
+                avatar: true,
+                firstName: true,
+                lastName: true,
+                studentId: true,
+              },
+            },
+            gradeComposition: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const notificationData: INotification = {
+      userId: gradeReview.grade.createdBy.id,
+      creatorId: user.id,
+      title: 'Student review grade composition created',
+      body: `${user.firstName} ${user.lastName} created review for grade composition ${gradeReview.grade.gradeComposition.name}.`,
+    };
+
+    this.emitterEvent.emit(EMIT_MESSAGES.NOTIFICATION_CREATED, {
+      userId: gradeReview.grade.createdBy.id,
+      notificationData,
     });
 
     return {
       message: GRADE_REVIEW_MESSAGES.CREATED_GRADE_REVIEW_SUCCESSFULLY,
       data: gradeReview,
     };
-  }
-
-  findAll() {
-    return `This action returns all gradeReview`;
   }
 
   async findOne(id: number) {
@@ -94,7 +125,7 @@ export class GradeReviewService {
   }
 
   async getListReview(courseId: number) {
-    let message;
+    let message: string;
 
     const data = [];
 
@@ -177,7 +208,7 @@ export class GradeReviewService {
     };
   }
 
-  async markCompleted(reviewId: number) {
+  async markCompleted(user: User, reviewId: number) {
     const gradeReview = await this.prisma.gradeReview.update({
       where: {
         id: reviewId,
@@ -185,11 +216,34 @@ export class GradeReviewService {
       data: {
         isResolve: true,
       },
+      select: {
+        createdBy: {
+          select: {
+            id: true,
+            email: true,
+            avatar: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
     });
 
     if (!gradeReview) {
       throw new NotFoundException(GRADE_REVIEW_MESSAGES.GRADE_REVIEW_NOT_FOUND);
     }
+
+    const notificationData: INotification = {
+      userId: gradeReview.createdBy.id,
+      creatorId: user.id,
+      title: 'Teacher marked grade composition finalized',
+      body: `${user.firstName} ${user.lastName} marked final decision for your grade composition review`,
+    };
+
+    this.emitterEvent.emit(EMIT_MESSAGES.NOTIFICATION_CREATED, {
+      userId: gradeReview.createdBy.id,
+      notificationData,
+    });
 
     return {
       message: GRADE_REVIEW_MESSAGES.MARK_COMPLETED_GRADE_REVIEW_SUCCESSFULLY,
@@ -265,24 +319,33 @@ export class GradeReviewService {
         },
       },
     });
+
     if (!commentReview) {
       throw new NotFoundException(GRADE_REVIEW_MESSAGES.GRADE_REVIEW_NOT_FOUND);
     }
 
-    const student = await this.prisma.user.findMany({
+    const student = await this.prisma.user.findUnique({
       where: {
         studentId: createCommentDto.studentId,
       },
     });
 
-    let userIds = [];
     const teacherList = await this.findTeacherInCourse(course.id);
 
-    userIds = [...teacherList.map((t) => t.teacher.id), student[0].id];
+    const userIds = [...teacherList.map((t) => t.teacher.id), student.id];
 
-    this.emitterEvent.emit(EMIT_MESSAGES.REVIEW_COMMENTED, {
-      userIds: userIds,
-      comment: commentReview,
+    userIds.forEach((userId) => {
+      const notificationData: INotification = {
+        userId: userId,
+        creatorId: user.id,
+        title: 'New comment on grade review',
+        body: `${user.firstName} ${user.lastName} created a comment on your grade review`,
+      };
+
+      this.emitterEvent.emit(EMIT_MESSAGES.NOTIFICATION_CREATED, {
+        userId: userId,
+        notificationData,
+      });
     });
 
     return {

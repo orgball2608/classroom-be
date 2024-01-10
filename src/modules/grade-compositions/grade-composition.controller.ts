@@ -21,7 +21,7 @@ import {
   ApiDelete,
 } from '@src/decorators';
 import { GradeCompositionEntity } from './entities/grade-composition.entity';
-import { IUserRequest } from '@src/interfaces';
+import { IGradeCompositionRequest, IUserRequest } from '@src/interfaces';
 import { ROUTES } from '@src/constants';
 
 @ApiTags('Grade compositions')
@@ -67,10 +67,14 @@ export class GradeCompositionController {
   @ApiParam({ name: 'id', type: Number, example: 1 })
   markFinalize(
     @Param('id', ParseIntPipe) id: number,
-    // @Req() req: IGradeCompositionRequest,
+    @Req() req: IGradeCompositionRequest,
     @Body() body: UpdateGradeCompositionDto,
   ) {
-    return this.gradeCompositionService.markFinalize(id, body.isFinalized);
+    return this.gradeCompositionService.markFinalize(
+      id,
+      req.course,
+      body.isFinalized,
+    );
   }
 
   @Patch(':id')
