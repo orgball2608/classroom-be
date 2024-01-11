@@ -334,19 +334,40 @@ export class GradeReviewService {
 
     const userIds = [...teacherList.map((t) => t.teacher.id), student.id];
 
-    userIds.forEach((userId) => {
-      const notificationData: INotification = {
+    //Realtime comment
+    userIds.forEach((userId: number) => {
+      this.emitterEvent.emit(EMIT_MESSAGES.REVIEW_COMMENTED, {
         userId: userId,
+        comment: commentReview,
+      });
+    });
+
+    //Send notification
+    if (user.id != commentReview.createdBy.id) {
+      const notificationData: INotification = {
+        userId: commentReview.createdBy.id,
         creatorId: user.id,
         title: 'New comment on grade review',
         body: `${user.firstName} ${user.lastName} created a comment on your grade review`,
       };
 
       this.emitterEvent.emit(EMIT_MESSAGES.NOTIFICATION_CREATED, {
-        userId: userId,
+        userId: commentReview.createdBy.id,
         notificationData,
       });
-    });
+    } else {
+      const notificationData: INotification = {
+        userId: course.createdById,
+        creatorId: user.id,
+        title: 'New comment on grade review of your course',
+        body: `${user.firstName} ${user.lastName} created a comment on grade review of your course`,
+      };
+
+      this.emitterEvent.emit(EMIT_MESSAGES.NOTIFICATION_CREATED, {
+        userId: course.createdById,
+        notificationData,
+      });
+    }
 
     return {
       message: GRADE_REVIEW_MESSAGES.MARK_INCOMPLETE_GRADE_REVIEW_SUCCESSFULLY,
