@@ -307,6 +307,17 @@ export class GradeReviewService {
         body: createCommentDto.body,
         createdById: user.id,
       },
+      select: {
+        createdBy: {
+          select: {
+            id: true,
+            email: true,
+            avatar: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
     });
 
     if (!commentReview) {
