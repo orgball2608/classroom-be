@@ -307,24 +307,13 @@ export class GradeReviewService {
         body: createCommentDto.body,
         createdById: user.id,
       },
-      include: {
-        createdBy: {
-          select: {
-            id: true,
-            email: true,
-            avatar: true,
-            firstName: true,
-            lastName: true,
-          },
-        },
-      },
     });
 
     if (!commentReview) {
       throw new NotFoundException(GRADE_REVIEW_MESSAGES.GRADE_REVIEW_NOT_FOUND);
     }
 
-    const student = await this.prisma.user.findUnique({
+    const student = await this.prisma.user.findUniqueOrThrow({
       where: {
         studentId: createCommentDto.studentId,
       },
@@ -343,16 +332,16 @@ export class GradeReviewService {
     });
 
     //Send notification
-    if (user.id != commentReview.createdBy.id) {
+    if (user.id === course.createdById) {
       const notificationData: INotification = {
-        userId: commentReview.createdBy.id,
+        userId: student.id,
         creatorId: user.id,
-        title: 'New comment on grade review',
+        title: 'New comment on your grade review',
         body: `${user.firstName} ${user.lastName} created a comment on your grade review`,
       };
 
       this.emitterEvent.emit(EMIT_MESSAGES.NOTIFICATION_CREATED, {
-        userId: commentReview.createdBy.id,
+        userId: student.id,
         notificationData,
       });
     } else {
