@@ -109,6 +109,7 @@ export const GRADE_COMPOSITION_MESSAGES = {
   INVALID_SWITCH_TO_INDEX: 'Invalid switch to index',
   GRADE_COMPOSITION_IS_NOT_FINALIZED: 'Grade composition is not finalized',
   MARK_AS_FINALIZED_SUCCESSFULLY: 'Mark as finalized successfully',
+  MARK_AS_UN_FINALIZED_SUCCESSFULLY: 'Mark as un finalized successfully',
 };
 
 export const GRADE_BOARS_MESSAGES = {
