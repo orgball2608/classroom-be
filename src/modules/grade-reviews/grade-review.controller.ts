@@ -47,8 +47,11 @@ export class GradeReviewController {
 
   @Patch('/:reviewId/mark-incomplete')
   @ApiParam({ name: 'reviewId', type: Number, example: 1 })
-  markInComplete(@Param('reviewId') reviewId: number) {
-    return this.gradeReviewService.markInComplete(reviewId);
+  markInComplete(
+    @Req() req: ICourseRequest,
+    @Param('reviewId') reviewId: number,
+  ) {
+    return this.gradeReviewService.markInComplete(req.user, reviewId);
   }
 
   @Post('/:reviewId/comment')

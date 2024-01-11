@@ -315,6 +315,13 @@ export class GradeCompositionService {
       },
     });
 
+    if (!value) {
+      return {
+        message: GRADE_COMPOSITION_MESSAGES.MARK_AS_UN_FINALIZED_SUCCESSFULLY,
+        data: gradeComposition,
+      };
+    }
+
     const enrollments = await this.prisma.enrollment.findMany({
       where: {
         courseId: course.id,
