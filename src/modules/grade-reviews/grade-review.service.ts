@@ -236,8 +236,8 @@ export class GradeReviewService {
     const notificationData: INotification = {
       userId: gradeReview.createdBy.id,
       creatorId: user.id,
-      title: 'Teacher marked grade composition finalized',
-      body: `${user.firstName} ${user.lastName} marked final decision for your grade composition review`,
+      title: 'Teacher marked your grade review finalized',
+      body: `${user.firstName} ${user.lastName} marked final decision for your grade review`,
     };
 
     this.emitterEvent.emit(EMIT_MESSAGES.NOTIFICATION_CREATED, {
@@ -251,7 +251,7 @@ export class GradeReviewService {
     };
   }
 
-  async markInComplete(reviewId: number) {
+  async markInComplete(user: User, reviewId: number) {
     const gradeReview = await this.prisma.gradeReview.update({
       where: {
         id: reviewId,
@@ -259,11 +259,34 @@ export class GradeReviewService {
       data: {
         isResolve: false,
       },
+      select: {
+        createdBy: {
+          select: {
+            id: true,
+            email: true,
+            avatar: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
     });
 
     if (!gradeReview) {
       throw new NotFoundException(GRADE_REVIEW_MESSAGES.GRADE_REVIEW_NOT_FOUND);
     }
+
+    const notificationData: INotification = {
+      userId: gradeReview.createdBy.id,
+      creatorId: user.id,
+      title: 'Teacher marked your grade review not finalized',
+      body: `${user.firstName} ${user.lastName} marked  your grade review not finalized`,
+    };
+
+    this.emitterEvent.emit(EMIT_MESSAGES.NOTIFICATION_CREATED, {
+      userId: gradeReview.createdBy.id,
+      notificationData,
+    });
 
     return {
       message: GRADE_REVIEW_MESSAGES.MARK_INCOMPLETE_GRADE_REVIEW_SUCCESSFULLY,
