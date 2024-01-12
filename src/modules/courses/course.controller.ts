@@ -222,4 +222,16 @@ export class CourseController {
   ) {
     return this.courseService.getRoleOfUserInCourse(userId, courseId);
   }
+
+  @Patch(':courseId/lock')
+  @ApiParam({ name: 'courseId', type: 'number', example: 1 })
+  lockClass(@Param('courseId', ParseIntPipe) courseId: number) {
+    return this.courseService.lockClass(courseId);
+  }
+
+  @Patch(':courseId/un-lock')
+  @ApiParam({ name: 'courseId', type: 'number', example: 1 })
+  unLockClass(@Param('courseId', ParseIntPipe) courseId: number) {
+    return this.courseService.unLockClass(courseId);
+  }
 }
