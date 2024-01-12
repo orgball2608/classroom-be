@@ -6,15 +6,15 @@ import {
 } from '@nestjs/common';
 import { COURSES_MESSAGES, USERS_MESSAGES } from '@src/constants/message';
 import { CourseTeacher, User } from '@prisma/client';
+import { EnrollmentRole, RoleInCourse } from './course.enum';
 
 import { ConfigService } from '@nestjs/config';
 import { Course } from './entities/course.entity';
 import { CoursesPageOptionsDto } from './dto/course-page-options-dto';
 import { CreateCourseDto } from './dto/create-course.dto';
-// import { EMIT_MESSAGES } from '@src/constants';
-import { EnrollmentRole, RoleInCourse } from './course.enum';
+import { EMIT_MESSAGES } from '@src/constants';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-// import { INotification } from '@src/interfaces';
+import { INotification } from '@src/interfaces';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { PageDto } from '@src/common/dto/page.dto';
@@ -99,6 +99,7 @@ export class CourseService {
         ],
       };
     }
+
     whereClause = {
       ...whereClause,
     };
@@ -243,9 +244,7 @@ export class CourseService {
       where: {
         id,
       },
-      data: {
-        ...updateCourseDto,
-      },
+      data: updateCourseDto,
     });
 
     return {
@@ -297,13 +296,6 @@ export class CourseService {
     const course = await this.prisma.course.findMany({
       where: {
         id: courseId,
-        // enrollments: {
-        //   some: {
-        //     userId: {
-        //       not: null,
-        //     },
-        //   },
-        // },
       },
       include: {
         enrollments: {
@@ -453,6 +445,18 @@ export class CourseService {
       },
     });
 
+    const notificationData: INotification = {
+      userId: course.createdById,
+      creatorId: user.id,
+      title: 'Student enrolled to your course',
+      body: `${user.firstName} ${user.lastName} enrolled to your course`,
+    };
+
+    this.emitterEvent.emit(EMIT_MESSAGES.NOTIFICATION_CREATED, {
+      userId: course.createdById,
+      notificationData,
+    });
+
     return {
       message: COURSES_MESSAGES.ENROLLED_TO_COURSE_SUCCESSFULLY,
       data: enrollment,
@@ -467,8 +471,8 @@ export class CourseService {
     return course.data;
   }
 
-  async leaveCourse(userId: number, course: Course, courseId: number) {
-    if (course.createdById === userId) {
+  async leaveCourse(user: User, course: Course, courseId: number) {
+    if (course.createdById === user.id) {
       throw new ForbiddenException(
         COURSES_MESSAGES.YOU_ARE_OWNER_OF_THIS_COURSE_CAN_NOT_LEAVE,
       );
@@ -481,14 +485,14 @@ export class CourseService {
           {
             enrollments: {
               some: {
-                userId: userId,
+                userId: user.id,
               },
             },
           },
           {
             courseTeachers: {
               some: {
-                teacherId: userId,
+                teacherId: user.id,
               },
             },
           },
@@ -507,14 +511,14 @@ export class CourseService {
 
     if (
       enrollment.courseTeachers.some(
-        (teacher: CourseTeacher): boolean => teacher.teacherId === userId,
+        (teacher: CourseTeacher): boolean => teacher.teacherId === user.id,
       )
     ) {
       await this.prisma.courseTeacher.delete({
         where: {
           courseId_teacherId: {
             courseId: courseId,
-            teacherId: userId,
+            teacherId: user.id,
           },
         },
       });
@@ -523,11 +527,23 @@ export class CourseService {
         where: {
           userId_courseId: {
             courseId: courseId,
-            userId: userId,
+            userId: user.id,
           },
         },
       });
     }
+
+    const notificationData: INotification = {
+      userId: course.createdById,
+      creatorId: user.id,
+      title: 'Student left your course',
+      body: `${user.firstName} ${user.lastName} created a comment on grade review of your course`,
+    };
+
+    this.emitterEvent.emit(EMIT_MESSAGES.NOTIFICATION_CREATED, {
+      userId: course.createdById,
+      notificationData,
+    });
 
     return {
       message: COURSES_MESSAGES.LEAVE_COURSE_SUCCESSFULLY,
@@ -676,18 +692,6 @@ export class CourseService {
           },
         });
 
-        // const notificationData: INotification = {
-        //   userId: course.createdBy.id,
-        //   creatorId: user.id,
-        //   title: 'New enrollment to your course',
-        //   body: `${user.firstName} ${user.lastName} enrolled to course ${course.name}`,
-        // };
-
-        // this.emitterEvent.emit(EMIT_MESSAGES.NOTIFICATION_CREATED, {
-        //   userId: course.createdById,
-        //   notificationData,
-        // });
-
         return {
           message: COURSES_MESSAGES.ENROLLED_TO_COURSE_SUCCESSFULLY,
           data: result,
@@ -703,7 +707,17 @@ export class CourseService {
   }
 
   async removeUserInCourse(userId: number, course: Course, courseId: number) {
-    const result = await this.leaveCourse(userId, course, courseId);
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException(USERS_MESSAGES.USER_NOT_FOUND);
+    }
+
+    const result = await this.leaveCourse(user, course, courseId);
 
     return result;
   }
@@ -789,15 +803,19 @@ export class CourseService {
       throw new NotFoundException(COURSES_MESSAGES.COURSE_NOT_FOUND);
     }
 
-    let data = RoleInCourse.NONE;
-    let message = COURSES_MESSAGES.GET_ROLE_OF_USER_IN_COURSE_SUCCESSFULLY;
-    if (course.courseTeachers.length > 0) {
-      data = RoleInCourse.TEACHER;
-    } else if (course.enrollments.length > 0) {
-      data = RoleInCourse.STUDENT;
-    } else {
-      message = COURSES_MESSAGES.USER_NOT_IN_COURSE;
-    }
+    const isTeacher = course.courseTeachers.length > 0;
+    const isStudent = !isTeacher && course.enrollments.length > 0;
+
+    const data = isTeacher
+      ? RoleInCourse.TEACHER
+      : isStudent
+        ? RoleInCourse.STUDENT
+        : RoleInCourse.NONE;
+
+    const message =
+      isTeacher || isStudent
+        ? COURSES_MESSAGES.GET_ROLE_OF_USER_IN_COURSE_SUCCESSFULLY
+        : COURSES_MESSAGES.USER_NOT_IN_COURSE;
 
     return {
       message,
