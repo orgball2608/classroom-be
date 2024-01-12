@@ -13,8 +13,7 @@ import { Inject } from '@nestjs/common';
 import { IGatewaySessionManager } from './gateway.session';
 import { IAuthenticatedSocket, INotification } from '@src/interfaces';
 import _ from 'lodash';
-import { IcommentReview } from '@src/interfaces/ICommentReview';
-
+import { ICommentReview } from '@src/interfaces/ICommentReview';
 @WebSocketGateway({
   cors: {
     origin: '*',
@@ -26,7 +25,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(PROVIDERS.GATEWAY_SESSION_MANAGER)
-    readonly sessions: IGatewaySessionManager,
+    readonly session: IGatewaySessionManager,
   ) {}
 
   @WebSocketServer()
@@ -40,12 +39,12 @@ export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   handleConnection(socket: IAuthenticatedSocket) {
-    this.sessions.setUserSocket(socket.user.id, socket);
+    this.session.setUserSocket(socket.user.id, socket);
     socket.emit('connected');
   }
 
   handleDisconnect(socket: IAuthenticatedSocket) {
-    this.sessions.removeUserSocket(socket.user.id);
+    this.session.removeUserSocket(socket.user.id);
     socket.emit('disconnected');
   }
 
@@ -73,7 +72,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       },
     });
 
-    const socket = this.sessions.getUserSocket(payload.userId);
+    const socket = this.session.getUserSocket(payload.userId);
 
     if (socket) {
       socket.emit(
@@ -85,17 +84,15 @@ export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @OnEvent(EMIT_MESSAGES.REVIEW_COMMENTED)
   async sendComment(payload: {
-    userIds: number[];
-    comment: IcommentReview;
+    userId: number;
+    comment: ICommentReview;
   }): Promise<void> {
-    payload.userIds.map((userId) => {
-      const socket = this.sessions.getUserSocket(userId);
-      if (socket) {
-        socket.emit(
-          SOCKET_MESSAGES.REVIEW_COMMENTED,
-          _.omit(payload.comment, 'updatedAt'),
-        );
-      }
-    });
+    const socket = this.session.getUserSocket(payload.userId);
+    if (socket) {
+      socket.emit(
+        SOCKET_MESSAGES.REVIEW_COMMENTED,
+        _.omit(payload.comment, 'updatedAt'),
+      );
+    }
   }
 }
