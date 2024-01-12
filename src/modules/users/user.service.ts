@@ -20,7 +20,7 @@ import { StorageService } from '@src/shared/storage/services/storage.service';
 import { TokenInvalidException } from '@src/exceptions';
 import { UpdateFullFieldUserDto } from './dto/update-full-field-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from '@prisma/client';
+import { User, UserRole } from '@prisma/client';
 import { UsersPageOptionsDto } from './dto/user-page-options.dto';
 import _ from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
@@ -81,9 +81,14 @@ export class UserService {
       skip,
       take,
       where: whereClause,
-      orderBy: {
-        firstName: order,
-      },
+      orderBy: [
+        {
+          firstName: order,
+        },
+        {
+          createdAt: order,
+        },
+      ],
     });
     const pageMetaDto = new PageMetaDto({
       itemCount,
@@ -475,5 +480,136 @@ export class UserService {
     return {
       message: USERS_MESSAGES.UNLOCK_USER_SUCCESSFULLY,
     };
+  }
+
+  async findNotAdmin(pageOptionsDto: UsersPageOptionsDto) {
+    const { skip, take, order, search } = pageOptionsDto;
+    //search by name or email if search is not null
+    let whereClause = {};
+
+    if (search !== ' ' && search.length > 0) {
+      //search by name or email
+      const searchQuery = search.trim();
+      whereClause = {
+        OR: [
+          {
+            firstName: {
+              contains: searchQuery,
+              mode: 'insensitive',
+            },
+          },
+          {
+            lastName: {
+              contains: searchQuery,
+              mode: 'insensitive',
+            },
+          },
+          {
+            email: {
+              contains: searchQuery,
+              mode: 'insensitive',
+            },
+          },
+          {
+            studentId: {
+              contains: searchQuery,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      };
+    }
+    whereClause = {
+      ...whereClause,
+      role: {
+        not: UserRole.ADMIN,
+      },
+    };
+    // eslint-disable-next-line prettier/prettier
+    const itemCount = await this.prisma.user.count({
+      where: whereClause,
+    });
+
+    const users = await this.prisma.user.findMany({
+      skip,
+      take,
+      where: whereClause,
+      orderBy: [
+        {
+          firstName: order,
+        },
+        {
+          createdAt: order,
+        },
+      ],
+      include: {
+        studentEnrollments: true,
+      },
+    });
+    const pageMetaDto = new PageMetaDto({
+      itemCount,
+      pageOptionsDto,
+    });
+
+    const filteredUsers = users.map((user) =>
+      _.omit(user, ['password', 'forgotPasswordToken', 'verifyEmailToken']),
+    );
+
+    const result = new PageDto(filteredUsers, pageMetaDto);
+
+    return {
+      message: USERS_MESSAGES.GET_USERS_LIST_SUCCESSFULLY,
+      data: result,
+    };
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async mapStudentsList(data: { Email: string; StudentId: string }[]) {
+    try {
+      await Promise.all(
+        data.map(async (item) => {
+          if (item.StudentId === null || item.Email === null) {
+            return; // return để bỏ qua khi có StudentId hoặc Email là null
+          }
+
+          const user = await this.prisma.user.findMany({
+            where: {
+              studentId: item.StudentId,
+            },
+          });
+
+          if (user.length > 0 && user[0].email !== item.Email) {
+            throw new BadRequestException(
+              `${item.StudentId} has been used by other students`,
+            );
+          }
+
+          const userEmail = await this.prisma.user.findMany({
+            where: {
+              email: item.Email,
+            },
+          });
+
+          if (userEmail.length === 0) {
+            throw new NotFoundException(`${item.Email} Account not found`);
+          }
+
+          await this.prisma.user.update({
+            where: {
+              email: item.Email,
+            },
+            data: {
+              studentId: item.StudentId,
+            },
+          });
+        }),
+      );
+
+      return {
+        message: USERS_MESSAGES.MAP_STUDENT_ID_WITH_USER_ID_SUCCESSFULLY,
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 }

@@ -256,4 +256,17 @@ export class UserController {
     const userIdsToDelete = ids.split(',').map((id) => parseInt(id, 10));
     return this.userService.deleteUserList(userIdsToDelete);
   }
+
+  @Get('/list/not-admin')
+  findNotAdmin(
+    @Query(new ValidationPipe({ transform: true }))
+    pageOptionsDto: UsersPageOptionsDto,
+  ) {
+    return this.userService.findNotAdmin(pageOptionsDto);
+  }
+
+  @Patch('/map/students-list')
+  mapStudentsList(@Body() body: { Email: string; StudentId: string }[]) {
+    return this.userService.mapStudentsList(body);
+  }
 }

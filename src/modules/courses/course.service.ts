@@ -111,9 +111,14 @@ export class CourseService {
       skip,
       take,
       where: whereClause,
-      orderBy: {
-        name: order,
-      },
+      orderBy: [
+        {
+          name: order,
+        },
+        {
+          createdAt: order,
+        },
+      ],
       include: {
         createdBy: {
           select: {
