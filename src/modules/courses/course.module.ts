@@ -26,6 +26,14 @@ export class CourseModule implements NestModule {
         path: 'course/:ids',
         method: RequestMethod.DELETE,
       },
+      {
+        path: 'course/:courseId/lock',
+        method: RequestMethod.PATCH,
+      },
+      {
+        path: 'course/:courseId/un-lock',
+        method: RequestMethod.PATCH,
+      },
     );
 
     consumer

@@ -71,6 +71,9 @@ export const COURSES_MESSAGES = {
   YOU_ARE_NOT_COURSE_OWNER: 'You are not course owner',
   GET_ROLE_OF_USER_IN_COURSE_SUCCESSFULLY:
     'Get role of user in course successfully',
+  LOCK_COURSE_SUCCESSFULLY: 'Lock course successfully',
+  UNLOCK_COURSE_SUCCESSFULLY: 'Unlock course successfully',
+  COURSE_IS_LOCKED: 'Course is locked',
 };
 
 export const AUTHORIZATION_MESSAGES = {

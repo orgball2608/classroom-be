@@ -101,7 +101,6 @@ export class CourseService {
     }
     whereClause = {
       ...whereClause,
-      deleted: false,
     };
     // eslint-disable-next-line prettier/prettier
     const itemCount = await this.prisma.course.count({
@@ -798,6 +797,44 @@ export class CourseService {
     return {
       message,
       data,
+    };
+  }
+
+  async lockClass(courseId: number) {
+    const course = await this.prisma.course.update({
+      where: {
+        id: courseId,
+      },
+      data: {
+        deleted: true,
+        deletedAt: new Date(),
+      },
+    });
+    console.log(course);
+    if (!course) {
+      throw new NotFoundException(COURSES_MESSAGES.COURSE_NOT_FOUND);
+    }
+
+    return {
+      message: COURSES_MESSAGES.LOCK_COURSE_SUCCESSFULLY,
+    };
+  }
+
+  async unLockClass(courseId: number) {
+    const course = await this.prisma.course.update({
+      where: {
+        id: courseId,
+      },
+      data: {
+        deleted: false,
+      },
+    });
+    if (!course) {
+      throw new NotFoundException(COURSES_MESSAGES.COURSE_NOT_FOUND);
+    }
+
+    return {
+      message: COURSES_MESSAGES.UNLOCK_COURSE_SUCCESSFULLY,
     };
   }
 }

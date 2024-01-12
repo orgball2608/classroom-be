@@ -43,9 +43,8 @@ export class CourseMiddleware implements NestMiddleware {
     if (!course) {
       throw new NotFoundException(COURSES_MESSAGES.COURSE_NOT_FOUND);
     }
-
     if (req.user.role !== UserRole.ADMIN && course.deleted === true) {
-      throw new NotFoundException(COURSES_MESSAGES.COURSE_NOT_FOUND);
+      throw new NotFoundException(COURSES_MESSAGES.COURSE_IS_LOCKED);
     }
 
     const userId = req.user.id;
