@@ -166,7 +166,7 @@ export class CourseController {
     @Req() req: ICourseRequest,
     @Param('id', ParseIntPipe) courseId: number,
   ) {
-    return this.courseService.leaveCourse(req.user.id, req.course, courseId);
+    return this.courseService.leaveCourse(req.user, req.course, courseId);
   }
 
   @Post('/invite/email')
@@ -190,7 +190,6 @@ export class CourseController {
 
   //join course by class code
   @Post('/join-by-code')
-  // @ApiBody({ type: InviteEmailDto })
   joinCourseByClassCode(
     @Req() req: IUserRequest,
     @Body() body: { classCode: string },
