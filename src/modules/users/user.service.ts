@@ -82,7 +82,7 @@ export class UserService {
       take,
       where: whereClause,
       orderBy: {
-        createdAt: order,
+        firstName: order,
       },
     });
     const pageMetaDto = new PageMetaDto({

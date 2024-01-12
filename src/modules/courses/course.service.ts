@@ -112,7 +112,7 @@ export class CourseService {
       take,
       where: whereClause,
       orderBy: {
-        createdAt: order,
+        name: order,
       },
       include: {
         createdBy: {
