@@ -61,6 +61,10 @@ export class UserModule implements NestModule {
           path: 'users/:id/student-id',
           method: RequestMethod.DELETE,
         },
+        {
+          path: 'users/list/not-admin',
+          method: RequestMethod.GET,
+        },
       );
   }
 }
