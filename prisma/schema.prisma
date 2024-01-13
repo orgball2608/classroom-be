@@ -56,8 +56,8 @@ model Notification {
   body      String             @db.Text
   status    NotificationStatus @default(UNREAD)
 
-  user    User  @relation(name: "user_notifications", fields: [userId], references: [id])
-  creator User? @relation(fields: [creatorId], references: [id])
+  user    User  @relation(name: "user_notifications", fields: [userId], references: [id], onDelete: Cascade)
+  creator User? @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -79,7 +79,7 @@ model Course {
 
   enrollments       Enrollment[]       @relation("course_students")
   courseTeachers    CourseTeacher[]    @relation("course_teachers")
-  createdBy         User               @relation(fields: [createdById], references: [id])
+  createdBy         User               @relation(fields: [createdById], references: [id], onDelete: Cascade)
   gradeCompositions GradeComposition[]
 
   deletedAt DateTime? @map("deleted_at")
@@ -98,9 +98,9 @@ model Enrollment {
   fullName    String? @map("full_name")
   createdById Int     @map("created_by_id")
 
-  student   User?  @relation(name: "student_enrollments", fields: [userId], references: [id])
-  course    Course @relation(name: "course_students", fields: [courseId], references: [id])
-  createdBy User   @relation(fields: [createdById], references: [id])
+  student   User?  @relation(name: "student_enrollments", fields: [userId], references: [id], onDelete: Cascade)
+  course    Course @relation(name: "course_students", fields: [courseId], references: [id], onDelete: Cascade)
+  createdBy User   @relation(fields: [createdById], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -115,8 +115,8 @@ model CourseTeacher {
   courseId  Int @map("course_id")
   teacherId Int @map("teacher_id")
 
-  course  Course @relation(name: "course_teachers", fields: [courseId], references: [id])
-  teacher User   @relation(fields: [teacherId], references: [id])
+  course  Course @relation(name: "course_teachers", fields: [courseId], references: [id], onDelete: Cascade)
+  teacher User   @relation(fields: [teacherId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -134,8 +134,8 @@ model GradeComposition {
   index       Int?
   isFinalized Boolean @default(false)
 
-  course    Course  @relation(fields: [courseId], references: [id])
-  createdBy User    @relation(fields: [createdById], references: [id])
+  course    Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdBy User    @relation(fields: [createdById], references: [id], onDelete: Cascade)
   grades    Grade[]
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -152,12 +152,12 @@ model Grade {
   grade              Float?
   createdById        Int    @map("created_by_id")
 
-  createdBy        User             @relation(name: "created_grades", fields: [createdById], references: [id])
-  gradeComposition GradeComposition @relation(fields: [gradeCompositionId], references: [id])
+  createdBy        User             @relation(name: "created_grades", fields: [createdById], references: [id], onDelete: Cascade)
+  gradeComposition GradeComposition @relation(fields: [gradeCompositionId], references: [id], onDelete: Cascade)
+  gradeReviews     GradeReview[]
 
-  createdAt   DateTime      @default(now()) @map("created_at")
-  updatedAt   DateTime      @updatedAt @map("updated_at")
-  GradeReview GradeReview[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@unique([studentId, gradeCompositionId])
   @@map("grades")
@@ -172,8 +172,8 @@ model GradeReview {
   createdById   Int     @map("created_by_id")
 
   reviewComments ReviewComment[]
-  grade          Grade           @relation(fields: [gradeId], references: [id])
-  createdBy      User            @relation(fields: [createdById], references: [id])
+  grade          Grade           @relation(fields: [gradeId], references: [id], onDelete: Cascade)
+  createdBy      User            @relation(fields: [createdById], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -187,8 +187,8 @@ model ReviewComment {
   body        String @db.Text
   createdById Int    @map("created_by_id")
 
-  review    GradeReview @relation(fields: [reviewId], references: [id])
-  createdBy User        @relation(fields: [createdById], references: [id])
+  review    GradeReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  createdBy User        @relation(fields: [createdById], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

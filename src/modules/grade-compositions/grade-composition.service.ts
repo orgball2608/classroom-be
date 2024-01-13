@@ -4,7 +4,11 @@ import {
 } from '@src/common/entity/response.entity';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Course, User } from '@prisma/client';
-import { EMIT_MESSAGES, GRADE_COMPOSITION_MESSAGES } from '@src/constants';
+import {
+  EMIT_MESSAGES,
+  GRADE_COMPOSITION_MESSAGES,
+  Order,
+} from '@src/constants';
 
 import { CreateGradeCompositionDto } from './dto/create-grade-composition.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -148,6 +152,9 @@ export class GradeCompositionService {
           index: {
             gt: deletedGradeComposition.index,
           },
+        },
+        orderBy: {
+          index: Order.DESC,
         },
       });
 
