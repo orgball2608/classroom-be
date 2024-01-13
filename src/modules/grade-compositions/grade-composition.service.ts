@@ -137,6 +137,12 @@ export class GradeCompositionService {
 
   async remove(id: number): Promise<ApiResponseOmitDataEntity> {
     await this.prisma.$transaction(async (tx) => {
+      await tx.grade.deleteMany({
+        where: {
+          gradeCompositionId: id,
+        },
+      });
+
       const deletedGradeComposition = await tx.gradeComposition.delete({
         where: {
           id,
