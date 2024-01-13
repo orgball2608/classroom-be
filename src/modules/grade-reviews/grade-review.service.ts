@@ -186,6 +186,7 @@ export class GradeReviewService {
     gradeReview.map((review) => {
       const grade = grades.find((g) => g.id === review.gradeId);
       const student = enrollment.find((e) => e.studentId === grade.studentId);
+      if (!student) return;
       data.push({
         id: review.id,
         gradeId: grade.id,
@@ -358,12 +359,14 @@ export class GradeReviewService {
     const userIds = [...teacherList.map((t) => t.teacher.id), student.id];
 
     //Realtime comment
-    userIds.forEach((userId: number) => {
-      this.emitterEvent.emit(EMIT_MESSAGES.REVIEW_COMMENTED, {
-        userId: userId,
-        comment: commentReview,
-      });
-    });
+    await Promise.all(
+      userIds.map(async (userId: number) => {
+        this.emitterEvent.emit(EMIT_MESSAGES.REVIEW_COMMENTED, {
+          userId: userId,
+          comment: commentReview,
+        });
+      }),
+    );
 
     //Send notification
     if (user.id === course.createdById) {
