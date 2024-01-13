@@ -2,17 +2,20 @@ version: '3.8'
 
 services:
   postgres:
+    image: postgres
     container_name: postgres
-    image: postgres:16-alpine
     restart: always
     environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: webnc
-    volumes:
-      - postgres:/var/lib/postgresql/data
+      POSTGRES_PASSWORD: postgres
+      TZ: 'GMT'
+      PGTZ: 'GMT'
     ports:
-      - 5432:5432
+      - '5423:5432'
+    volumes:
+      - postgres:/data/postgres
+      - ../../init-data.sh:/docker-entrypoint-initdb.d/init-data.sh
+    env_file:
+      - ../../.env.docker
     networks:
       - elearning
 

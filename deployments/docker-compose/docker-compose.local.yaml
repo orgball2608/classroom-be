@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: postgres
+      TZ: 'GMT'
+      PGTZ: 'GMT'
+    ports:
+      - '5423:5432'
+    volumes:
+      - postgres:/data/postgres
+      - ../../init-data.sh:/docker-entrypoint-initdb.d/init-data.sh
+    env_file:
+      - ../../.env.docker
+
+  redis:
+    container_name: redis
+    image: redis/redis-stack:latest
+    pull_policy: if_not_present
+    restart: on-failure
+    ports:
+      - 6379:6379
+    volumes:
+      - redis:/data
+
+  nestjs:
+    container_name: nestjs
+    build:
+      context: ../../
+      dockerfile: Dockerfile
+      target: development
+    command: yarn run start:dev
+    env_file:
+      - ../../.env.docker
+    ports:
+      - 3001:3001
+    volumes:
+      - .:/usr/src/app
+    depends_on:
+      - redis
+      - postgres
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3001/api/v1/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres:
+  redis:
