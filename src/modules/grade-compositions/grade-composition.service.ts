@@ -152,6 +152,7 @@ export class GradeCompositionService {
           index: {
             gt: deletedGradeComposition.index,
           },
+          courseId: deletedGradeComposition.courseId,
         },
         orderBy: {
           index: Order.ASC,
