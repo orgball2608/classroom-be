@@ -330,7 +330,7 @@ export class GradeReviewService {
         body: createCommentDto.body,
         createdById: user.id,
       },
-      select: {
+      include: {
         createdBy: {
           select: {
             id: true,
