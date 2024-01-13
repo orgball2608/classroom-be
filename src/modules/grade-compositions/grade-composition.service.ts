@@ -154,7 +154,7 @@ export class GradeCompositionService {
           },
         },
         orderBy: {
-          index: Order.DESC,
+          index: Order.ASC,
         },
       });
 
