@@ -1,5 +1,5 @@
-# Stage 1: Development
-FROM node:18-alpine3.18 AS development
+# Stage 1: build
+FROM node:18-alpine3.18 AS build
 
 WORKDIR /app
 
@@ -19,10 +19,10 @@ FROM node:18-alpine3.18 AS production
 
 WORKDIR /app
 
-COPY --from=development /app/node_modules ./node_modules
-COPY --from=development /app/package*.json ./
-COPY --from=development /app/prisma ./prisma
-COPY --from=development /app/templates ./templates
-COPY --from=development /app/dist ./dist
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/package*.json ./
+COPY --from=build /app/prisma ./prisma
+COPY --from=build /app/templates ./templates
+COPY --from=build /app/dist ./dist
 
 CMD [ "node", "dist/main.js" ]
