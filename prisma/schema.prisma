@@ -154,7 +154,7 @@ model Grade {
 
   createdBy        User             @relation(name: "created_grades", fields: [createdById], references: [id], onDelete: Cascade)
   gradeComposition GradeComposition @relation(fields: [gradeCompositionId], references: [id], onDelete: Cascade)
-  gradeReviews     GradeReview[]
+  GradeReview      GradeReview[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
