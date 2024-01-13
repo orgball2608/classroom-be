@@ -33,7 +33,7 @@ yarn run start:dev
 ```
 or
 ```
-docker-compose up --detach --build; docker-compose exec api yarn run dev:migrate
+docker-compose -f docker-compose.local.yaml up --detach --build; docker-compose exec nestjs yarn run dev:migrate
 ```
 ## Visualize database
 ### Install Atlas: https://atlasgo.io/getting-started/
