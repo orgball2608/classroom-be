@@ -8,13 +8,14 @@ import {
 
 import { AuthModule } from '../auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
+import { MailModule } from '../mails/mail.module';
 import { StorageModule } from '@src/shared/storage/storage.module';
 import { UserController } from './user.controller';
 import { UserRole } from '@prisma/client';
 import { UserService } from './user.service';
 
 @Module({
-  imports: [AuthModule, StorageModule, JwtModule.register({})],
+  imports: [AuthModule, StorageModule, JwtModule.register({}), MailModule],
   controllers: [UserController],
   providers: [UserService],
 })

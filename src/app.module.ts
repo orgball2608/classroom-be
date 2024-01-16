@@ -17,9 +17,11 @@ import { GradeBoardModule } from './modules/grade-boards/grade-board.module';
 import { GradeCompositionModule } from './modules/grade-compositions/grade-composition.module';
 import { GradeModule } from './modules/grades/grade.module';
 import { GradeReviewModule } from './modules/grade-reviews/grade-review.module';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { HealthModule } from './modules/health/health.module';
 import { JwtModule } from '@nestjs/jwt';
-import { MailModule } from './shared/mail/mail.module';
+import { MailModule } from './modules/mails/mail.module';
+import { MailerModule } from '@nestjs-modules/mailer';
 import { NotificationModule } from './modules/notifications/notification.module';
 import { PrismaModule } from './shared/prisma/prisma.module';
 import { PrometheusModule } from '@willsoto/nestjs-prometheus';
@@ -53,7 +55,30 @@ import redisConfig from './configs/redis.config';
         abortEarly: false,
       },
     }),
-    MailModule,
+    MailerModule.forRootAsync({
+      useFactory: (config: ConfigService) => ({
+        transport: {
+          host: config.getOrThrow('mail.host'),
+          port: config.getOrThrow('mail.port'),
+          secure: true,
+          auth: {
+            user: config.getOrThrow('mail.username'),
+            pass: config.getOrThrow('mail.password'),
+          },
+        },
+        defaults: {
+          from: '"No Reply" <no-reply@localhost>',
+        },
+        template: {
+          dir: process.cwd() + '/templates/',
+          adapter: new HandlebarsAdapter(),
+          options: {
+            strict: true,
+          },
+        },
+      }),
+      inject: [ConfigService],
+    }),
     JwtModule.register({}),
     EventEmitterModule.forRoot(),
     PrometheusModule.register({
@@ -74,6 +99,7 @@ import redisConfig from './configs/redis.config';
       }),
     }),
     SharedModule,
+    MailModule,
     AuthModule,
     UserModule,
     CourseModule,
@@ -104,10 +130,7 @@ export class AppModule implements NestModule {
           path: 'metrics',
           method: RequestMethod.GET,
         },
-        {
-          path: 'mail/test',
-          method: RequestMethod.GET,
-        },
+
         {
           path: 'users/forgot-password',
           method: RequestMethod.POST,

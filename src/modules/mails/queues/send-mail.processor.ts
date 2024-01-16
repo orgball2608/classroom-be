@@ -6,29 +6,30 @@ import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 @Processor('mail:send')
-export class MailProcessor extends WorkerHost {
+export class SendMailProcessor extends WorkerHost {
   constructor(private readonly mailerService: MailerService) {
     super();
   }
 
   public async process(
     job: Job<{
-      emailAddress: string;
+      to: string;
+      from: string;
+      subject: string;
+      template: string;
+      context: Record<string, any>;
     }>,
   ) {
-    try {
-      console.log('Sending email to: ' + job.data.emailAddress);
-      return this.mailerService.sendMail({
-        to: job.data.emailAddress,
-        from: 'elearningapp@gmail.com',
-        subject: '',
-        template: './verify-mail',
-        context: {
-          name: 'demo',
-          verifyEmailUrl: 'demo',
-        },
-      });
-    } catch {}
+    return this.mailerService.sendMail({
+      to: job.data.to,
+      from: job.data.from,
+      subject: job.data.subject,
+      template: job.data.template,
+      context: {
+        name: job.data.context.name,
+        verifyEmailUrl: job.data.context.verifyEmailUrl,
+      },
+    });
   }
 
   @OnWorkerEvent('completed')

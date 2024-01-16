@@ -4,13 +4,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { TOKEN_MESSAGES, USERS_MESSAGES } from '@src/constants/message';
+import { User, UserRole } from '@prisma/client';
 import { generateHash, validateHash } from '@src/common/utils';
 
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { ConfigService } from '@nestjs/config';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { JwtService } from '@nestjs/jwt';
-import { MailerService } from '@nestjs-modules/mailer';
+import { MailService } from '../mails/mail.service';
 import { MapStudentIdWithUserIdDto } from './dto/map-student-id.dto';
 import { PageDto } from '@src/common/dto/page.dto';
 import { PageMetaDto } from '@src/common/dto/page-meta.dto';
@@ -20,7 +21,6 @@ import { StorageService } from '@src/shared/storage/services/storage.service';
 import { TokenInvalidException } from '@src/exceptions';
 import { UpdateFullFieldUserDto } from './dto/update-full-field-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User, UserRole } from '@prisma/client';
 import { UsersPageOptionsDto } from './dto/user-page-options.dto';
 import _ from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
@@ -31,8 +31,8 @@ export class UserService {
     private prisma: PrismaService,
     private readonly config: ConfigService,
     private readonly jwtService: JwtService,
-    private readonly mailerService: MailerService,
     private readonly storageService: StorageService,
+    private readonly mailService: MailService,
   ) {}
 
   async findAll(pageOptionsDto: UsersPageOptionsDto) {
@@ -146,7 +146,7 @@ export class UserService {
       'app.appURL',
     )}/${apiPrefix}/users/verify/forgot-password?token=${token}`;
 
-    return this.mailerService.sendMail({
+    return this.mailService.sendMail({
       to: email,
       from: 'elearningapp@gmail.com',
       subject: 'Email reset forgot password for leaning app',

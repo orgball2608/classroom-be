@@ -11,7 +11,7 @@ import { generateHash, validateHash } from '@src/common/utils';
 
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { MailerService } from '@nestjs-modules/mailer';
+import { MailService } from '../mails/mail.service';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -25,7 +25,7 @@ export class AuthService {
     private prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
-    private readonly mailerService: MailerService,
+    private readonly mailService: MailService,
   ) {}
   async register(registerDto: RegisterDto) {
     const { email, password } = registerDto;
@@ -198,7 +198,7 @@ export class AuthService {
       'app.appURL',
     )}/${apiPrefix}/auth/verify-email?token=${token}`;
 
-    return this.mailerService.sendMail({
+    return this.mailService.sendMail({
       to: email,
       from: 'elearningapp@gmail.com',
       subject: 'Email confirmation for leaning app',
