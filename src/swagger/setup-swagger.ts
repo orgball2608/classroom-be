@@ -54,8 +54,10 @@ export function setupSwagger(
     )
     .addBearerAuth();
 
-  if (process.env.API_VERSION) {
-    documentBuilder.setVersion(process.env.API_VERSION);
+  const apiVersion = configService.get('app.apiVersion');
+
+  if (apiVersion) {
+    documentBuilder.setVersion(apiVersion);
   }
 
   const document = SwaggerModule.createDocument(app, documentBuilder.build());
