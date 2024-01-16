@@ -45,10 +45,10 @@ export type AwsConfig = {
 };
 
 export type MailConfig = {
-  mailHost: string;
-  mailPort: number;
-  mailUsername: string;
-  mailPassword: string;
+  host: string;
+  port: number;
+  username: string;
+  password: string;
   jwtMailSecret: string;
   jwtMailTokenTTL: number;
 };

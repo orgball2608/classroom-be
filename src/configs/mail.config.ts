@@ -39,14 +39,14 @@ class EnvironmentVariablesValidator {
   JWT_MAIL_TOKEN_TTL: number;
 }
 
-export default registerAs<MailConfig>('mailer', () => {
+export default registerAs<MailConfig>('mail', () => {
   validateConfig(process.env, EnvironmentVariablesValidator);
 
   return {
-    mailHost: process.env.MAIL_HOST,
-    mailPort: process.env.MAIL_PORT ? parseInt(process.env.MAIL_PORT, 10) : 345,
-    mailUsername: process.env.MAIL_USERNAME,
-    mailPassword: process.env.MAIL_PASSWORD,
+    host: process.env.MAIL_HOST,
+    port: process.env.MAIL_PORT ? parseInt(process.env.MAIL_PORT, 10) : 345,
+    username: process.env.MAIL_USERNAME,
+    password: process.env.MAIL_PASSWORD,
     jwtMailSecret: process.env.JWT_MAIL_SECRET,
     jwtMailTokenTTL: process.env.JWT_MAIL_TOKEN_TTL
       ? parseInt(process.env.JWT_MAIL_TOKEN_TTL, 10)
