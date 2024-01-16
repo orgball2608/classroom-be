@@ -13,8 +13,6 @@ export type AuthConfig = {
   accessTokenExpires: number;
   refreshTokenSecret: string;
   refreshTokenExpires: number;
-  jwtMailSecret: string;
-  jwtMailExpires: number;
   jwtForgotPasswordSecret: string;
   jwtForgotPasswordExpires: number;
   facebookClientID: string;
@@ -50,5 +48,5 @@ export type MailConfig = {
   username: string;
   password: string;
   jwtMailSecret: string;
-  jwtMailTokenTTL: number;
+  jwtMailExpires: number;
 };
