@@ -596,7 +596,8 @@ export class CourseService {
       role === EnrollmentRole.STUDENT ? 'student' : 'teacher';
 
     const verifyEmailToken = this.signJoinCourseToken(email, courseId, role);
-    const inviteLink = `${process.env.FRONTEND_URL}/class/join?token=${verifyEmailToken}`;
+    const frontendUrl = this.config.getOrThrow<string>('app.frontendUrl');
+    const inviteLink = `${frontendUrl}/class/join?token=${verifyEmailToken}`;
 
     return this.mailerService.sendMail({
       to: email,

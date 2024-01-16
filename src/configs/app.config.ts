@@ -32,6 +32,10 @@ class EnvironmentVariablesValidator {
   @IsOptional()
   API_VERSION: string;
 
+  @IsBoolean()
+  @IsOptional()
+  DOCUMENT_ENABLED: boolean;
+
   @IsString()
   @IsOptional()
   APP_URL: string;
@@ -40,9 +44,9 @@ class EnvironmentVariablesValidator {
   @IsOptional()
   FRONTEND_URL: string;
 
-  @IsBoolean()
+  @IsString()
   @IsOptional()
-  DOCUMENT_ENABLED: boolean;
+  ADMIN_FRONTEND_URL: string;
 }
 
 export default registerAs<AppConfig>('app', () => {
@@ -57,10 +61,10 @@ export default registerAs<AppConfig>('app', () => {
         : 3000,
     apiPrefix: process.env.API_PREFIX || 'api',
     apiVersion: process.env.API_VERSION || 'v1',
+    documentEnabled: process.env.DOCUMENT_ENABLED === 'true',
     appURL: process.env.APP_URL || 'http://localhost:3001',
     frontendURL: process.env.FRONTEND_URL || 'http://localhost:3000',
     adminFrontendURL:
       process.env.ADMIN_FRONTEND_URL || 'http://localhost:3030/admin',
-    documentEnabled: process.env.DOCUMENT_ENABLED === 'true',
   };
 });
