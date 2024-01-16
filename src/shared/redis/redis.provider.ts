@@ -1,4 +1,5 @@
 import { ConfigService } from '@nestjs/config';
+import { PROVIDERS } from '@src/constants';
 import { Provider } from '@nestjs/common';
 import Redis from 'ioredis';
 
@@ -8,6 +9,6 @@ export const RedisProvider: Provider = {
   useFactory: (configService: ConfigService): RedisClient => {
     return new Redis(configService.getOrThrow<string>('redis.url'));
   },
-  provide: 'REDIS_CLIENT',
+  provide: PROVIDERS.REDIS_CLIENT,
   inject: [ConfigService],
 };

@@ -43,3 +43,12 @@ export type AwsConfig = {
   awsRateTTL: number;
   awsRateLimit: number;
 };
+
+export type MailConfig = {
+  mailHost: string;
+  mailPort: number;
+  mailUsername: string;
+  mailPassword: string;
+  jwtMailSecret: string;
+  jwtMailTokenTTL: number;
+};
