@@ -33,7 +33,7 @@ export class AuthenticateMiddleware implements NestMiddleware {
       id: number;
       exp: number;
     } = this.jwtService.verify(token, {
-      secret: this.config.get<string>('auth.accessTokenSecret'),
+      secret: this.config.getOrThrow<string>('auth.accessTokenSecret'),
       ignoreExpiration: true,
     });
 

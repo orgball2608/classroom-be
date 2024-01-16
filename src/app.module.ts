@@ -10,7 +10,6 @@ import { AuthModule } from './modules/auth/auth.module';
 import { AuthenticateMiddleware } from './middlewares';
 import { BullModule } from '@nestjs/bullmq';
 import { CourseModule } from './modules/courses/course.module';
-import { CustomMailerModule } from './shared/mailer/mailer.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ExcelModule } from './modules/excels/excel.module';
 import { GatewayModule } from './shared/gateway/gateway.module';
@@ -20,6 +19,7 @@ import { GradeModule } from './modules/grades/grade.module';
 import { GradeReviewModule } from './modules/grade-reviews/grade-review.module';
 import { HealthModule } from './modules/health/health.module';
 import { JwtModule } from '@nestjs/jwt';
+import { MailModule } from './shared/mail/mail.module';
 import { NotificationModule } from './modules/notifications/notification.module';
 import { PrismaModule } from './shared/prisma/prisma.module';
 import { PrometheusModule } from '@willsoto/nestjs-prometheus';
@@ -53,7 +53,7 @@ import redisConfig from './configs/redis.config';
         abortEarly: false,
       },
     }),
-    CustomMailerModule,
+    MailModule,
     JwtModule.register({}),
     EventEmitterModule.forRoot(),
     PrometheusModule.register({
@@ -63,6 +63,7 @@ import redisConfig from './configs/redis.config';
     RedisModule,
     GatewayModule,
     BullModule.forRootAsync({
+      inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         connection: {
           db: configService.getOrThrow('redis.dbBullQueue'),
@@ -71,7 +72,6 @@ import redisConfig from './configs/redis.config';
           password: configService.getOrThrow('redis.password'),
         },
       }),
-      inject: [ConfigService],
     }),
     SharedModule,
     AuthModule,
@@ -102,6 +102,10 @@ export class AppModule implements NestModule {
         },
         {
           path: 'metrics',
+          method: RequestMethod.GET,
+        },
+        {
+          path: 'mail/test',
           method: RequestMethod.GET,
         },
         {
