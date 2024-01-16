@@ -25,7 +25,17 @@ class EnvironmentVariablesValidator {
   @ValidateIf((envValues) => !envValues.REDIS_URL)
   @IsInt()
   @Min(1)
-  REDIS_DB: number;
+  REDIS_DB_CACHE: number;
+
+  @ValidateIf((envValues) => !envValues.REDIS_URL)
+  @IsInt()
+  @Min(1)
+  REDIS_DB_BULL_QUEUE: number;
+
+  @ValidateIf((envValues) => !envValues.REDIS_URL)
+  @IsInt()
+  @Min(1)
+  REDIS_DB_THROTTLER: number;
 }
 
 export default registerAs('redis', () => {
@@ -36,6 +46,8 @@ export default registerAs('redis', () => {
     host: process.env.REDIS_HOST,
     port: process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT, 10) : 6379,
     password: process.env.REDIS_PASSWORD,
-    db: parseInt(process.env.REDIS_DB, 10),
+    dbCache: parseInt(process.env.REDIS_DB_CACHE, 10),
+    dbBullQueue: parseInt(process.env.REDIS_DB_BULL_QUEUE, 10),
+    dbThrottler: parseInt(process.env.REDIS_DB_THROTTLER, 10),
   };
 });

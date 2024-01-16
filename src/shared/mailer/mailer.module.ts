@@ -8,12 +8,12 @@ import { Module } from '@nestjs/common';
     MailerModule.forRootAsync({
       useFactory: (config: ConfigService) => ({
         transport: {
-          host: config.getOrThrow('mailer.mailHost'),
-          port: config.getOrThrow('mailer.mailPort'),
+          host: config.getOrThrow('mail.host'),
+          port: config.getOrThrow('mail.port'),
           secure: true,
           auth: {
-            user: config.getOrThrow('mailer.mailUsername'),
-            pass: config.getOrThrow('mailer.mailPassword'),
+            user: config.getOrThrow('mail.username'),
+            pass: config.getOrThrow('mail.password'),
           },
         },
         defaults: {
@@ -27,8 +27,10 @@ import { Module } from '@nestjs/common';
           },
         },
       }),
+      inject: [ConfigService],
     }),
   ],
+
   exports: [MailerModule],
 })
 export class CustomMailerModule {}

@@ -1,3 +1,4 @@
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import {
   MiddlewareConsumer,
   Module,
@@ -7,7 +8,7 @@ import {
 
 import { AuthModule } from './modules/auth/auth.module';
 import { AuthenticateMiddleware } from './middlewares';
-import { ConfigModule } from '@nestjs/config';
+import { BullModule } from '@nestjs/bullmq';
 import { CourseModule } from './modules/courses/course.module';
 import { CustomMailerModule } from './shared/mailer/mailer.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -61,6 +62,17 @@ import redisConfig from './configs/redis.config';
     PrismaModule,
     RedisModule,
     GatewayModule,
+    BullModule.forRootAsync({
+      useFactory: (configService: ConfigService) => ({
+        connection: {
+          db: configService.getOrThrow('redis.dbBullQueue'),
+          host: configService.getOrThrow('redis.host'),
+          port: configService.getOrThrow('redis.port'),
+          password: configService.getOrThrow('redis.password'),
+        },
+      }),
+      inject: [ConfigService],
+    }),
     SharedModule,
     AuthModule,
     UserModule,
