@@ -48,7 +48,7 @@ export default registerAs<MailConfig>('mail', () => {
     username: process.env.MAIL_USERNAME,
     password: process.env.MAIL_PASSWORD,
     jwtMailSecret: process.env.JWT_MAIL_SECRET,
-    jwtMailTokenTTL: process.env.JWT_MAIL_TOKEN_TTL
+    jwtMailExpires: process.env.JWT_MAIL_TOKEN_TTL
       ? parseInt(process.env.JWT_MAIL_TOKEN_TTL, 10)
       : 259200,
   };

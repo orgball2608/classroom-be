@@ -72,8 +72,8 @@ export class AuthService {
     return this.jwtService.sign(
       { email },
       {
-        secret: this.config.get('auth.jwtMailSecret'),
-        expiresIn: `${this.config.get('auth.jwtMailExpires')}s`,
+        secret: this.config.getOrThrow('mail.jwtMailSecret'),
+        expiresIn: `${this.config.getOrThrow('mail.jwtMailExpires')}s`,
       },
     );
   }
@@ -136,7 +136,7 @@ export class AuthService {
       verifyStatus: VerifyStatus.VERIFY,
     });
 
-    const frontendURL = this.config.get('app.frontendURL');
+    const frontendURL = this.config.getOrThrow('app.frontendURL');
 
     return `${frontendURL}/signin?access_token=${accessToken}&refresh_token=${refreshToken}`;
   }
@@ -175,7 +175,7 @@ export class AuthService {
       verifyStatus: VerifyStatus.VERIFY,
     });
 
-    const frontendURL = this.config.get('app.frontendURL');
+    const frontendURL = this.config.getOrThrow('app.frontendURL');
 
     return `${frontendURL}/signin?access_token=${accessToken}&refresh_token=${refreshToken}`;
   }
@@ -190,11 +190,11 @@ export class AuthService {
     token: string;
   }) {
     const apiPrefix =
-      this.config.get<string>('app.apiPrefix') +
+      this.config.getOrThrow<string>('app.apiPrefix') +
       '/' +
-      this.config.get<string>('app.apiVersion');
+      this.config.getOrThrow<string>('app.apiVersion');
 
-    const verifyEmailUrl = `${this.config.get(
+    const verifyEmailUrl = `${this.config.getOrThrow(
       'app.appURL',
     )}/${apiPrefix}/auth/verify-email?token=${token}`;
 
@@ -220,9 +220,10 @@ export class AuthService {
     return this.jwtService.sign(
       { id: userId, verifyStatus },
       {
-        secret: this.config.get<string>('auth.accessTokenSecret'),
+        secret: this.config.getOrThrow<string>('auth.accessTokenSecret'),
         // change expires unit to seconds
-        expiresIn: this.config.get<number>('auth.accessTokenExpires') + 's',
+        expiresIn:
+          this.config.getOrThrow<number>('auth.accessTokenExpires') + 's',
       },
     );
   }
@@ -237,9 +238,10 @@ export class AuthService {
     return this.jwtService.sign(
       { id: userId, verifyStatus },
       {
-        secret: this.config.get<string>('auth.refreshTokenSecret'),
+        secret: this.config.getOrThrow<string>('auth.refreshTokenSecret'),
         // change expires unit to seconds
-        expiresIn: this.config.get<number>('auth.refreshTokenExpires') + 's',
+        expiresIn:
+          this.config.getOrThrow<number>('auth.refreshTokenExpires') + 's',
       },
     );
   }
@@ -281,7 +283,7 @@ export class AuthService {
       const payload: {
         id: number;
       } = this.jwtService.verify(refreshTokenDto.refreshToken, {
-        secret: this.config.get<string>('auth.refreshTokenSecret'),
+        secret: this.config.getOrThrow<string>('auth.refreshTokenSecret'),
         ignoreExpiration: false,
       });
 
@@ -306,7 +308,7 @@ export class AuthService {
       const payload: {
         email: string;
       } = this.jwtService.verify(token, {
-        secret: this.config.get<string>('auth.jwtMailSecret'),
+        secret: this.config.getOrThrow<string>('mail.jwtMailSecret'),
         ignoreExpiration: false,
       });
 
