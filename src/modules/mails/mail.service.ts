@@ -15,6 +15,12 @@ export class MailService {
     template: string;
     context: Record<string, any>;
   }) {
-    return this.sendMailQueue.add('mail:send', options);
+    return this.sendMailQueue.add('mail:send', options, {
+      attempts: 3,
+      backoff: {
+        type: 'exponential',
+        delay: 120000, // 2 minutes
+      },
+    });
   }
 }
