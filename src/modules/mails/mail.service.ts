@@ -1,11 +1,12 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable } from '@nestjs/common';
+import { QUEUES } from '@src/constants';
 import { Queue } from 'bullmq';
 
 @Injectable()
 export class MailService {
   constructor(
-    @InjectQueue('mail:send') private readonly sendMailQueue: Queue,
+    @InjectQueue(QUEUES.SEND_MAIL) private readonly sendMailQueue: Queue,
   ) {}
 
   async sendMail(options: {

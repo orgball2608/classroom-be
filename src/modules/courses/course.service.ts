@@ -16,7 +16,7 @@ import { EMIT_MESSAGES } from '@src/constants';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { INotification } from '@src/interfaces';
 import { JwtService } from '@nestjs/jwt';
-import { MailerService } from '@nestjs-modules/mailer';
+import { MailService } from '../mails/mail.service';
 import { PageDto } from '@src/common/dto/page.dto';
 import { PageMetaDto } from '@src/common/dto/page-meta.dto';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
@@ -30,7 +30,7 @@ import { v4 as uuid4 } from 'uuid';
 export class CourseService {
   constructor(
     private readonly storageService: StorageService,
-    private readonly mailerService: MailerService,
+    private readonly mailService: MailService,
     private readonly emitterEvent: EventEmitter2,
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
@@ -599,7 +599,7 @@ export class CourseService {
     const frontendUrl = this.config.getOrThrow<string>('app.frontendUrl');
     const inviteLink = `${frontendUrl}/class/join?token=${verifyEmailToken}`;
 
-    return this.mailerService.sendMail({
+    return this.mailService.sendMail({
       to: email,
       from: 'elearningapp@gmail.com',
       subject: 'Invitation to join the class',

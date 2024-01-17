@@ -3,9 +3,10 @@ import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq';
 import { Injectable } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { MailerService } from '@nestjs-modules/mailer';
+import { QUEUES } from '@src/constants';
 
 @Injectable()
-@Processor('mail:send')
+@Processor(QUEUES.SEND_MAIL)
 export class SendMailProcessor extends WorkerHost {
   constructor(private readonly mailerService: MailerService) {
     super();
