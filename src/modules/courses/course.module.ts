@@ -9,12 +9,13 @@ import { CourseController } from './course.controller';
 import { CourseMiddleware } from '@src/middlewares/course.middleware';
 import { CourseService } from './course.service';
 import { JwtModule } from '@nestjs/jwt';
+import { MailModule } from '../mails/mail.module';
 import { RoleChecker } from '@src/middlewares/role-checker.middleware';
 import { StorageModule } from '@src/shared/storage/storage.module';
 import { UserRole } from '@prisma/client';
 
 @Module({
-  imports: [StorageModule, JwtModule.register({})],
+  imports: [StorageModule, JwtModule.register({}), MailModule],
   controllers: [CourseController],
   providers: [CourseService],
 })

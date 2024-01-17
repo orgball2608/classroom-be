@@ -3,11 +3,12 @@ import { ConfigService } from '@nestjs/config';
 import { MailController } from './mail.controller';
 import { MailService } from './mail.service';
 import { Module } from '@nestjs/common';
+import { QUEUES } from '@src/constants';
 import { SendMailProcessor } from './queues/send-mail.processor';
 @Module({
   imports: [
     BullModule.registerQueueAsync({
-      name: 'mail:send',
+      name: QUEUES.SEND_MAIL,
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         connection: {
