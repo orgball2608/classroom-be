@@ -24,7 +24,7 @@ services:
     image: redis/redis-stack:latest
     restart: on-failure
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis:/data
     networks:
@@ -36,11 +36,11 @@ services:
       context: ../../
       dockerfile: Dockerfile
       target: build
-    command: yarn run start:dev
+    command: pnpm run start:dev
     env_file:
       - ../../.env.docker
     ports:
-      - "3001:3001"
+      - '3001:3001'
     volumes:
       - .:/usr/src/app
     depends_on:
@@ -58,7 +58,7 @@ services:
     image: prom/prometheus
     container_name: prometheus
     ports:
-      - "9090:9090"
+      - '9090:9090'
     volumes:
       - ./prometheus:/etc/prometheus
       - prometheus_data:/prometheus
@@ -71,7 +71,7 @@ services:
     image: grafana/grafana
     container_name: grafana
     ports:
-      - "7889:3000"
+      - '7889:3000'
     volumes:
       - grafana:/var/lib/grafana
       - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards

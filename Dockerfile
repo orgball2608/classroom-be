@@ -11,11 +11,8 @@ COPY --chown=node:node pnpm-lock.yaml ./
 RUN pnpm fetch --prod
 
 COPY --chown=node:node . .
-COPY --chown=node:node prisma ./prisma/
-COPY --chown=node:node templates ./templates
 
 RUN pnpm install
-
 RUN pnpm prisma generate
 
 USER node
@@ -32,8 +29,6 @@ COPY --chown=node:node pnpm-lock.yaml ./
 COPY --chown=node:node --from=development /usr/src/app/node_modules ./node_modules
 
 COPY --chown=node:node . .
-COPY --chown=node:node prisma ./prisma/
-COPY --chown=node:node templates ./templates
 
 RUN pnpm build
 
@@ -48,11 +43,9 @@ USER node
 ###################
 FROM node:18-alpine3.18 AS production
 
-WORKDIR /usr/src/app
-
 COPY --chown=node:node --from=build /usr/src/app/node_modules ./node_modules
+COPY --chown=node:node --from=build /usr/src/app/dist ./dist
 COPY --chown=node:node --from=build /usr/src/app/prisma ./prisma
 COPY --chown=node:node --from=build /usr/src/app/templates ./templates
-COPY --chown=node:node --from=build /usr/src/app/dist ./dist
 
 CMD [ "node", "dist/main.js" ]
