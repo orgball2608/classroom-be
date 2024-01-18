@@ -17,26 +17,26 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - name: Cache Yarn dependencies
-        uses: actions/cache@v2
-        with:
-          path: |
-            node_modules
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/*.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
+      - name: Cache pnpm dependencies
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.pnpm-store
+        key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-
 
-      - name: Install Yarn
-        run: npm install -g yarn
+      - name: Install pnpm
+        run: npm install -g pnpm
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Run lint
-        run: yarn lint
+        run: pnpm lint
 
       - name: Run build
-        run: yarn build
+        run: pnpm build
 
       - name: Sonar cloud Scan
         uses: SonarSource/sonarcloud-github-action@master
@@ -45,4 +45,4 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_CLOUD_TOKEN }}
 
       # - name: Run test
-      #   run: yarn test
+      #   run: pnpm test

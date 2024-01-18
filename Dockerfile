@@ -5,14 +5,14 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN yarn install --frozen-lockfile
+RUN pnpm install --frozen-lockfile
 
 COPY prisma ./prisma/
 COPY templates ./templates
 COPY . .
 
-RUN yarn prisma generate
-RUN yarn build
+RUN pnpm prisma generate
+RUN pnpm build
 
 # Stage 2: Production
 FROM node:18-alpine3.18 AS production
