@@ -5,6 +5,8 @@ WORKDIR /app
 
 COPY package*.json ./
 
+RUN npm install -g pnpm
+
 RUN pnpm install --frozen-lockfile
 
 COPY prisma ./prisma/
@@ -12,6 +14,7 @@ COPY templates ./templates
 COPY . .
 
 RUN pnpm prisma generate
+
 RUN pnpm build
 
 # Stage 2: Production
