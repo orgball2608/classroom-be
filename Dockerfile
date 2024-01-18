@@ -8,11 +8,11 @@ RUN curl -f https://get.pnpm.io/v6.16.js | node - add --global pnpm
 WORKDIR /usr/src/app
 
 COPY --chown=node:node pnpm-lock.yaml ./
+COPY --chown=node:node package.json ./
 
-RUN pnpm fetch --prod
+RUN pnpm install --frozen-lockfile
 
 COPY --chown=node:node . .
-RUN pnpm install
 
 RUN pnpm prisma generate
 
