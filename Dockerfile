@@ -9,10 +9,6 @@ WORKDIR /app
 
 ENV NODE_ENV development
 
-# Create non-root user for Docker
-RUN addgroup --system --gid 1001 node
-RUN adduser --system --uid 1001 node
-
 COPY --chown=node:node pnpm-lock.yaml ./
 COPY --chown=node:node package.json ./
 
@@ -35,10 +31,6 @@ WORKDIR /app
 
 ENV NODE_ENV production
 
-# Re-create non-root user for Docker
-RUN addgroup --system --gid 1001 node
-RUN adduser --system --uid 1001 node
-
 COPY --chown=node:node pnpm-lock.yaml ./
 
 COPY --chown=node:node --from=development /app/node_modules ./node_modules
@@ -60,10 +52,6 @@ FROM node:18-alpine AS production
 WORKDIR /app
 
 ENV NODE_ENV production
-
-# Re-create non-root user for Docker
-RUN addgroup --system --gid 1001 node
-RUN adduser --system --uid 1001 node
 
 COPY --chown=node:node --from=build /app/node_modules ./node_modules
 COPY --chown=node:node --from=build /app/dist ./dist
