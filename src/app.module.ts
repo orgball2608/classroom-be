@@ -65,16 +65,18 @@ import redisConfig from './configs/redis.config';
         const logLevel =
           config.getOrThrow('app.nodeEnv') === Environment.PRODUCTION ? LogLevel.DEBUG :  LogLevel.INFO;
         return {
+          exclude: ['health', 'metrics'],
           pinoHttp: { level: logLevel },
-          autoLogging: {
-            ignore: (req: any) => req.originalUrl === ('/health' || '/metrics'),
-          },
           transport:
             config.getOrThrow('app.nodeEnv') !== 'production'
               ? {
                   target: 'pino-pretty',
                   options: {
                     singleLine: true,
+                    colorize: true,
+                    levelFirst: true,
+                    translateTime: 'mmm-dd h:MM:ss',
+                    ignore: 'hostname',
                   },
                 }
               : null,

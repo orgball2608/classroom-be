@@ -2,7 +2,7 @@ import {
   ApiResponseEntity,
   ApiResponseOmitDataEntity,
 } from '@src/common/entity/response.entity';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { Course, User } from '@prisma/client';
 import {
   EMIT_MESSAGES,
@@ -20,6 +20,7 @@ import { UpdateGradeCompositionDto } from './dto/update-grade-composition.dto';
 
 @Injectable()
 export class GradeCompositionService {
+  private readonly logger = new Logger(GradeCompositionService.name);
   constructor(
     private readonly prisma: PrismaService,
     private readonly emitterEvent: EventEmitter2,

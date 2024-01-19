@@ -1,11 +1,12 @@
 import { GRADE_BOARS_MESSAGES, Order } from '@src/constants';
+import { Injectable, Logger } from '@nestjs/common';
 
 import { IGradeBoarRowData } from './grade-boar.interface';
-import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 
 @Injectable()
 export class GradeBoardService {
+  private readonly logger = new Logger(GradeBoardService.name);
   constructor(private readonly prisma: PrismaService) {}
 
   async getGradeBoardTemplate(courseId: number) {

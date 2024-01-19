@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 
 import { NOTIFICATION_MESSAGES } from '@src/constants';
 import { NotificationStatus } from '@prisma/client';
@@ -6,6 +6,7 @@ import { PrismaService } from '@src/shared/prisma/prisma.service';
 
 @Injectable()
 export class NotificationService {
+  private readonly logger = new Logger(NotificationService.name);
   constructor(private readonly prisma: PrismaService) {}
   async findAllByUserId(userId: number) {
     const notifications = await this.prisma.notification.findMany({
