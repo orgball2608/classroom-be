@@ -10,6 +10,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { AuthenticateMiddleware } from './middlewares';
 import { BullModule } from '@nestjs/bullmq';
 import { CourseModule } from './modules/courses/course.module';
+import { Environment } from './common/enum/node-env';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ExcelModule } from './modules/excels/excel.module';
 import { GatewayModule } from './shared/gateway/gateway.module';
@@ -20,6 +21,8 @@ import { GradeReviewModule } from './modules/grade-reviews/grade-review.module';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { HealthModule } from './modules/health/health.module';
 import { JwtModule } from '@nestjs/jwt';
+import { LogLevel } from './common/enum/logger-level';
+import { LoggerModule } from 'nestjs-pino';
 import { MailModule } from './modules/mails/mail.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { NotificationModule } from './modules/notifications/notification.module';
@@ -35,7 +38,6 @@ import awsConfig from './configs/aws.config';
 import databaseConfig from './configs/database.config';
 import mailConfig from './configs/mail.config';
 import redisConfig from './configs/redis.config';
-import { LoggerModule } from 'nestjs-pino';
 
 @Module({
   imports: [
@@ -61,9 +63,12 @@ import { LoggerModule } from 'nestjs-pino';
       inject: [ConfigService],
       useFactory: async (config: ConfigService) => {
         const logLevel =
-          config.getOrThrow('app.nodeEnv') === 'production' ? 'debug' : 'info';
+          config.getOrThrow('app.nodeEnv') === Environment.PRODUCTION ? LogLevel.DEBUG :  LogLevel.INFO;
         return {
           pinoHttp: { level: logLevel },
+          autoLogging: {
+            ignore: (req: any) => req.originalUrl === ('/health' || '/metrics'),
+          },
           transport:
             config.getOrThrow('app.nodeEnv') !== 'production'
               ? {
@@ -73,6 +78,17 @@ import { LoggerModule } from 'nestjs-pino';
                   },
                 }
               : null,
+              customLogLevel: (req: any, res:any, err:any) => {
+                if (res.statusCode === 401) {
+                  return 'silent';
+                }
+                if (res.statusCode >= 400 && res.statusCode < 500) {
+                  return 'warn';
+                } else if (res.statusCode >= 500 || err) {
+                  return 'error';
+                }
+                return 'info';
+              },
         };
       },
     }),

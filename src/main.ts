@@ -9,9 +9,11 @@ import {
   Reflector,
 } from '@nestjs/core';
 import { HttpExceptionFilter, PrismaClientExceptionFilter } from './filters';
+import { Logger, LoggerErrorInterceptor } from 'nestjs-pino';
 import { UnprocessableEntityException, ValidationPipe } from '@nestjs/common';
 
 import { AppModule } from './app.module';
+import { ClsMiddleware } from 'nestjs-cls';
 import { ConfigService } from '@nestjs/config';
 import { Environment } from './common/enum/node-env';
 import { WebsocketAdapter } from './shared/gateway/gateway.adapter';
@@ -20,7 +22,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import { setupSwagger } from './swagger/setup-swagger';
-import { Logger, LoggerErrorInterceptor } from 'nestjs-pino';
+import { v4 } from 'uuid';
 
 async function bootstrap(): Promise<NestExpressApplication> {
   const app = await NestFactory.create<NestExpressApplication>(
@@ -31,21 +33,18 @@ async function bootstrap(): Promise<NestExpressApplication> {
 
   const configService = app.get(ConfigService);
   const PORT = configService.getOrThrow<number>('app.port') || 3001;
-
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true, // Remove all non-whitelisted properties
-      transform: true, // Automatically transform payloads to DTO instances
-      exceptionFactory: (errors) => new UnprocessableEntityException(errors),
-    }),
+  const apiPrefix =
+  configService.getOrThrow<string>('app.apiPrefix') +
+  '/' +
+  configService.getOrThrow<string>('app.apiVersion');
+  const isDocumentEnabled = configService.getOrThrow<boolean>(
+    'app.documentEnabled',
   );
+  const isDevelopment =
+  configService.getOrThrow<string>('app.nodeEnv') === Environment.DEVELOPMENT;
 
-  const moduleRef = app.get(ModuleRef);
-  const adapter = new WebsocketAdapter(app, moduleRef);
-  app.useWebSocketAdapter(adapter);
 
   app.set('trust proxy', 1);
-
   app.use(helmet());
   app.use(
     rateLimit({
@@ -57,6 +56,28 @@ async function bootstrap(): Promise<NestExpressApplication> {
   app.use(morgan('combined'));
   app.enableVersioning();
   app.useLogger(app.get(Logger));
+  app.enableVersioning()
+  app.setGlobalPrefix(apiPrefix, { exclude: ['health','metrics'] });
+
+
+  const moduleRef = app.get(ModuleRef);
+  const adapter = new WebsocketAdapter(app, moduleRef);
+  app.useWebSocketAdapter(adapter);
+
+  app.use(
+    new ClsMiddleware({
+      generateId: true,
+      idGenerator: (req: Request) => (req.headers['X-Request-Id'] as string) ?? v4(),
+    }).use,
+  )
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true, // Remove all non-whitelisted properties
+      transform: true, // Automatically transform payloads to DTO instances
+      exceptionFactory: (errors) => new UnprocessableEntityException(errors),
+    }),
+  );
 
   const { httpAdapter } = app.get(HttpAdapterHost);
   const reflector = app.get(Reflector);
@@ -69,26 +90,12 @@ async function bootstrap(): Promise<NestExpressApplication> {
 
   app.useGlobalInterceptors(new LoggerErrorInterceptor());
 
-  const apiPrefix =
-    configService.getOrThrow<string>('app.apiPrefix') +
-    '/' +
-    configService.getOrThrow<string>('app.apiVersion');
-
-  app.setGlobalPrefix(apiPrefix);
-
   //Swagger
-  const isDocumentEnabled = configService.getOrThrow<boolean>(
-    'app.documentEnabled',
-  );
-
   if (isDocumentEnabled) {
     setupSwagger(app, configService);
   }
 
   //Enable shutdown hooks
-  const isDevelopment =
-    configService.getOrThrow<string>('app.nodeEnv') === Environment.DEVELOPMENT;
-
   if (!isDevelopment) {
     app.enableShutdownHooks();
   }
