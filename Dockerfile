@@ -1,28 +1,52 @@
-# Stage 1: build
-FROM node:18-alpine3.18 AS build
+###################
+# BUILD FOR LOCAL DEVELOPMENT
+###################
 
-WORKDIR /app
+FROM node:18 As development
 
-COPY package*.json ./
+WORKDIR /usr/src/app
+
+COPY --chown=node:node package.json ./
+COPY --chown=node:node yarn.lock ./
 
 RUN yarn install --frozen-lockfile
 
-COPY prisma ./prisma/
-COPY templates ./templates
-COPY . .
+COPY --chown=node:node . .
 
-RUN yarn prisma generate
+RUN yarn run prisma:generate
+
+USER node
+
+###################
+# BUILD FOR PRODUCTION
+###################
+
+FROM node:18 As build
+
+WORKDIR /usr/src/app
+
+ENV NODE_ENV production
+
+COPY --chown=node:node --from=development /usr/src/app/node_modules ./node_modules
+COPY --chown=node:node . .
+
 RUN yarn build
 
-# Stage 2: Production
-FROM node:18-alpine3.18 AS production
+RUN yarn --frozen-lockfile --production && yarn cache clean --force
 
-WORKDIR /app
+USER node
 
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/package*.json ./
-COPY --from=build /app/prisma ./prisma
-COPY --from=build /app/templates ./templates
-COPY --from=build /app/dist ./dist
+###################
+# PRODUCTION
+###################
 
+FROM node:18-alpine As production
+
+# Copy the bundled code from the build stage to the production image
+COPY --chown=node:node --from=build /usr/src/app/node_modules ./node_modules
+COPY --chown=node:node --from=build /usr/src/app/dist ./dist
+COPY --chown=node:node --from=build /usr/src/app/prisma ./prisma
+COPY --chown=node:node --from=build /usr/src/app/templates ./templates
+
+# Start the server using the production build
 CMD [ "node", "dist/main.js" ]

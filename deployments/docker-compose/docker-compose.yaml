@@ -13,7 +13,7 @@ services:
       - '5423:5432'
     volumes:
       - postgres:/data/postgres
-      - ../../init-data.sh:/docker-entrypoint-initdb.d/init-data.sh
+      - ./init-data.sh:/docker-entrypoint-initdb.d/init-data.sh
     env_file:
       - ../../.env.docker
     networks:
@@ -22,10 +22,9 @@ services:
   redis:
     container_name: redis
     image: redis/redis-stack:latest
-    pull_policy: if_not_present
     restart: on-failure
     ports:
-      - 6379:6379
+      - '6379:6379'
     volumes:
       - redis:/data
     networks:
@@ -36,14 +35,15 @@ services:
     build:
       context: ../../
       dockerfile: Dockerfile
-      target: development
+      target: build
     command: yarn run start:dev
     env_file:
       - ../../.env.docker
     ports:
-      - 3001:3001
+      - '3001:3001'
     volumes:
-      - .:/usr/src/app
+      - ../../:/usr/src/app
+      - /usr/src/app/node_modules
     depends_on:
       - redis
       - postgres
@@ -59,7 +59,7 @@ services:
     image: prom/prometheus
     container_name: prometheus
     ports:
-      - 9090:9090
+      - '9090:9090'
     volumes:
       - ./prometheus:/etc/prometheus
       - prometheus_data:/prometheus
@@ -72,7 +72,7 @@ services:
     image: grafana/grafana
     container_name: grafana
     ports:
-      - 7889:3000
+      - '7889:3000'
     volumes:
       - grafana:/var/lib/grafana
       - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
