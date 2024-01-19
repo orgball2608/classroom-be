@@ -9,6 +9,7 @@ import {
 import { AuthModule } from './modules/auth/auth.module';
 import { AuthenticateMiddleware } from './middlewares';
 import { BullModule } from '@nestjs/bullmq';
+import { ClsModule } from 'nestjs-cls';
 import { CourseModule } from './modules/courses/course.module';
 import { Environment } from './common/enum/node-env';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -31,6 +32,8 @@ import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 import { ROUTES } from './constants';
 import { RedisModule } from './shared/redis/redis.module';
 import { SharedModule } from './shared/shared.module';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis';
 import { UserModule } from './modules/users/user.module';
 import appConfig from '@src/configs/app.config';
 import authConfig from './configs/auth.config';
@@ -38,6 +41,7 @@ import awsConfig from './configs/aws.config';
 import databaseConfig from './configs/database.config';
 import mailConfig from './configs/mail.config';
 import redisConfig from './configs/redis.config';
+import throttlerConfig from './configs/throttler.config';
 
 @Module({
   imports: [
@@ -50,6 +54,7 @@ import redisConfig from './configs/redis.config';
         redisConfig,
         awsConfig,
         mailConfig,
+        throttlerConfig,
       ],
       cache: true,
       expandVariables: true,
@@ -57,6 +62,28 @@ import redisConfig from './configs/redis.config';
       validationOptions: {
         abortEarly: false,
       },
+    }),
+    ClsModule.forRoot({
+      global: true,
+      middleware: {
+        mount: true,
+      },
+    }),
+    ThrottlerModule.forRootAsync({
+      imports: [SharedModule],
+      useFactory: (configService: ConfigService) => ({
+        throttlers: [{
+          ttl: configService.getOrThrow('throttler.ttl'),
+          limit: configService.getOrThrow('throttler.limit'),
+          storage: new ThrottlerStorageRedisService( {
+            db: configService.getOrThrow('redis.dbThrottler'),
+            host: configService.getOrThrow('redis.host'),
+            port: configService.getOrThrow('redis.port'),
+            password: configService.getOrThrow('redis.password'),
+          } ),
+        }]
+      }),
+      inject: [ConfigService],
     }),
     LoggerModule.forRootAsync({
       imports: [ConfigModule],
