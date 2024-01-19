@@ -35,6 +35,7 @@ import awsConfig from './configs/aws.config';
 import databaseConfig from './configs/database.config';
 import mailConfig from './configs/mail.config';
 import redisConfig from './configs/redis.config';
+import { LoggerModule } from 'nestjs-pino';
 
 @Module({
   imports: [
@@ -53,6 +54,26 @@ import redisConfig from './configs/redis.config';
       envFilePath: process.env.NODE_ENV == 'development' ? '.env.dev' : '.env',
       validationOptions: {
         abortEarly: false,
+      },
+    }),
+    LoggerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (config: ConfigService) => {
+        const logLevel =
+          config.getOrThrow('app.nodeEnv') === 'production' ? 'debug' : 'info';
+        return {
+          pinoHttp: { level: logLevel },
+          transport:
+            config.getOrThrow('app.nodeEnv') !== 'production'
+              ? {
+                  target: 'pino-pretty',
+                  options: {
+                    singleLine: true,
+                  },
+                }
+              : null,
+        };
       },
     }),
     MailerModule.forRootAsync({
