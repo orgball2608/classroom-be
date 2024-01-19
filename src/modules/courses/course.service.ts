@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { COURSES_MESSAGES, USERS_MESSAGES } from '@src/constants/message';
@@ -28,6 +29,7 @@ import { v4 as uuid4 } from 'uuid';
 
 @Injectable()
 export class CourseService {
+  private readonly logger = new Logger(CourseService.name);
   constructor(
     private readonly storageService: StorageService,
     private readonly mailService: MailService,

@@ -2,13 +2,14 @@ import * as tmp from 'tmp';
 
 import { Column, Workbook, Worksheet } from 'exceljs';
 import { Course, GradeComposition } from '@prisma/client';
+import { Injectable, Logger } from '@nestjs/common';
 
 import { EXCEL_MESSAGES } from '@src/constants';
-import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 
 @Injectable()
 export class ExcelService {
+  private readonly logger = new Logger(ExcelService.name);
   constructor(private readonly prisma: PrismaService) {}
 
   private styleSheet(sheet: Worksheet) {

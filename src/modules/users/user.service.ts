@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { TOKEN_MESSAGES, USERS_MESSAGES } from '@src/constants/message';
@@ -27,6 +28,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class UserService {
+  private readonly logger = new Logger(UserService.name);
   constructor(
     private prisma: PrismaService,
     private readonly config: ConfigService,

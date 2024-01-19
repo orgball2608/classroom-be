@@ -1,10 +1,12 @@
+import { Injectable, Logger } from '@nestjs/common';
+
 import { GRADE_MESSAGES } from '@src/constants';
-import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { UpdateGradeDto } from './dto/update-grade.dto';
 
 @Injectable()
 export class GradeService {
+  private readonly logger = new Logger(GradeService.name);
   constructor(private readonly prisma: PrismaService) {}
   async updateGrade(
     compositionId: number,

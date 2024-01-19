@@ -1,6 +1,6 @@
 import { Course, User } from '@prisma/client';
 import { EMIT_MESSAGES, GRADE_REVIEW_MESSAGES, Order } from '@src/constants';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { CreateGradeReviewDto } from './dto/create-grade-review.dto';
@@ -11,6 +11,7 @@ import { UpdateGradeReviewDto } from './dto/update-grade-review.dto';
 
 @Injectable()
 export class GradeReviewService {
+  private readonly logger = new Logger(GradeReviewService.name);
   constructor(
     private readonly prisma: PrismaService,
     private readonly emitterEvent: EventEmitter2,
