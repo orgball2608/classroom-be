@@ -8257,6 +8257,11 @@ nestjs-redis@1.3.3:
     rxjs "^6"
     uuid "^8"
 
+nestjs-throttler-storage-redis@^0.4.1:
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/nestjs-throttler-storage-redis/-/nestjs-throttler-storage-redis-0.4.1.tgz#516318861b88b78ce5f6efc5c2aa70d8c0ac580e"
+  integrity sha512-nSjPWfzAqwTFl6WA+wqwjJIHf63ffG9RJTojccHrDIE6cEk5Iw5IjO98crcBbu4PEqezWoX2eaUwAtpB1Ei8jA==
+
 nice-try@^1.0.4:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/nice-try/-/nice-try-1.0.5.tgz#a3378a7696ce7d223e88fc9b764bd7ef1089e366"

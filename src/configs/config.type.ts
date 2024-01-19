@@ -50,3 +50,8 @@ export type MailConfig = {
   jwtMailSecret: string;
   jwtMailExpires: number;
 };
+
+export type ThrottlerConfig = {
+  ttl: string;
+  limit: number;
+};
