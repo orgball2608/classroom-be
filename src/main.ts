@@ -20,12 +20,13 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import { setupSwagger } from './swagger/setup-swagger';
+import { Logger, LoggerErrorInterceptor } from 'nestjs-pino';
 
 async function bootstrap(): Promise<NestExpressApplication> {
   const app = await NestFactory.create<NestExpressApplication>(
     AppModule,
     new ExpressAdapter(),
-    { cors: true },
+    { cors: true, bufferLogs: true },
   );
 
   const configService = app.get(ConfigService);
@@ -55,7 +56,7 @@ async function bootstrap(): Promise<NestExpressApplication> {
   app.use(compression());
   app.use(morgan('combined'));
   app.enableVersioning();
-  app.useLogger(['debug', 'error', 'log', 'verbose', 'warn']);
+  app.useLogger(app.get(Logger));
 
   const { httpAdapter } = app.get(HttpAdapterHost);
   const reflector = app.get(Reflector);
@@ -65,6 +66,8 @@ async function bootstrap(): Promise<NestExpressApplication> {
 
     new PrismaClientExceptionFilter(httpAdapter),
   );
+
+  app.useGlobalInterceptors(new LoggerErrorInterceptor());
 
   const apiPrefix =
     configService.getOrThrow<string>('app.apiPrefix') +

@@ -18,9 +18,11 @@ import { RegisterDto } from './dto/register.dto';
 import { ResendConfirmEmailDto } from './dto/resend-confirm-email.dto';
 import { TokenInvalidException } from '@src/exceptions';
 import { omit } from 'lodash';
+import { Logger } from '@nestjs/common';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   constructor(
     private prisma: PrismaService,
     private readonly jwtService: JwtService,
