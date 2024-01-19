@@ -34,15 +34,14 @@ async function bootstrap(): Promise<NestExpressApplication> {
   const configService = app.get(ConfigService);
   const PORT = configService.getOrThrow<number>('app.port') || 3001;
   const apiPrefix =
-  configService.getOrThrow<string>('app.apiPrefix') +
-  '/' +
-  configService.getOrThrow<string>('app.apiVersion');
+    configService.getOrThrow<string>('app.apiPrefix') +
+    '/' +
+    configService.getOrThrow<string>('app.apiVersion');
   const isDocumentEnabled = configService.getOrThrow<boolean>(
     'app.documentEnabled',
   );
   const isDevelopment =
-  configService.getOrThrow<string>('app.nodeEnv') === Environment.DEVELOPMENT;
-
+    configService.getOrThrow<string>('app.nodeEnv') === Environment.DEVELOPMENT;
 
   app.set('trust proxy', 1);
   app.use(helmet());
@@ -56,9 +55,8 @@ async function bootstrap(): Promise<NestExpressApplication> {
   app.use(morgan('combined'));
   app.enableVersioning();
   app.useLogger(app.get(Logger));
-  app.enableVersioning()
-  app.setGlobalPrefix(apiPrefix, { exclude: ['health','metrics'] });
-
+  app.enableVersioning();
+  app.setGlobalPrefix(apiPrefix, { exclude: ['health', 'metrics'] });
 
   const moduleRef = app.get(ModuleRef);
   const adapter = new WebsocketAdapter(app, moduleRef);
@@ -67,9 +65,10 @@ async function bootstrap(): Promise<NestExpressApplication> {
   app.use(
     new ClsMiddleware({
       generateId: true,
-      idGenerator: (req: Request) => (req.headers['X-Request-Id'] as string) ?? v4(),
+      idGenerator: (req: Request) =>
+        (req.headers['X-Request-Id'] as string) ?? v4(),
     }).use,
-  )
+  );
 
   app.useGlobalPipes(
     new ValidationPipe({
