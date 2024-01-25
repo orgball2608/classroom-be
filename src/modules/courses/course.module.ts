@@ -11,13 +11,20 @@ import { CourseService } from './course.service';
 import { JwtModule } from '@nestjs/jwt';
 import { MailModule } from '../mails/mail.module';
 import { RoleChecker } from '@src/middlewares/role-checker.middleware';
-import { StorageModule } from '@src/shared/storage/storage.module';
+import { StorageService } from '@src/shared/storage/storage.service';
+import { StorageServiceAbstract } from '@src/shared/storage/storage.abstract';
 import { UserRole } from '@prisma/client';
 
 @Module({
-  imports: [StorageModule, JwtModule.register({}), MailModule],
+  imports: [JwtModule.register({}), MailModule],
   controllers: [CourseController],
-  providers: [CourseService],
+  providers: [
+    CourseService,
+    {
+      provide: StorageServiceAbstract,
+      useClass: StorageService,
+    },
+  ],
 })
 export class CourseModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

@@ -9,15 +9,22 @@ import {
 import { AuthModule } from '../auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { MailModule } from '../mails/mail.module';
-import { StorageModule } from '@src/shared/storage/storage.module';
+import { StorageService } from '@src/shared/storage/storage.service';
+import { StorageServiceAbstract } from '@src/shared/storage/storage.abstract';
 import { UserController } from './user.controller';
 import { UserRole } from '@prisma/client';
 import { UserService } from './user.service';
 
 @Module({
-  imports: [AuthModule, StorageModule, JwtModule.register({}), MailModule],
+  imports: [AuthModule, JwtModule.register({}), MailModule],
   controllers: [UserController],
-  providers: [UserService],
+  providers: [
+    UserService,
+    {
+      provide: StorageServiceAbstract,
+      useClass: StorageService,
+    },
+  ],
 })
 export class UserModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

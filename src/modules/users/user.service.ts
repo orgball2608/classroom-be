@@ -18,7 +18,7 @@ import { PageDto } from '@src/common/dto/page.dto';
 import { PageMetaDto } from '@src/common/dto/page-meta.dto';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { StorageService } from '@src/shared/storage/services/storage.service';
+import { StorageServiceAbstract } from '@src/shared/storage/storage.abstract';
 import { TokenInvalidException } from '@src/exceptions';
 import { UpdateFullFieldUserDto } from './dto/update-full-field-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -33,7 +33,7 @@ export class UserService {
     private prisma: PrismaService,
     private readonly config: ConfigService,
     private readonly jwtService: JwtService,
-    private readonly storageService: StorageService,
+    private readonly storageService: StorageServiceAbstract,
     private readonly mailService: MailService,
   ) {}
 

@@ -72,16 +72,18 @@ import throttlerConfig from './configs/throttler.config';
     ThrottlerModule.forRootAsync({
       imports: [SharedModule],
       useFactory: (configService: ConfigService) => ({
-        throttlers: [{
-          ttl: configService.getOrThrow('throttler.ttl'),
-          limit: configService.getOrThrow('throttler.limit'),
-          storage: new ThrottlerStorageRedisService( {
-            db: configService.getOrThrow('redis.dbThrottler'),
-            host: configService.getOrThrow('redis.host'),
-            port: configService.getOrThrow('redis.port'),
-            password: configService.getOrThrow('redis.password'),
-          } ),
-        }]
+        throttlers: [
+          {
+            ttl: configService.getOrThrow('throttler.ttl'),
+            limit: configService.getOrThrow('throttler.limit'),
+            storage: new ThrottlerStorageRedisService({
+              db: configService.getOrThrow('redis.dbThrottler'),
+              host: configService.getOrThrow('redis.host'),
+              port: configService.getOrThrow('redis.port'),
+              password: configService.getOrThrow('redis.password'),
+            }),
+          },
+        ],
       }),
       inject: [ConfigService],
     }),
@@ -90,7 +92,9 @@ import throttlerConfig from './configs/throttler.config';
       inject: [ConfigService],
       useFactory: async (config: ConfigService) => {
         const logLevel =
-          config.getOrThrow('app.nodeEnv') === Environment.PRODUCTION ? LogLevel.DEBUG :  LogLevel.INFO;
+          config.getOrThrow('app.nodeEnv') === Environment.PRODUCTION
+            ? LogLevel.DEBUG
+            : LogLevel.INFO;
         return {
           exclude: ['health', 'metrics'],
           pinoHttp: { level: logLevel },
@@ -107,17 +111,17 @@ import throttlerConfig from './configs/throttler.config';
                   },
                 }
               : null,
-              customLogLevel: (req: any, res:any, err:any) => {
-                if (res.statusCode === 401) {
-                  return 'silent';
-                }
-                if (res.statusCode >= 400 && res.statusCode < 500) {
-                  return 'warn';
-                } else if (res.statusCode >= 500 || err) {
-                  return 'error';
-                }
-                return 'info';
-              },
+          customLogLevel: (req: any, res: any, err: any) => {
+            if (res.statusCode === 401) {
+              return 'silent';
+            }
+            if (res.statusCode >= 400 && res.statusCode < 500) {
+              return 'warn';
+            } else if (res.statusCode >= 500 || err) {
+              return 'error';
+            }
+            return 'info';
+          },
         };
       },
     }),

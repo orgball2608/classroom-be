@@ -7,8 +7,8 @@ import {
 import { APP_GUARD } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { Module } from '@nestjs/common';
-import { StorageService } from './services/storage.service';
-import { StorageServiceProvider } from './services';
+import { StorageService } from './storage.service';
+import { StorageServiceAbstract } from './storage.abstract';
 
 @Module({
   imports: [
@@ -23,13 +23,20 @@ import { StorageServiceProvider } from './services';
     }),
   ],
   providers: [
-    StorageServiceProvider,
-    StorageService,
+    {
+      provide: StorageServiceAbstract,
+      useClass: StorageService,
+    },
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
   ],
-  exports: [StorageServiceProvider, StorageService],
+  exports: [
+    {
+      provide: StorageServiceAbstract,
+      useClass: StorageService,
+    },
+  ],
 })
 export class StorageModule {}

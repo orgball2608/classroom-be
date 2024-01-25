@@ -29,7 +29,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.470.0",
     "@aws-sdk/credential-providers": "^3.470.0",
-    "@aws-sdk/lib-storage": "^3.470.0",
+    "@aws-sdk/lib-storage": "^3.499.0",
     "@nestjs-modules/mailer": "1.10.3",
     "@nestjs/bullmq": "^10.0.1",
     "@nestjs/common": "10.3.0",

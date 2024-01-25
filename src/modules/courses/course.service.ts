@@ -21,7 +21,7 @@ import { MailService } from '../mails/mail.service';
 import { PageDto } from '@src/common/dto/page.dto';
 import { PageMetaDto } from '@src/common/dto/page-meta.dto';
 import { PrismaService } from '@src/shared/prisma/prisma.service';
-import { StorageService } from '@src/shared/storage/services/storage.service';
+import { StorageServiceAbstract } from '@src/shared/storage/storage.abstract';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import _ from 'lodash';
 import { generateCourseCode } from '@src/common/utils';
@@ -31,7 +31,7 @@ import { v4 as uuid4 } from 'uuid';
 export class CourseService {
   private readonly logger = new Logger(CourseService.name);
   constructor(
-    private readonly storageService: StorageService,
+    private readonly storageService: StorageServiceAbstract,
     private readonly mailService: MailService,
     private readonly emitterEvent: EventEmitter2,
     private readonly jwtService: JwtService,
