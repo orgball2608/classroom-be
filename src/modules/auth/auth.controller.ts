@@ -16,6 +16,7 @@ import {
   LocalAuthGuard,
   GoogleAuthGuard,
   FacebookAuthGuard,
+  AccessTokenGuard,
 } from '@src/guards';
 import {
   ApiBearerAuth,
@@ -133,6 +134,7 @@ export class AuthController {
     },
   })
   @ApiOkResponse({ type: UserEntity })
+  @UseGuards(AccessTokenGuard)
   @HttpCode(HttpStatus.OK)
   @Get('/me')
   async me(@Req() req: IUserRequest) {
@@ -177,6 +179,7 @@ export class AuthController {
   }
 
   @ApiBearerAuth()
+  @UseGuards(AccessTokenGuard)
   @ApiOkResponse({
     schema: {
       type: 'object',
