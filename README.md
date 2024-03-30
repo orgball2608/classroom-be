@@ -1,22 +1,22 @@
-# Đồ án Web nâng cao - 2023 
-## Getting started
+# Final project of the Advanced Web Application Development subject - 2023 
+# GETTING STARTED
 ```bash
 
 # 1. Clone the repository
 
-git  clone  https://github.com/orgball2608/webnc-be.git
+git clone https://github.com/orgball2608/classroom-be.git
 
 # 2. Enter your newly-cloned folder.
 
-cd  main-service
+cd classroom-be
 
 # 3. Create Environment variables file.  
 
-cp  .env.example  .env
+cp .env.example .env
 
 #4 Run prisma migrate reset
 
-yarn  prisma  migrate  reset
+yarn prisma migrate reset
 
 # 3. Install dependencies. (Make sure yarn is installed: https://yarnpkg.com/lang/en/docs/install)
 
@@ -24,29 +24,16 @@ yarn
 
 ```
 
-## Development
+# DEVELOPMENT
 
-### Run development server and open http://localhost:3001
+## Run development server and open http://localhost:3001
 
 ```
 yarn run start:dev
 ```
 or
 ```
-docker-compose -f docker-compose.local.yaml up --detach --build; docker-compose exec nestjs yarn run dev:migrate
-```
-## Visualize database
-### Install Atlas: https://atlasgo.io/getting-started/
-### Inspecting database online
-```
-yarn run visualize
-```
-
-## Reverse proxy with caddy
-### Install Caddy: https://caddyserver.com/docs/install
-### Reverse proxy
-```
-yarn run start:proxy
+docker-compose -f docker-compose.local.yaml up
 ```
 
 # GIT RULES
